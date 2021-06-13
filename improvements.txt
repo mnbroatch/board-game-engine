@@ -1,0 +1,11 @@
+SENSIBLE DEFAULTS
+
+==================================
+
+
+shorthand if player only has one kind of piece on a grid.
+
+"playerPieces": true
+
+
+==================================

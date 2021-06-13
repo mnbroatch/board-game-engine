@@ -1,0 +1,100 @@
+{
+  "shared": {
+    "board": {
+      "type": "grid",
+      "x": 5,
+      "y": 5
+    },
+    "extraMoveCard": {
+      "piece": "card:move"
+    }
+  },
+  "player": {
+    "hand": [
+      {
+        "piece": "card:move",
+        "count": 2
+      }
+    ]
+  },
+  "pieces": {
+    "card:move": {
+      "type": "card",
+      "variations": [
+        {
+          "name": "tiger",
+          "movement": {
+            "type": "relative",
+            "spaces": [
+              [0, 2],
+              [0, -1]
+            ]
+          }
+        },
+        {
+          "name": "ox",
+          "movement": {
+            "type": "relative",
+            "spaces": [
+              [0, 1],
+              [1, 0],
+              [0, -1]
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "setup": {
+    "board": [
+      {
+        "eachPlayer": [
+          {
+            "position": [0, 0], 
+            "piece": "student",
+            "player": 0
+          },
+          {
+            "position": [0, 1], 
+            "piece": "student",
+            "player": 0
+          },
+          {
+            "position": [0, 2], 
+            "piece": "master",
+            "player": 0
+          },
+          {
+            "position": [0, 3],
+            "piece": "student",
+            "player": 0
+          },
+          {
+            "position": [0, 4],
+            "piece": "student",
+            "player": 0
+          }
+        ]
+      }
+    ]
+  },
+  "winCondition": {
+    "or": [
+      {
+        "type": "capture",
+        "piece": "master"
+      },
+      {
+        "and": [
+        ]
+      },
+      {
+        "type": "moveTo",
+        "piece": "master",
+        "position": [0, 2]
+      }
+    ]
+  },
+  "gameplay": [
+  ]
+}
