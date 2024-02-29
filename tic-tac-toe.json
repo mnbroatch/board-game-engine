@@ -1,11 +1,10 @@
 {
-  "shared": [
-    {
-      "type": "grid",
-      "x": 3,
-      "y": 3
-    }
-  ],
-  "gameplay": "placeOnGrid",
-  "winCondition": "bingo"
+  "sharedBoard": {
+    "type": "grid",
+    "width": 3,
+    "height": 3
+  },
+  "playersCount": 2,
+  "winCondition": "bingo",
+  "drawCondition": "blackout"
 }

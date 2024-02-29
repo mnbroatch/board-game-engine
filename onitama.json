@@ -1,48 +1,69 @@
 {
-  "shared": {
-    "board": {
+  "sharedBoard": {
+    "main": {
       "type": "grid",
       "x": 5,
       "y": 5
     },
     "extraMoveCard": {
-      "piece": "card:move"
+      "piece": "animalCard"
     }
   },
+  "playersCount": 2,
   "player": {
-    "hand": [
-      {
-        "piece": "card:move",
-        "count": 2
-      }
-    ]
+    "hand": {
+      "piece": "animalCard",
+      "count": 2
+    }
   },
   "pieces": {
-    "card:move": {
+    "animalCard": {
       "type": "card",
-      "variations": [
-        {
-          "name": "tiger",
-          "movement": {
-            "type": "relative",
-            "spaces": [
-              [0, 2],
-              [0, -1]
-            ]
-          }
-        },
-        {
-          "name": "ox",
-          "movement": {
-            "type": "relative",
-            "spaces": [
-              [0, 1],
-              [1, 0],
-              [0, -1]
-            ]
-          }
+      "action": {
+        "type": "movePiece",
+        "piece": "student",
+        "movement": {
+          "type": "relative"
         }
-      ]
+      },
+      "variants": {
+        "tiger": {
+          "action.movement.legalMoves": [
+            [0, 2],
+            [0, -1]
+          ]
+        },
+        "ox": {
+          "action.movement.legalMoves": [
+            [0, 1],
+            [1, 0],
+            [0, -1]
+          ]
+        },
+        "dragon": {
+          "action.movement.legalMoves": [
+            [-2, 1],
+            [2, 1],
+            [-1, -1],
+            [1, -1]
+          ]
+        },
+        "crane": {
+          "action.movement.legalMoves": [
+            [-1, -1],
+            [1, -1],
+            [0, 1]
+          ]
+        },
+        "monkey": {
+          "action.movement.legalMoves": [
+            [-1, -1],
+            [1, -1],
+            [-1, 1],
+            [1, 1]
+          ]
+        }
+      }
     }
   },
   "setup": {
@@ -91,10 +112,9 @@
       {
         "type": "moveTo",
         "piece": "master",
-        "position": [0, 2]
+        "position": [5, 2]
       }
     ]
   },
-  "gameplay": [
-  ]
+  "gameplay": "playCard"
 }
