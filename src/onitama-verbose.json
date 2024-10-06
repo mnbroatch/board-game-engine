@@ -1,0 +1,163 @@
+{
+  "sharedBoard": {
+    "grid": {
+      "type": "grid",
+      "width": 5,
+      "height": 5
+    },
+    "extraMoveCard": {
+      "type": "stack",
+      "piece": "animalCard",
+      "initialCount": 1
+    }
+  },
+  "player": {
+    "personalBoard": {
+      "piece": "animalCard",
+      "initialCount": 2
+    },
+    "pieces": [
+      {
+        "id": "student",
+        "count": 4,
+        "initialPlacements": {
+          "type": "relative",
+          "location": ["sharedBoard", "grid"],
+          "targets": [
+            [0, 0],
+            [0, 1],
+            [0, 3],
+            [0, 4]
+          ]
+        }
+      },
+      {
+        "id": "master",
+        "count": 1,
+        "initialPlacements": {
+          "type": "relative",
+          "location": ["sharedBoard", "grid"],
+          "targets": [ [0, 2] ]
+        }
+      }
+    ],
+    "winCondition": {
+      "type": "some",
+      "conditions": [
+        {
+          "type": "doesNotContain",
+          "location": ["sharedBoard"],
+          "target": "all",
+          "piece": {
+            "type": "master",
+            "player": "them"
+          }
+        },
+        {
+          "type": "contains",
+          "location": ["sharedBoard"],
+          "relative": true,
+          "target": [4, 2],
+          "piece": {
+            "type": "master",
+            "player": "me"
+          }
+        }
+      ]
+    }
+  },
+  "pieces": {
+    "animalCard": {
+      "actions": [
+        {
+          "type": "movePiece",
+          "piece": {
+            "location": ["personalBoard"],
+            "player": "me"
+          },
+          "capture": true,
+          "conditions": [
+            {
+              "type": "doesNotContain",
+              "piece": {
+                "player": "me"
+              }
+            },
+            {
+              "type": "relativeMove",
+              "moves": {
+                "location": ["thisPiece", "moves"]
+              }
+            }
+          ]
+        },
+        {
+          "type": "swap",
+          "automatic": "true",
+          "a": ["previousAction", "piece"],
+          "b": {
+            "location": ["sharedBoard", "extraMoveCard"],
+            "target": "top"
+          }
+        }
+      ],
+      "variants": {
+        "tiger": {
+          "count": 1,
+          "moves": [
+            [0, 2],
+            [0, -1]
+          ]
+        },
+        "ox": {
+          "count": 1,
+          "moves": [
+            [0, 1],
+            [1, 0],
+            [0, -1]
+          ]
+        },
+        "dragon": {
+          "count": 1,
+          "moves": [
+            [-2, 1],
+            [2, 1],
+            [-1, -1],
+            [1, -1]
+          ]
+        },
+        "crane": {
+          "count": 1,
+          "moves": [
+            [-1, -1],
+            [1, -1],
+            [0, 1]
+          ]
+        },
+        "monkey": {
+          "count": 1,
+          "moves": [
+            [-1, -1],
+            [1, -1],
+            [-1, 1],
+            [1, 1]
+          ]
+        }
+      }
+    }
+  },
+  "round": {
+    "loopUntil": false,
+    "phases": [
+      {
+        "type": "sequentialPlayerTurn",
+        "actions": [ 
+          {
+            "type": "playFrom",
+            "location": ["me", "pieces", "animalCard"]
+          }
+        ]
+      }
+    ]
+  }
+}

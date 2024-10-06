@@ -1,0 +1,53 @@
+{
+  "sharedBoard": {
+    "grid": {
+      "type": "grid",
+      "width": 3,
+      "height": 3
+    }
+  },
+  "player": {
+    "pieces": [
+      {
+        "id": "playerMarker",
+        "count": "Infinity"
+      }
+    ],
+    "winCondition": {
+      "type": "bingo",
+      "location": ["sharedBoard", "grid"],
+      "piece": {
+        "id": "playerMarker"
+      }
+    }
+  },
+  "round": {
+    "loopUntil": false,
+    "phases": [
+      {
+        "type": "sequentialPlayerTurn",
+        "actions": [
+          {
+            "type": "movePiece",
+            "piece": "playerMarker",
+            "from": "player",
+            "to": ["sharedBoard", "grid"],
+            "conditions": [
+              {
+                "type": "doesNotContain",
+                "piece": "any"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "drawCondition": {
+    "type": "blackout",
+    "location": ["sharedBoard", "grid"],
+    "piece": {
+      "id": "playerMarker"
+    }
+  }
+}
