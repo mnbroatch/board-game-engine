@@ -1,6 +1,6 @@
 import pieceFactory from './piece-factory'
 
-class PieceGroup {
+class Pile {
   constructor (pieceRule, options) {
     this.pieceRule = pieceRule
     this.id = pieceRule.id
@@ -32,4 +32,4 @@ class PieceGroup {
   }
 }
 
-export default PieceGroup
+export default Pile

@@ -27,6 +27,9 @@ export default class Game {
         location
       }
     }, {})
+    // this.rules.sharedBoard.initialPieces?.forEach((pieceRule) => {
+    //   this.sharedBoard.placePiece
+    // })
     this.players = Array.from(Array(this.options.playerCount)).map((_, i) => new Player(this.rules.player, i))
   }
 
