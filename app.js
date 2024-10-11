@@ -15,24 +15,17 @@ export default function App () {
   }
 
   const onCellClick = (cell, board) => {
-    if (!selectedPiece) {
-      doAction({
-        playerId: game.currentRound.currentPlayer.id,
-        pieceId: game.currentRound.currentPlayer.pieces[0].id,
-        from: 'player',
-        type: 'movePiece',
-        location: board.location,
-        target: cell.coordinates
-      })
-    } else {
-      doAction({
-        playerId: game.currentRound.currentPlayer.id,
-        pieceId: selectedPiece.id,
-        type: 'movePiece',
-        location: board.location,
-        target: cell.coordinates
-      })
+    const currentPlayer = game.currentRound.currentPlayer
+    const action = {
+      playerId: currentPlayer.id,
+      type: 'movePiece',
+      board: board.path,
+      target: cell.coordinates
     }
+    if (selectedPiece) {
+      action.pieceId = selectedPiece.id
+    }
+    doAction(action)
   }
 
   return (

@@ -4,10 +4,8 @@ import boardFactory from '../board/board-factory'
 import Player from '../player/player'
 import roundFactory from '../round/round-factory'
 import conditionFactory from '../condition/condition-factory'
+import PieceGroup from '../piece/piece-group'
 
-const defaultOptions = {
-  playerCount: 2
-}
 
 export default class Game {
   constructor (rules, options) {
@@ -20,24 +18,39 @@ export default class Game {
 
   initialize () {
     this.sharedBoard = Object.entries(this.rules.sharedBoard).reduce((acc, [id, board]) => {
-      const location = ['sharedBoard', id]
+      const path = ['sharedBoard', id]
       return {
         ...acc,
-        [id]: boardFactory({ ...board, location }, this.options),
-        location
+        [id]: boardFactory({ ...board, path }, this.options)
       }
     }, {})
-    // this.rules.sharedBoard.initialPieces?.forEach((pieceRule) => {
-    //   this.sharedBoard.placePiece
-    // })
+
     this.players = Array.from(Array(this.options.playerCount)).map((_, i) => new Player(this.rules.player, i))
+
+    this.personalBoard = this.players.map((acc, player) => {
+      boardFactory(this.rules.personalBoard, { player })
+    })
+
+    this.pieces = this.rules.pieces.reduce((acc, pieceRule) => {
+      if (pieceRule.perPlayer) {
+        return [
+          ...acc,
+          ...this.players.map(player => new PieceGroup(pieceRule, { player }))
+        ]
+      } else {
+        return [
+          ...acc,
+          new PieceGroup(pieceRule)
+        ]
+      }
+    }, [])
   }
 
   doAction (actionPayload) {
     if (this.gameOver) {
       throw new Error('game is over!')
     }
-    this.currentRound.doAction(actionPayload)
+    this.currentRound.doAction(expandActionPayload(actionPayload))
     this.advance()
   }
 
@@ -63,9 +76,9 @@ export default class Game {
     // runtime-only expansion and compile-time-possible expansions
     return this.players.find((player) => {
       const winCondition = {
-        ...player.rules.winCondition,
+        ...this.rules.winCondition,
         piece: {
-          ...player.rules.winCondition.piece,
+          ...this.rules.winCondition.piece,
           player
         }
       }
@@ -91,19 +104,29 @@ export default class Game {
     }
   }
 
-  getLocation (path) {
-    console.log('-----------')
-    console.log('this', this)
-    console.log('path', path)
+  getConfigPath (path) {
     return get(this, path)
   }
 }
 
 function expandRules (rules, options) {
-  // attach board locations (paths) to board rule objects
+  // attach board paths to board rule objects
   return rules
 }
 
 function expandOptions (rules, options) {
+  const defaultOptions = {
+    playerCount: 2
+  }
   return merge({}, defaultOptions, options)
+}
+
+function expandActionPayload (actionPayload) {
+  const defaultActionPayload = {
+    piece: {
+      id: 'playerMarker',
+      playerId: actionPayload.playerId
+    }
+  }
+  return merge({}, defaultActionPayload, actionPayload)
 }

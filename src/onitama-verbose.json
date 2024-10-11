@@ -11,61 +11,32 @@
       "initialCount": 1
     }
   },
-  "player": {
-    "personalBoard": {
-      "piece": "animalCard",
-      "initialCount": 2
-    },
-    "pieces": [
-      {
-        "id": "student",
-        "initialPieces": {
-          "type": "relative",
-          "location": ["sharedBoard", "grid"],
-          "targets": [
-            [0, 0],
-            [0, 1],
-            [0, 3],
-            [0, 4]
-          ]
-        }
-      },
-      {
-        "id": "master",
-        "initialPieces": {
-          "type": "relative",
-          "location": ["sharedBoard", "grid"],
-          "targets": [ [0, 2] ]
-        }
+  "pieces": [
+    {
+      "id": "student",
+      "initialPlacements": {
+        "type": "relative",
+        "perPlayer": true,
+        "board": ["sharedBoard", "grid"],
+        "targets": [
+          [0, 0],
+          [0, 1],
+          [0, 3],
+          [0, 4]
+        ]
       }
-    ],
-    "winCondition": {
-      "type": "some",
-      "conditions": [
-        {
-          "type": "doesNotContain",
-          "location": ["sharedBoard"],
-          "target": "all",
-          "piece": {
-            "type": "master",
-            "player": "them"
-          }
-        },
-        {
-          "type": "contains",
-          "location": ["sharedBoard"],
-          "relative": true,
-          "target": [4, 2],
-          "piece": {
-            "type": "master",
-            "player": "me"
-          }
-        }
-      ]
-    }
-  },
-  "pieces": {
-    "animalCard": {
+    },
+    {
+      "id": "master",
+      "perPlayer": true,
+      "initialPlacements": {
+        "type": "relative",
+        "board": ["sharedBoard", "grid"],
+        "targets": [ [0, 2] ]
+      }
+    },
+    {
+      "id": "animalCard",
       "variants": {
         "tiger": {
           "count": 1,
@@ -110,6 +81,37 @@
         }
       }
     }
+  ],
+  "winCondition": {
+    "type": "some",
+    "conditions": [
+      {
+        "type": "doesNotContain",
+        "board": ["sharedBoard", "grid"],
+        "target": "all",
+        "piece": {
+          "type": "master",
+          "player": "them"
+        }
+      },
+      {
+        "type": "contains",
+        "board": ["sharedBoard", "grid"],
+        "relative": true,
+        "target": [4, 2],
+        "piece": {
+          "type": "master",
+          "player": "me"
+        }
+      }
+    ]
+  },
+  "personalBoard": {
+    "cards": {
+      "type": "stack",
+      "piece": "animalCard",
+      "initialCount": 2
+    }
   },
   "round": {
     "loopUntil": false,
@@ -121,7 +123,7 @@
             "type": "movePiece",
             "piece": {
               "id": "animalCard",
-              "location": ["personalBoard"],
+              "board": ["personalBoard", "cards"],
               "player": "me"
             },
             "capture": true,
@@ -143,9 +145,11 @@
           {
             "type": "swap",
             "automatic": "true",
-            "a": ["previousAction", "piece"],
+            "a": {
+              "state": ["previousAction", "piece"]
+            },
             "b": {
-              "location": ["sharedBoard", "extraMoveCard"],
+              "board": ["sharedBoard", "extraMoveCard"],
               "target": "top"
             }
           }

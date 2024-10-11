@@ -6,19 +6,18 @@
       "height": 3
     }
   },
-  "player": {
-    "pieces": [
-      {
-        "id": "playerMarker",
-        "count": "Infinity"
-      }
-    ],
-    "winCondition": {
-      "type": "bingo",
-      "location": ["sharedBoard", "grid"],
-      "piece": {
-        "id": "playerMarker"
-      }
+  "pieces": [
+    {
+      "id": "playerMarker",
+      "count": "Infinity",
+      "perPlayer": true
+    }
+  ],
+  "winCondition": {
+    "type": "bingo",
+    "board": ["sharedBoard", "grid"],
+    "piece": {
+      "id": "playerMarker"
     }
   },
   "round": {
@@ -45,7 +44,7 @@
   },
   "drawCondition": {
     "type": "blackout",
-    "location": ["sharedBoard", "grid"],
+    "board": ["sharedBoard", "grid"],
     "piece": {
       "id": "playerMarker"
     }

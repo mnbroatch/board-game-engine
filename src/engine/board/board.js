@@ -1,6 +1,7 @@
 export default class Board {
-  constructor (boardRule) {
-    this.location = boardRule.location
+  constructor (boardRule, options = {}) {
+    this.path = boardRule.path
+    this.player = options.player
   }
 
   placePiece (target, piece) {

@@ -1,19 +1,27 @@
+import isMatch from 'lodash/isMatch'
 import Action from './action'
+import PieceGroup from '../piece/piece-group'
 
 export default class MovePieceAction extends Action {
   do (actionPayload) {
-    let piece
-    if (actionPayload.from === 'player') {
-      piece = this.game.players
-        .find(player => player.id === actionPayload.playerId).pieces
-        .find(piece => piece.id === actionPayload.pieceId)
-        .getOne()
-    } else {
+    const piece = this.targetPiece(actionPayload)
+    this.game.getConfigPath(actionPayload.board)
+      .placePiece(
+        actionPayload.target,
+        piece
+      )
+  }
+
+  // add invariant condition for taking from a depleted pile
+  targetPiece (actionPayload) {
+    const matcher = {
+      id: actionPayload.piece.id,
+      player: {
+        id: actionPayload.playerId
+      }
     }
-    this.game.getLocation(actionPayload.location)
-    .placePiece(
-      actionPayload.target,
-      piece
-    )
+    const match = this.game.pieces.find(piece => isMatch(piece, matcher))
+    return match instanceof PieceGroup ? match.getOne() : match
   }
 }
+

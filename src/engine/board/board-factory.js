@@ -6,5 +6,7 @@ export default function boardFactory (boardRule) {
     return new Grid(boardRule)
   } else if (boardRule.type === 'stack') {
     return new Stack(boardRule)
+  } else {
+    console.log('boardRule', boardRule)
   }
 }

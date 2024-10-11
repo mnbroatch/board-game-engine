@@ -9,8 +9,6 @@ Draw might not spawn "Game is Over!" message
 player pieces should have separate piece ids (I think they already do). Conditions,
 etc. should not need to reference the player object separately
 
-rename "location" to "path?"
-
 piece > player: "each" instead of pieces in player section?
 
 A grid click might not correspond to an action. In that case, dropdown / popup
