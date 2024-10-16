@@ -12,15 +12,19 @@ export default class MovePieceAction extends Action {
       )
   }
 
+  // move this?
   // add invariant condition for taking from a depleted pile
   targetPiece (actionPayload) {
     const matcher = {
       id: actionPayload.piece.id,
-      player: {
+    }
+    if (actionPayload.playerId) {
+      matcher.player = {
         id: actionPayload.playerId
       }
     }
     const match = this.game.pieces.find(piece => isMatch(piece, matcher))
+    console.log('match', match)
     return match instanceof PieceGroup ? match.getOne() : match
   }
 }

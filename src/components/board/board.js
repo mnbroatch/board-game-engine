@@ -10,7 +10,6 @@ export default function Board ({ board, game, onCellClick }) {
   } else if (board instanceof Stack) {
     return <StackComponent board={board} game={game} onCellClick={onCellClick} />
   } else {
-    console.log('board3333', board)
     return null
   }
 }

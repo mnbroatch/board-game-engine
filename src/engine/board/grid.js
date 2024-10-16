@@ -3,8 +3,8 @@ import Board from './board'
 import Space from '../space/space'
 
 export default class Grid extends Board {
-  constructor (boardRule) {
-    super(boardRule)
+  constructor (boardRule, options) {
+    super(boardRule, options)
     this.grid = makeGrid(boardRule)
   }
 

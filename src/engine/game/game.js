@@ -4,6 +4,7 @@ import boardFactory from '../board/board-factory'
 import Player from '../player/player'
 import roundFactory from '../round/round-factory'
 import conditionFactory from '../condition/condition-factory'
+import actionFactory from '../action/action-factory'
 import PieceGroup from '../piece/piece-group'
 
 
@@ -16,6 +17,7 @@ export default class Game {
     this.advance()
   }
 
+  // TODO: DRY this up 
   initialize () {
     this.sharedBoard = Object.entries(this.rules.sharedBoard).reduce((acc, [id, board]) => {
       const path = ['sharedBoard', id]
@@ -27,9 +29,16 @@ export default class Game {
 
     this.players = Array.from(Array(this.options.playerCount)).map((_, i) => new Player(this.rules.player, i))
 
-    this.personalBoard = this.players.map((acc, player) => {
-      boardFactory(this.rules.personalBoard, { player })
-    })
+    this.personalBoards = this.players.reduce((acc, player) => ({
+      ...acc,
+      [player.id]: Object.entries(this.rules.personalBoard).reduce((acc, [id, board]) => {
+        const path = ['sharedBoard', id]
+        return {
+          ...acc,
+          [id]: boardFactory({ ...board, path }, { ...this.options, player })
+        }
+      }, {})
+    }), {})
 
     this.pieces = this.rules.pieces.reduce((acc, pieceRule) => {
       if (pieceRule.perPlayer) {
@@ -44,6 +53,43 @@ export default class Game {
         ]
       }
     }, [])
+
+    this.rules.initialPlacements.forEach((placement) => {
+      if (placement.perPlayer) {
+      } else {
+        const actionRule = {
+          type: 'movePiece',
+          piece: {
+            id: placement.pieceId,
+            board: placement.board
+          }
+        }
+
+        if (placement.targets) {
+          placement.targets.forEach(target => {
+            actionFactory(actionRule, this).do({
+              piece: {
+                id: placement.pieceId,
+                board: placement.board
+              },
+              type: 'movePiece',
+              board: placement.board,
+              target
+            })
+          })
+        } else {
+          actionFactory(actionRule, this).do({
+            piece: {
+              id: placement.pieceId,
+              board: placement.board
+            },
+            type: 'movePiece',
+            board: placement.board,
+          })
+        }
+      }
+    })
+    console.log('this', this)
   }
 
   doAction (actionPayload) {

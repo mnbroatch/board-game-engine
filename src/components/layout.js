@@ -3,15 +3,14 @@ import Board from './board/board'
 
 export default function Layout ({ game, onCellClick, onPieceClick }) {
   const halfCount = Math.ceil(game.players.length / 2)
-  console.log('game.personalBoard', game.personalBoard)
 
   return (
     <div className="layout">
-      {!!game.personalBoard && (
+      {!!game.personalBoards && (
         <div>
           {game.players.slice(0, halfCount).map(player => (
             <div key={player.id} className="layout__personal-board">
-              {Object.entries(game.personalBoard).map(([key, board]) => (
+              {Object.entries(game.personalBoards[player.id]).map(([key, board]) => (
                 <Board
                   key={key}
                   board={board}
@@ -35,11 +34,11 @@ export default function Layout ({ game, onCellClick, onPieceClick }) {
           />
         ))}
       </div>
-      {!!game.personalBoard && (
+      {!!game.personalBoards && (
         <div>
           {game.players.slice(halfCount).map(player => (
             <div key={player.id} className="layout__personal-board">
-              {Object.entries(game.personalBoard).map(([key, board]) => (
+              {Object.entries(game.personalBoards[player.id]).map(([key, board]) => (
                 <Board
                   key={key}
                   board={board}

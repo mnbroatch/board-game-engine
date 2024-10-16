@@ -33,4 +33,6 @@ export default class Round {
   isOver() {
     return true
   }
+
+  afterDoAction () { }
 }

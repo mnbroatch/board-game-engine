@@ -7,46 +7,63 @@
     },
     "extraMoveCard": {
       "type": "stack",
-      "piece": "animalCard",
-      "initialCount": 1
+      "piece": "animalCard"
     }
   },
+  "initialPlacements": [
+    {
+      "pieceId": "student",
+      "perPlayer": true,
+      "type": "relative",
+      "board": ["sharedBoard", "grid"],
+      "targets": [
+        [0, 0],
+        [0, 1],
+        [0, 3],
+        [0, 4]
+      ]
+    },
+    {
+      "pieceId": "master",
+      "perPlayer": true,
+      "type": "relative",
+      "board": ["sharedBoard", "grid"],
+      "targets": [ [0, 2] ]
+    },
+    {
+      "pieceId": "animalCard",
+      "perPlayer": true,
+      "count": 2,
+      "board": ["personalBoard", "stack"]
+    },
+    {
+      "pieceId": "animalCard",
+      "count": 1,
+      "board": ["sharedBoard", "extraMoveCard"]
+    }
+  ],
   "pieces": [
     {
       "id": "student",
-      "initialPlacements": {
-        "type": "relative",
-        "perPlayer": true,
-        "board": ["sharedBoard", "grid"],
-        "targets": [
-          [0, 0],
-          [0, 1],
-          [0, 3],
-          [0, 4]
-        ]
-      }
+      "count": 4,
+      "perPlayer": true
     },
     {
       "id": "master",
-      "perPlayer": true,
-      "initialPlacements": {
-        "type": "relative",
-        "board": ["sharedBoard", "grid"],
-        "targets": [ [0, 2] ]
-      }
+      "count": 1,
+      "perPlayer": true
     },
     {
       "id": "animalCard",
+      "shuffled": true,
       "variants": {
         "tiger": {
-          "count": 1,
           "moves": [
             [0, 2],
             [0, -1]
           ]
         },
         "ox": {
-          "count": 1,
           "moves": [
             [0, 1],
             [1, 0],
@@ -54,7 +71,6 @@
           ]
         },
         "dragon": {
-          "count": 1,
           "moves": [
             [-2, 1],
             [2, 1],
@@ -63,7 +79,6 @@
           ]
         },
         "crane": {
-          "count": 1,
           "moves": [
             [-1, -1],
             [1, -1],
@@ -71,7 +86,6 @@
           ]
         },
         "monkey": {
-          "count": 1,
           "moves": [
             [-1, -1],
             [1, -1],

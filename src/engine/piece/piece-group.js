@@ -4,10 +4,23 @@ class Pile {
   constructor (pieceRule, options = {}) {
     this.pieceRule = pieceRule
     this.id = pieceRule.id
-    this.count = +pieceRule.count
     this.player = options.player
     this.options = options
-    this.pool = []
+    this.pool = (pieceRule.variants ? Object.values(pieceRule.variants) : []).reduce((acc, variant) => {
+      const count = variant.count || 1
+      return [
+        ...acc,
+        ...Array.from(Array(count)).map(_ => pieceFactory({ ...pieceRule, ...variant }, this.options))
+      ]
+    }, [])
+
+    if (pieceRule.shuffled) {
+      this.pool = this.pool
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value) 
+    }
+    this.count = this.pool.length || +pieceRule.count
 
     if (typeof this.count === 'undefined') {
       throw new Error('Piece has no count: ', pieceRule.id)
