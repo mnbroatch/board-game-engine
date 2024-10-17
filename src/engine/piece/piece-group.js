@@ -6,11 +6,12 @@ class Pile {
     this.id = pieceRule.id
     this.player = options.player
     this.options = options
-    this.pool = (pieceRule.variants ? Object.values(pieceRule.variants) : []).reduce((acc, variant) => {
+    this.pool = (pieceRule.variants ? Object.entries(pieceRule.variants) : []).reduce((acc, [variantId, variant]) => {
       const count = variant.count || 1
+      console.log('variant', variant)
       return [
         ...acc,
-        ...Array.from(Array(count)).map(_ => pieceFactory({ ...pieceRule, ...variant }, this.options))
+        ...Array.from(Array(count)).map(_ => pieceFactory({ ...{ ...pieceRule, variantId }, ...variant }, this.options))
       ]
     }, [])
 

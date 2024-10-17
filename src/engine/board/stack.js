@@ -5,5 +5,13 @@ export default class Stack extends Board {
     super(boardRule, options)
     this.stack = []
   }
+
+  placePiece (target, piece) {
+    if (target) {
+      // insert by index?
+    } else {
+      this.stack.push(piece)
+    }
+  }
 }
 

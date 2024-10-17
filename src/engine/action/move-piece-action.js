@@ -24,7 +24,6 @@ export default class MovePieceAction extends Action {
       }
     }
     const match = this.game.pieces.find(piece => isMatch(piece, matcher))
-    console.log('match', match)
     return match instanceof PieceGroup ? match.getOne() : match
   }
 }

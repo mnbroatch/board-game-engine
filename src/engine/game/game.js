@@ -31,7 +31,7 @@ export default class Game {
 
     this.personalBoards = this.players.reduce((acc, player) => ({
       ...acc,
-      [player.id]: Object.entries(this.rules.personalBoard).reduce((acc, [id, board]) => {
+      [player.id]: Object.entries(this.rules.personalBoard || []).reduce((acc, [id, board]) => {
         const path = ['sharedBoard', id]
         return {
           ...acc,
@@ -54,7 +54,7 @@ export default class Game {
       }
     }, [])
 
-    this.rules.initialPlacements.forEach((placement) => {
+    this.rules.initialPlacements?.forEach((placement) => {
       if (placement.perPlayer) {
       } else {
         const actionRule = {
@@ -70,7 +70,6 @@ export default class Game {
             actionFactory(actionRule, this).do({
               piece: {
                 id: placement.pieceId,
-                board: placement.board
               },
               type: 'movePiece',
               board: placement.board,
@@ -81,7 +80,6 @@ export default class Game {
           actionFactory(actionRule, this).do({
             piece: {
               id: placement.pieceId,
-              board: placement.board
             },
             type: 'movePiece',
             board: placement.board,
@@ -89,7 +87,6 @@ export default class Game {
         }
       }
     })
-    console.log('this', this)
   }
 
   doAction (actionPayload) {
