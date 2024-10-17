@@ -4,12 +4,21 @@ import PieceGroup from '../piece/piece-group'
 
 export default class MovePieceAction extends Action {
   do (actionPayload) {
-    const piece = this.targetPiece(actionPayload)
-    this.game.getConfigPath(actionPayload.board)
-      .placePiece(
-        actionPayload.target,
-        piece
-      )
+    try {
+      const piece = this.targetPiece(actionPayload)
+      this.getBoard(actionPayload)
+        .placePiece(
+          actionPayload.target,
+          piece
+        )
+    } catch (e) {
+      console.log('================')
+      const piece = this.targetPiece(actionPayload)
+      console.log('piece', piece)
+      console.log('actionPayload', actionPayload)
+      console.log('this.game', this.game)
+      throw e
+    }
   }
 
   // move this?

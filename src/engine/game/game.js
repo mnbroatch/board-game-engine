@@ -56,37 +56,46 @@ export default class Game {
 
     this.rules.initialPlacements?.forEach((placement) => {
       if (placement.perPlayer) {
+        this.players.forEach((player) => {
+          this.doInitialPlacement(placement, player)
+        })
       } else {
-        const actionRule = {
-          type: 'movePiece',
-          piece: {
-            id: placement.pieceId,
-            board: placement.board
-          }
-        }
-
-        if (placement.targets) {
-          placement.targets.forEach(target => {
-            actionFactory(actionRule, this).do({
-              piece: {
-                id: placement.pieceId,
-              },
-              type: 'movePiece',
-              board: placement.board,
-              target
-            })
-          })
-        } else {
-          actionFactory(actionRule, this).do({
-            piece: {
-              id: placement.pieceId,
-            },
-            type: 'movePiece',
-            board: placement.board,
-          })
-        }
+        this.doInitialPlacement(placement)
       }
     })
+  }
+
+  doInitialPlacement (placement, player) {
+    const actionRule = {
+      type: 'movePiece',
+      piece: {
+        id: placement.pieceId,
+        board: placement.board,
+        player
+      }
+    }
+    if (placement.targets) {
+      placement.targets.forEach(target => {
+        actionFactory(actionRule, this).do({
+          piece: {
+            id: placement.pieceId,
+            player
+          },
+          type: 'movePiece',
+          board: placement.board,
+          target
+        })
+      })
+    } else {
+      actionFactory(actionRule, this).do({
+        piece: {
+          id: placement.pieceId,
+          player
+        },
+        type: 'movePiece',
+        board: placement.board,
+      })
+    }
   }
 
   doAction (actionPayload) {
@@ -147,7 +156,7 @@ export default class Game {
     }
   }
 
-  getConfigPath (path) {
+  get (path, options = {}) {
     return get(this, path)
   }
 }

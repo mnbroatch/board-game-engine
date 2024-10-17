@@ -2,7 +2,7 @@ import Condition from '../condition/condition'
 
 export default class BingoCondition extends Condition {
   isMet () {
-    const grid = this.game.getConfigPath(this.rules.board).grid
+    const grid = this.game.get(this.rules.board).grid
 
     // TODO: handle rectangles in addition to squares
     const size = grid.length;

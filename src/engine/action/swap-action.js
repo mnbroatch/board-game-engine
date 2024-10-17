@@ -11,7 +11,7 @@ export default class SwapAction extends Action {
     } else {
       console.log('actionPayload', actionPayload)
     }
-    this.game.getConfigPath(actionPayload.board)
+    this.game.get(actionPayload.board)
     .placePiece(
       actionPayload.target,
       piece

@@ -34,7 +34,7 @@
       "pieceId": "animalCard",
       "perPlayer": true,
       "count": 2,
-      "board": ["personalBoard", "stack"]
+      "board": ["personalBoard", "cards"]
     },
     {
       "pieceId": "animalCard",
