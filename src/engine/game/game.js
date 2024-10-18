@@ -71,6 +71,7 @@ export default class Game {
       piece: {
         id: placement.pieceId,
         board: placement.board,
+        relative: placement.relative,
         player
       }
     }
@@ -83,17 +84,21 @@ export default class Game {
           },
           type: 'movePiece',
           board: placement.board,
+          relative: placement.relative,
           target
         })
       })
     } else {
-      actionFactory(actionRule, this).do({
-        piece: {
-          id: placement.pieceId,
-          player
-        },
-        type: 'movePiece',
-        board: placement.board,
+      Array.from(new Array(placement.count)).forEach(() => {
+        actionFactory(actionRule, this).do({
+          piece: {
+            id: placement.pieceId,
+            player
+          },
+          type: 'movePiece',
+          board: placement.board,
+          relative: placement.relative
+        })
       })
     }
   }

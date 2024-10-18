@@ -4,21 +4,13 @@ import PieceGroup from '../piece/piece-group'
 
 export default class MovePieceAction extends Action {
   do (actionPayload) {
-    try {
-      const piece = this.targetPiece(actionPayload)
-      this.getBoard(actionPayload)
-        .placePiece(
-          actionPayload.target,
-          piece
-        )
-    } catch (e) {
-      console.log('================')
-      const piece = this.targetPiece(actionPayload)
-      console.log('piece', piece)
-      console.log('actionPayload', actionPayload)
-      console.log('this.game', this.game)
-      throw e
-    }
+    const piece = this.targetPiece(actionPayload)
+
+    this.getBoard(actionPayload)
+      .placePiece(
+        actionPayload.target,
+        piece
+      )
   }
 
   // move this?
@@ -33,7 +25,16 @@ export default class MovePieceAction extends Action {
       }
     }
     const match = this.game.pieces.find(piece => isMatch(piece, matcher))
-    return match instanceof PieceGroup ? match.getOne() : match
+    let x = match instanceof PieceGroup ? match.getOne() : match
+    if (!x) {
+      console.log('==============')
+      console.log('matcher', matcher)
+      console.log('match', match)
+      console.log('match.getOne', match.getOne)
+      console.log('actionPayload', actionPayload)
+      console.log('match instanceof PieceGroup ', match instanceof PieceGroup )
+    }
+    return x
   }
 }
 
