@@ -57,6 +57,7 @@ export default class Game {
     this.rules.initialPlacements?.forEach((placement) => {
       if (placement.perPlayer) {
         this.players.forEach((player) => {
+          // player specifies both the piece owner (if relevant) and personalBoard
           this.doInitialPlacement(placement, player)
         })
       } else {
@@ -66,39 +67,24 @@ export default class Game {
   }
 
   doInitialPlacement (placement, player) {
-    const actionRule = {
-      type: 'movePiece',
-      piece: {
-        id: placement.pieceId,
-        board: placement.board,
-        relative: placement.relative,
-        player
-      }
+    const actionRule = { type: 'movePiece' }
+    if (placement.playerPerspective) {
+      actionRule.playerPerspective = placement.playerPerspective
+    }
+    const actionPayload = {
+      piece: placement.piece,
+      board: placement.board,
     }
     if (placement.targets) {
       placement.targets.forEach(target => {
-        actionFactory(actionRule, this).do({
-          piece: {
-            id: placement.pieceId,
-            player
-          },
-          type: 'movePiece',
-          board: placement.board,
-          relative: placement.relative,
-          target
-        })
+        actionFactory(actionRule, this).do(this.expandActionPayload(
+          { ...actionPayload, target },
+          player
+        ))
       })
     } else {
       Array.from(new Array(placement.count)).forEach(() => {
-        actionFactory(actionRule, this).do({
-          piece: {
-            id: placement.pieceId,
-            player
-          },
-          type: 'movePiece',
-          board: placement.board,
-          relative: placement.relative
-        })
+        actionFactory(actionRule, this).do(this.expandActionPayload(actionPayload, player))
       })
     }
   }
@@ -107,7 +93,7 @@ export default class Game {
     if (this.gameOver) {
       throw new Error('game is over!')
     }
-    this.currentRound.doAction(expandActionPayload(actionPayload))
+    this.currentRound.doAction(this.expandActionPayload(actionPayload))
     this.advance()
   }
 
@@ -162,7 +148,25 @@ export default class Game {
   }
 
   get (path, options = {}) {
-    return get(this, path)
+    return get(this, normalizePath(path, options))
+  }
+
+  expandActionPayload (actionPayload, player) {
+    const pieceId = actionPayload.piece?.id || 'playerMarker'
+    const pieceRule = this.rules.pieces.find(piece => piece.id === pieceId)
+    const defaultActionPayload = {
+      type: 'movePiece',
+      piece: {
+        id: pieceId,
+      },
+      board: normalizePath(actionPayload.board, player)
+    }
+
+    if (pieceRule.perPlayer && !actionPayload.player) {
+      defaultActionPayload.piece.player = { id: player.id }
+    }
+
+    return merge({}, defaultActionPayload, actionPayload)
   }
 }
 
@@ -178,12 +182,13 @@ function expandOptions (rules, options) {
   return merge({}, defaultOptions, options)
 }
 
-function expandActionPayload (actionPayload) {
-  const defaultActionPayload = {
-    piece: {
-      id: 'playerMarker',
-      playerId: actionPayload.playerId
-    }
-  }
-  return merge({}, defaultActionPayload, actionPayload)
+function normalizePath (path, options = {}) {
+  return path[0] === 'personalBoard'
+    ? [
+      'personalBoards',
+      options.boardOwner,
+      ...path.slice(1)
+    ]
+    : path
 }
+

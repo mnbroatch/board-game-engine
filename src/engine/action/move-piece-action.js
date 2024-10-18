@@ -5,8 +5,9 @@ import PieceGroup from '../piece/piece-group'
 export default class MovePieceAction extends Action {
   do (actionPayload) {
     const piece = this.targetPiece(actionPayload)
+    console.log('piece', piece)
 
-    this.getBoard(actionPayload)
+    this.game.get(actionPayload.board, { player: actionPayload.player })
       .placePiece(
         actionPayload.target,
         piece
@@ -19,9 +20,9 @@ export default class MovePieceAction extends Action {
     const matcher = {
       id: actionPayload.piece.id,
     }
-    if (actionPayload.playerId) {
+    if (actionPayload.piece.player) {
       matcher.player = {
-        id: actionPayload.playerId
+        id: actionPayload.piece.player.id
       }
     }
     const match = this.game.pieces.find(piece => isMatch(piece, matcher))
@@ -30,7 +31,6 @@ export default class MovePieceAction extends Action {
       console.log('==============')
       console.log('matcher', matcher)
       console.log('match', match)
-      console.log('match.getOne', match.getOne)
       console.log('actionPayload', actionPayload)
       console.log('match instanceof PieceGroup ', match instanceof PieceGroup )
     }

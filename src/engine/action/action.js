@@ -28,17 +28,5 @@ export default class Action {
     }
   }
 
-  getBoard(actionPayload) {
-    const path = actionPayload.board[0] === 'personalBoard'
-      ? [
-        'personalBoards',
-        actionPayload.piece.player.id,
-        ...actionPayload.board.slice(1)
-      ]
-      : actionPayload.board
-    
-    return this.game.get(path)
-  }
-
   do () {}
 }

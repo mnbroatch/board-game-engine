@@ -23,7 +23,7 @@ export default function App () {
       target: cell.coordinates
     }
     if (selectedPiece) {
-      action.pieceId = selectedPiece.id
+      action.piece = { id: selectedPiece.id }
     }
     doAction(action)
   }

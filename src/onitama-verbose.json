@@ -12,9 +12,11 @@
   },
   "initialPlacements": [
     {
-      "pieceId": "student",
+      "piece": {
+        "id": "master"
+      },
       "perPlayer": true,
-      "relative": "true",
+      "playerPerspective": true,
       "board": ["sharedBoard", "grid"],
       "targets": [
         [0, 0],
@@ -24,20 +26,25 @@
       ]
     },
     {
-      "pieceId": "master",
+      "piece": {
+        "id": "master"
+      },
       "perPlayer": true,
-      "relative": "true",
+      "playerPerspective": true,
       "board": ["sharedBoard", "grid"],
       "targets": [ [0, 2] ]
     },
     {
-      "pieceId": "animalCard",
-      "perPlayer": true,
+      "piece": {
+        "id": "animalCard"
+      },
       "count": 2,
       "board": ["personalBoard", "cards"]
     },
     {
-      "pieceId": "animalCard",
+      "piece": {
+        "id": "animalCard"
+      },
       "count": 1,
       "board": ["sharedBoard", "extraMoveCard"]
     }
@@ -111,7 +118,7 @@
       {
         "type": "contains",
         "board": ["sharedBoard", "grid"],
-        "relative": true,
+        "playerPerspective": true,
         "target": [4, 2],
         "piece": {
           "type": "master",
@@ -150,6 +157,7 @@
               },
               {
                 "type": "relativeMove",
+                "playerPerspective": true,
                 "moves": {
                   "replace": ["thisPiece", "moves"]
                 }
