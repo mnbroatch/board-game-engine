@@ -159,7 +159,7 @@ export default class Game {
       piece: {
         id: pieceId,
       },
-      board: normalizePath(actionPayload.board, player)
+      board: normalizePath(actionPayload.board, { player })
     }
 
     if (pieceRule.perPlayer && !actionPayload.player) {
@@ -186,7 +186,7 @@ function normalizePath (path, options = {}) {
   return path[0] === 'personalBoard'
     ? [
       'personalBoards',
-      options.boardOwner,
+      options.player,
       ...path.slice(1)
     ]
     : path

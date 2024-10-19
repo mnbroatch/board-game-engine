@@ -5,9 +5,13 @@ import PieceGroup from '../piece/piece-group'
 export default class MovePieceAction extends Action {
   do (actionPayload) {
     const piece = this.targetPiece(actionPayload)
-    console.log('piece', piece)
 
-    this.game.get(actionPayload.board, { player: actionPayload.player })
+    let x = this.game.get(actionPayload.board, { player: actionPayload.player })
+    if (!x) {
+      console.log('===========')
+      console.log('actionPayload', actionPayload)
+    }
+    x
       .placePiece(
         actionPayload.target,
         piece

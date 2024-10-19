@@ -22,18 +22,13 @@ class Pile {
     }
 
     this.count = this.pool.length || +pieceRule.count
-    console.log('this.count', this.count)
     if (typeof this.count === 'undefined') {
       throw new Error('Piece has no count: ', pieceRule.id)
     }
   }
 
   getOne () {
-    let zzz = this.getMultiple(1)[0]
-    if (!zzz) {
-      console.log('this', this)
-    }
-    return zzz
+    return this.getMultiple(1)[0]
   }
 
   getMultiple (count) {
