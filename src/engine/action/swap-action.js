@@ -8,8 +8,6 @@ export default class SwapAction extends Action {
         .find(player => player.id === actionPayload.playerId).pieces
         .find(piece => piece.id === actionPayload.piece.id)
         .getOne()
-    } else {
-      console.log('actionPayload', actionPayload)
     }
     this.game.get(actionPayload.board)
     .placePiece(

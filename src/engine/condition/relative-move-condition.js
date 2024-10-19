@@ -3,7 +3,7 @@ import Condition from '../condition/condition'
 
 export default class RelativeMoveCondition extends Condition {
   isMet (actionPayload) {
-    const board = this.game.getConfigPath(actionPayload.board)
+    const board = this.game.get(actionPayload.board)
     const pieces = board.getPieces(actionPayload.target)
     return !pieces.filter(this.filterPieces.bind(this)).length
   }

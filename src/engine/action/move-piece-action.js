@@ -6,12 +6,7 @@ export default class MovePieceAction extends Action {
   do (actionPayload) {
     const piece = this.targetPiece(actionPayload)
 
-    let x = this.game.get(actionPayload.board, { player: actionPayload.player })
-    if (!x) {
-      console.log('===========')
-      console.log('actionPayload', actionPayload)
-    }
-    x
+    this.game.get(actionPayload.board, { player: actionPayload.player })
       .placePiece(
         actionPayload.target,
         piece
@@ -30,15 +25,7 @@ export default class MovePieceAction extends Action {
       }
     }
     const match = this.game.pieces.find(piece => isMatch(piece, matcher))
-    let x = match instanceof PieceGroup ? match.getOne() : match
-    if (!x) {
-      console.log('==============')
-      console.log('matcher', matcher)
-      console.log('match', match)
-      console.log('actionPayload', actionPayload)
-      console.log('match instanceof PieceGroup ', match instanceof PieceGroup )
-    }
-    return x
+    return match instanceof PieceGroup ? match.getOne() : match
   }
 }
 

@@ -147,7 +147,7 @@ export default class Game {
     }
   }
 
-  get (path, options = {}) {
+  get (path, options = {}, debug) {
     return get(this, normalizePath(path, options))
   }
 

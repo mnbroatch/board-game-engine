@@ -7,6 +7,6 @@ export default function boardFactory (boardRule, options) {
   } else if (boardRule.type === 'stack') {
     return new Stack(boardRule, options)
   } else {
-    console.log('boardRule', boardRule)
+    console.log('missing board type:', boardRule)
   }
 }
