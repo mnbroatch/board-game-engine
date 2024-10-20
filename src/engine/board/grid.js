@@ -29,8 +29,21 @@ export default class Grid extends Board {
     return this.getSpace(target).pieces
   }
 
-  placePiece (target, piece) {
+  placePiece (target, piece, rotation) {
     this.getSpace(target).placePiece(piece)
+  }
+
+  getTargetAfterRotation (target, rotation = 0) {
+    if (rotation === 180) {
+      const length = this.grid.length
+      const width = this.grid[0].length
+      return [
+        length - target[0] - 1,
+        width - target[1] - 1,
+      ]
+    } else {
+      return target
+    }
   }
 }
 

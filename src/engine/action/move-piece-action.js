@@ -5,12 +5,28 @@ import PieceGroup from '../piece/piece-group'
 export default class MovePieceAction extends Action {
   do (actionPayload) {
     const piece = this.targetPiece(actionPayload)
+    const board = this.game.get(actionPayload.board, { player: actionPayload.player })
+    const target = this.rules.playerPerspective
+      ? board.getTargetAfterRotation(actionPayload.target, this.getRotation(actionPayload.player))
+      : actionPayload.target
+    if (!target) {
+      console.log('actionPayload', actionPayload)
+    }
 
-    this.game.get(actionPayload.board, { player: actionPayload.player })
+    board
       .placePiece(
-        actionPayload.target,
+        target,
         piece
       )
+  }
+
+  getRotation (player) {
+    console.log('player', player)
+    return (
+      player
+        && this.game.options.playerCount === 2
+        && player.index === 1 
+    ) ? 180 : 0
   }
 
   // move this?

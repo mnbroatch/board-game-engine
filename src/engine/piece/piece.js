@@ -1,6 +1,6 @@
 export default class Piece {
   constructor (pieceRule, options) {
-    this.pieceRule = pieceRule
+    this.rule = pieceRule
     this.player = options.player
   }
 

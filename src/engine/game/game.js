@@ -16,7 +16,7 @@ export default class Game {
     this.generator = this.createRoundGenerator(this.rules.round)
     this.advance()
   }
-
+  
   // TODO: DRY this up 
   initialize () {
     this.sharedBoard = Object.entries(this.rules.sharedBoard).reduce((acc, [id, board]) => {
@@ -28,7 +28,6 @@ export default class Game {
     }, {})
 
     this.players = Array.from(Array(this.options.playerCount)).map((_, i) => new Player(this.rules.player, i))
-
     this.personalBoards = this.players.reduce((acc, player) => ({
       ...acc,
       [player.id]: Object.entries(this.rules.personalBoard || []).reduce((acc, [id, board]) => {
@@ -159,14 +158,16 @@ export default class Game {
       piece: {
         id: pieceId,
       },
-      board: normalizePath(actionPayload.board, { player })
+      player
     }
 
     if (pieceRule.perPlayer && !actionPayload.player) {
       defaultActionPayload.piece.player = { id: player.id }
     }
 
-    return merge({}, defaultActionPayload, actionPayload)
+    const merged = merge({}, defaultActionPayload, actionPayload)
+    merged.board = normalizePath(actionPayload.board, { player })
+    return merged
   }
 }
 
@@ -186,7 +187,7 @@ function normalizePath (path, options = {}) {
   return path[0] === 'personalBoard'
     ? [
       'personalBoards',
-      options.player,
+      options.player.id,
       ...path.slice(1)
     ]
     : path

@@ -39,6 +39,7 @@
         "id": "animalCard"
       },
       "count": 2,
+      "perPlayer": true,
       "board": ["personalBoard", "cards"]
     },
     {
