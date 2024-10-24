@@ -9,9 +9,6 @@ export default class MovePieceAction extends Action {
     const target = this.rules.playerPerspective
       ? board.getTargetAfterRotation(actionPayload.target, this.getRotation(actionPayload.player))
       : actionPayload.target
-    if (!target) {
-      console.log('actionPayload', actionPayload)
-    }
 
     board
       .placePiece(
@@ -21,7 +18,6 @@ export default class MovePieceAction extends Action {
   }
 
   getRotation (player) {
-    console.log('player', player)
     return (
       player
         && this.game.options.playerCount === 2

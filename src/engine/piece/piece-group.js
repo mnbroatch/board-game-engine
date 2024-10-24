@@ -1,5 +1,6 @@
 import pieceFactory from './piece-factory'
 
+// all this extra complication is to support arbitrary (infinite) piles of pieces
 class Pile {
   constructor (pieceRule, options = {}) {
     this.pieceRule = pieceRule

@@ -63,6 +63,8 @@ export default class Game {
         this.doInitialPlacement(placement)
       }
     })
+
+    console.log('game', this)
   }
 
   doInitialPlacement (placement, player) {
