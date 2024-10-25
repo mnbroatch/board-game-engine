@@ -9,14 +9,11 @@ export default function Grid ({ board, onCellClick }) {
           {row.map((cell, i) => (
             <div className="grid__cell" key={i}>
               {cell.pieces.map((piece, j) => (
-                <button
-                >
-                  <Piece
-                    piece={piece}
-                    onClick={() => { onCellClick?.(cell, board) }}
-                    key={j}
-                  />
-                </button>
+                <Piece
+                  piece={piece}
+                  onClick={() => { onCellClick?.(cell, board) }}
+                  key={j}
+                />
               ))}
             </div>
           ))}

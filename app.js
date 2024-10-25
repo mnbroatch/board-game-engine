@@ -4,6 +4,7 @@ import Layout from './src/components/layout'
 import ticTacToeVerbose from './src/tic-tac-toe-verbose.json'
 import onitamaVerbose from './src/onitama-verbose.json'
 import Game from './src/engine/game/game.js'
+import GameContext from './src/context/game-context'
 
 export default function App () {
   /* const [ game, doAction ] = useGame(ticTacToeVerbose) */
@@ -29,6 +30,8 @@ export default function App () {
   }
 
   return (
-    <Layout game={game} onCellClick={onCellClick} onPieceClick={onPieceClick} />
+    <GameContext.Provider value={game}>
+      <Layout game={game} onCellClick={onCellClick} onPieceClick={onPieceClick} />
+    </GameContext.Provider>
   )
 }
