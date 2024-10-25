@@ -7,18 +7,18 @@ export default function Grid ({ board, onCellClick }) {
       { board.grid.map((row, i) => (
         <div className="grid__row" key={i}>
           {row.map((cell, i) => (
-            <button
-              onClick={() => { onCellClick?.(cell, board) }}
-              className="grid__cell"
-              key={i}
-            >
+            <div className="grid__cell" key={i}>
               {cell.pieces.map((piece, j) => (
-                <Piece
-                  piece={piece}
-                  key={j}
-                />
+                <button
+                >
+                  <Piece
+                    piece={piece}
+                    onClick={() => { onCellClick?.(cell, board) }}
+                    key={j}
+                  />
+                </button>
               ))}
-            </button>
+            </div>
           ))}
         </div>
       )) }
