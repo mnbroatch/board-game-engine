@@ -16,7 +16,13 @@
 }
 
 .piece--blah {
+  box-sizing: border-box;
   font-size: .6em;
   width: 100%;
   height: 100%;
+}
+
+.piece--blah--selected, .piece--blah--selected:focus {
+  border: 2px solid red;
+  outline: none;
 }

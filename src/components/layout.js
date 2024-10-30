@@ -1,7 +1,7 @@
 import React from 'react'
 import Board from './board/board'
 
-export default function Layout ({ game, onCellClick, onPieceClick }) {
+export default function Layout ({ game, onSpaceClick, onPieceClick }) {
   const halfCount = Math.ceil(game.players.length / 2)
 
   return (
@@ -16,7 +16,7 @@ export default function Layout ({ game, onCellClick, onPieceClick }) {
                   board={board}
                   location={['personalBoard', key]}
                   game={game}
-                  onCellClick={onCellClick}
+                  onSpaceClick={onSpaceClick}
                   onPieceClick={onPieceClick}
                 />
               ))}
@@ -30,7 +30,8 @@ export default function Layout ({ game, onCellClick, onPieceClick }) {
             board={board}
             location={['sharedBoard', key]}
             game={game}
-            onCellClick={onCellClick}
+            onSpaceClick={onSpaceClick}
+            onPieceClick={onPieceClick}
           />
         ))}
       </div>
@@ -44,7 +45,7 @@ export default function Layout ({ game, onCellClick, onPieceClick }) {
                   board={board}
                   location={['personalBoard', key]}
                   game={game}
-                  onCellClick={onCellClick}
+                  onSpaceClick={onSpaceClick}
                   onPieceClick={onPieceClick}
                 />
               ))}

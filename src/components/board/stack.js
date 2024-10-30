@@ -1,15 +1,17 @@
 import React from 'react'
-export default function Stack ({ board, onCellClick }) {
+import Piece from '../piece/piece'
+
+export default function Stack ({ board, onPieceClick }) {
   return (
     <div className="board--stack">
       {board.stack.map((piece, i) => (
-        <button
-          onClick={() => { onCellClick?.(piece, board) }}
-          className="stack__piece"
+        <Piece
+          piece={piece}
+          onClick={() => {
+            onPieceClick?.(piece)
+          }}
           key={i}
-        >
-          {JSON.stringify(piece)}
-        </button>
+        />
       ))}
     </div>
   )

@@ -15,6 +15,7 @@ export default class Game {
     this.initialize()
     this.generator = this.createRoundGenerator(this.rules.round)
     this.advance()
+    this.context = {}
   }
   
   // TODO: DRY this up 
@@ -94,7 +95,8 @@ export default class Game {
     if (this.gameOver) {
       throw new Error('game is over!')
     }
-    this.currentRound.doAction(this.expandActionPayload(actionPayload))
+    const player = this.players.find(player => player.id === actionPayload.playerId)
+    this.currentRound.doAction(this.expandActionPayload(actionPayload, player))
     this.advance()
   }
 

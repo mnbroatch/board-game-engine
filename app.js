@@ -9,15 +9,20 @@ import GameContext from './src/context/game-context'
 export default function App () {
   /* const [ game, doAction ] = useGame(ticTacToeVerbose) */
   const [ game, doAction ] = useGame(onitamaVerbose)
-  const [ selectedPiece, setSelectedPiece ] = useState()
 
   const onPieceClick = (piece) => {
-    selectPiece(piece)
+    doAction({
+      type: 'selectPiece',
+      playerId: game.currentRound.currentPlayer.id,
+      piece: {
+        id: piece.rule.id
+      }
+    })
   }
 
-  const onCellClick = (cell, board) => {
+  const onSpaceClick = (cell, board) => {
     const currentPlayer = game.currentRound.currentPlayer
-    const action = {
+    const actionPayload = {
       playerId: currentPlayer.id,
       type: 'movePiece',
       board: board.path,
@@ -26,12 +31,12 @@ export default function App () {
     if (selectedPiece) {
       action.piece = { id: selectedPiece.id }
     }
-    doAction(action)
+    doAction(actionPayload)
   }
 
   return (
     <GameContext.Provider value={game}>
-      <Layout game={game} onCellClick={onCellClick} onPieceClick={onPieceClick} />
+      <Layout game={game} onSpaceClick={onSpaceClick} onPieceClick={onPieceClick} />
     </GameContext.Provider>
   )
 }
