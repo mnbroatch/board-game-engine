@@ -11,11 +11,13 @@ export default function App () {
   const [ game, doAction ] = useGame(onitamaVerbose)
 
   const onPieceClick = (piece) => {
+    console.log('piece.rule', piece.rule)
     doAction({
       type: 'selectPiece',
       playerId: game.currentRound.currentPlayer.id,
       piece: {
-        id: piece.rule.id
+        id: piece.rule.id,
+        variantId: piece.rule.variantId,
       }
     })
   }

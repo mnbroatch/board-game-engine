@@ -1,6 +1,6 @@
 export default class Board {
   constructor (boardRule, options = {}) {
-    this.path = boardRule.path
+    this.id = Math.random()
     this.player = options.player
   }
 

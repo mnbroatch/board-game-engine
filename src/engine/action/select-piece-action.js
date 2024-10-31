@@ -14,7 +14,7 @@ export default class SelectPieceAction extends Action {
         .getOne()
     }
 
-    this.context.selectedPiece = piece
+    game.context.selectedPiece = piece
 
     actionPayload.then.forEach()
     this.currentRound.doAction(this.expandActionPayload())

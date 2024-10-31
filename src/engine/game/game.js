@@ -1,3 +1,4 @@
+import isMatch from 'lodash/isMatch'
 import merge from 'lodash/merge'
 import get from 'lodash/get'
 import boardFactory from '../board/board-factory'
@@ -6,6 +7,7 @@ import roundFactory from '../round/round-factory'
 import conditionFactory from '../condition/condition-factory'
 import actionFactory from '../action/action-factory'
 import PieceGroup from '../piece/piece-group'
+import findValuePath from '../../util/find-value-path'
 
 
 export default class Game {
@@ -169,9 +171,21 @@ export default class Game {
       defaultActionPayload.piece.player = { id: player.id }
     }
 
+    if (!actionPayload.board) {
+      this.getBoardContaining(actionPayload.piece)
+    }
+
     const merged = merge({}, defaultActionPayload, actionPayload)
     merged.board = normalizePath(actionPayload.board, { player })
     return merged
+  }
+
+  // will have to be recursive eventually
+  getBoardContaining (piece) {
+    const path = findValuePath(this, piece, isMatch)
+    console.log('path', path)
+    console.log('this.get(path)', this.get(path))
+    return this.get(path)
   }
 }
 
@@ -188,6 +202,7 @@ function expandOptions (rules, options) {
 }
 
 function normalizePath (path, options = {}) {
+  console.log('path', path)
   return path[0] === 'personalBoard'
     ? [
       'personalBoards',
