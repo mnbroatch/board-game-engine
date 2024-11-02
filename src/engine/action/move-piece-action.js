@@ -29,7 +29,7 @@ export default class MovePieceAction extends Action {
   // add invariant condition for taking from a depleted pile
   targetPiece (actionPayload) {
     const matcher = {
-      id: actionPayload.piece.id,
+      name: actionPayload.piece.name,
     }
     if (actionPayload.piece.player) {
       matcher.player = {

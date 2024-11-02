@@ -6,6 +6,7 @@ import SomeCondition from './some-condition'
 import RelativeMoveCondition from './relative-move-condition'
 import ActionTypeMatchesCondition from './action-type-matches-condition'
 import IsValidPlayerCondition from './is-valid-player-condition'
+import PieceMatchesCondition from './piece-matches-condition'
 
 export default function conditionFactory (conditionRule, game) {
   if (conditionRule.type === 'contains') {
@@ -24,5 +25,7 @@ export default function conditionFactory (conditionRule, game) {
     return new ActionTypeMatchesCondition(conditionRule, game)
   } else if (conditionRule.type === 'isValidPlayer') {
     return new IsValidPlayerCondition(conditionRule, game)
+  } else if (conditionRule.type === 'pieceMatches') {
+    return new PieceMatchesCondition(conditionRule, game)
   }
 }

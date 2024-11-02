@@ -11,13 +11,12 @@ export default function App () {
   const [ game, doAction ] = useGame(onitamaVerbose)
 
   const onPieceClick = (piece) => {
-    console.log('piece.rule', piece.rule)
     doAction({
       type: 'selectPiece',
       playerId: game.currentRound.currentPlayer.id,
       piece: {
-        id: piece.rule.id,
-        variantId: piece.rule.variantId,
+        name: piece.rule.name,
+        id: piece.id
       }
     })
   }
@@ -27,11 +26,11 @@ export default function App () {
     const actionPayload = {
       playerId: currentPlayer.id,
       type: 'movePiece',
-      board: board.path,
+      board: board.rule.path,
       target: cell.coordinates
     }
-    if (selectedPiece) {
-      action.piece = { id: selectedPiece.id }
+    if (game.context.selectedPiece) {
+      action.piece = { name: game.context.selectedPiece.name }
     }
     doAction(actionPayload)
   }

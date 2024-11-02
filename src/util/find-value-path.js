@@ -1,3 +1,4 @@
+// todo: return found object along w/ path
 export default function findValuePath (
   obj,
   target,

@@ -4,7 +4,7 @@ import pieceFactory from './piece-factory'
 class Pile {
   constructor (pieceRule, options = {}) {
     this.pieceRule = pieceRule
-    this.id = pieceRule.id
+    this.name = pieceRule.name
     this.player = options.player
     this.options = options
     this.pool = (pieceRule.variants ? Object.entries(pieceRule.variants) : []).reduce((acc, [variantId, variant]) => {

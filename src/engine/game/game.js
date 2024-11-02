@@ -66,8 +66,6 @@ export default class Game {
         this.doInitialPlacement(placement)
       }
     })
-
-    console.log('game', this)
   }
 
   doInitialPlacement (placement, player) {
@@ -157,40 +155,52 @@ export default class Game {
   }
 
   expandActionPayload (actionPayload, player) {
-    const pieceId = actionPayload.piece?.id || 'playerMarker'
-    const pieceRule = this.rules.pieces.find(piece => piece.id === pieceId)
+    const pieceName = actionPayload.piece?.name || 'playerMarker'
+    const pieceRule = this.rules.pieces.find(piece => piece.name === pieceName)
+
+    let piece
+    if (actionPayload.piece?.id) {
+      piece = { id: actionPayload.piece.id }
+    } else if (actionPayload.piece) {
+      piece = actionPayload.piece
+    } else {
+      piece = { name: 'playerMarker' }
+    }
+
     const defaultActionPayload = {
       type: 'movePiece',
-      piece: {
-        id: pieceId,
-      },
       player
     }
 
+    actionPayload.piece = piece
+
     if (pieceRule.perPlayer && !actionPayload.player) {
-      defaultActionPayload.piece.player = { id: player.id }
+      actionPayload.piece.player = { id: player.id }
     }
 
     if (!actionPayload.board) {
-      this.getBoardContaining(actionPayload.piece)
+      actionPayload.board = this.getBoardContaining(actionPayload.piece)
     }
 
     const merged = merge({}, defaultActionPayload, actionPayload)
+    
     merged.board = normalizePath(actionPayload.board, { player })
+
     return merged
   }
 
-  // will have to be recursive eventually
+  getPiece (piece) {
+    return this.get(findValuePath(this, piece, isMatch))
+  }
+
   getBoardContaining (piece) {
     const path = findValuePath(this, piece, isMatch)
-    console.log('path', path)
-    console.log('this.get(path)', this.get(path))
     return this.get(path)
   }
 }
 
+// todo. will allow smaller rulesets
 function expandRules (rules, options) {
-  // attach board paths to board rule objects
   return rules
 }
 
@@ -202,7 +212,6 @@ function expandOptions (rules, options) {
 }
 
 function normalizePath (path, options = {}) {
-  console.log('path', path)
   return path[0] === 'personalBoard'
     ? [
       'personalBoards',

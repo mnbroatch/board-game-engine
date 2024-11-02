@@ -8,6 +8,7 @@ export default class Action {
 
     const invariantConditionRules = [
       { type: 'actionTypeMatches', actionType: this.rules.type },
+      { type: 'pieceMatches', piece: this.rules.piece },
       { type: 'isValidPlayer' }
     ]
 

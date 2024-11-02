@@ -6,7 +6,7 @@ export default class SwapAction extends Action {
     if (actionPayload.from === 'player') {
       piece = this.game.players
         .find(player => player.id === actionPayload.playerId).pieces
-        .find(piece => piece.id === actionPayload.piece.id)
+        .find(piece => piece.name === actionPayload.piece.name)
         .getOne()
     }
     this.game.get(actionPayload.board)

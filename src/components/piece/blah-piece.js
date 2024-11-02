@@ -13,9 +13,11 @@ export default function Blah ({ piece, onClick }) {
         game.context.selectedPiece === piece && 'piece--blah--selected',
       ].filter(Boolean).join(' ')}
     >
-      <div>
-        {piece.rule.id}
-      </div>
+      {piece.rule.name !== 'playerMarker' && (
+        <div>
+          {piece.rule.name}
+        </div>
+      )}
       {piece.player && (
         <div>
           P{piece.player.index}

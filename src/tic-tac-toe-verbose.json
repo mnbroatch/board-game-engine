@@ -8,7 +8,7 @@
   },
   "pieces": [
     {
-      "id": "playerMarker",
+      "name": "playerMarker",
       "count": "Infinity",
       "perPlayer": true
     }
@@ -46,7 +46,7 @@
     "type": "blackout",
     "board": ["sharedBoard", "grid"],
     "piece": {
-      "id": "playerMarker"
+      "name": "playerMarker"
     }
   }
 }

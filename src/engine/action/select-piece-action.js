@@ -6,18 +6,17 @@ export default class SelectPieceAction extends Action {
   }
   do (actionPayload) {
     let piece
-    console.log('123', 123)
-    if (actionPayload.from === 'player') {
+    if (actionPayload.piece?.id) {
+      piece = this.game.getPiece({
+        id: actionPayload.piece?.id
+      })
+    } else if (actionPayload.from === 'player') {
       piece = this.game.players
         .find(player => player.id === actionPayload.playerId).pieces
-        .find(piece => piece.id === actionPayload.piece.id)
+        .find(piece => piece.name === actionPayload.piece.name)
         .getOne()
     }
-
-    game.context.selectedPiece = piece
-
-    actionPayload.then.forEach()
-    this.currentRound.doAction(this.expandActionPayload())
+    this.game.context.selectedPiece = piece
 
     // do the "then"
 
