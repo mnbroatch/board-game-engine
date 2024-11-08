@@ -3,6 +3,6 @@ import Condition from '../condition/condition'
 
 export default class ActionTypeMatchesCondition extends Condition {
   isMet (actionPayload) {
-    return actionPayload.type === this.rules.actionType
+    return actionPayload.actionRule?.type === this.rules.actionType
   }
 }
