@@ -161,7 +161,7 @@ export default class Game {
     let piece
     if (actionPayload.piece?.id) {
       piece = { id: actionPayload.piece.id }
-    } else if (actionPayload.piece) {
+    } else if (actionPayload.piece?.name) {
       piece = actionPayload.piece
     } else {
       piece = { name: 'playerMarker' }
@@ -173,6 +173,7 @@ export default class Game {
     }
 
     actionPayload.piece = piece
+    console.log('actionPayload', actionPayload)
 
     if (pieceRule.perPlayer && !actionPayload.player) {
       actionPayload.piece.player = { id: player.id }
