@@ -123,7 +123,7 @@
         "target": [4, 2],
         "piece": {
           "type": "master",
-          "player": "me"
+          "player": "currentPlayer"
         }
       }
     ]
@@ -146,8 +146,7 @@
 
             "piece": {
               "name": "animalCard",
-              "board": ["personalBoard", "cards"],
-              "player": "me"
+              "board": ["personalBoard", "cards"]
             },
 
             "then": [
@@ -155,14 +154,14 @@
                 "type": "movePiece",
                 "piece": {
                   "board": ["sharedBoard", "grid"],
-                  "player": "me"
+                  "player": "currentPlayer"
                 },
                 "capture": true,
                 "conditions": [
                   {
                     "type": "doesNotContain",
                     "piece": {
-                      "player": "me"
+                      "player": "currentPlayer"
                     }
                   },
                   {

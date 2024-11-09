@@ -173,7 +173,6 @@ export default class Game {
     }
 
     actionPayload.piece = piece
-    console.log('actionPayload', actionPayload)
 
     if (pieceRule.perPlayer && !actionPayload.player) {
       actionPayload.piece.player = { id: player.id }
@@ -190,8 +189,8 @@ export default class Game {
     return merged
   }
 
-  getPiece (piece) {
-    return this.get(findValuePath(this, piece, isMatch))
+  getPiece (pieceMatcher) {
+    return this.get(findValuePath(this, pieceMatcher, isMatch))
   }
 
   getBoardContaining (piece) {
