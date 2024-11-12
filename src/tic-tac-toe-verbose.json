@@ -17,7 +17,7 @@
     "type": "bingo",
     "board": ["sharedBoard", "grid"],
     "piece": {
-      "id": "playerMarker"
+      "name": "playerMarker"
     }
   },
   "round": {
@@ -28,7 +28,9 @@
         "actions": [
           {
             "type": "movePiece",
-            "piece": "playerMarker",
+            "piece": {
+              "name": "playerMarker"
+            },
             "from": "player",
             "to": ["sharedBoard", "grid"],
             "conditions": [

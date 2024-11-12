@@ -1,8 +1,7 @@
 // todo: return found object along w/ path
 export default function findValuePath (
   obj,
-  target,
-  compare = (a, b) => a === b,
+  compare,
   currentPath = [],
   visited = new Set()
 ) {
@@ -13,14 +12,14 @@ export default function findValuePath (
 
   visited.add(obj); // Mark the current object as visited
 
-  if (compare(obj, target)) {
+  if (compare(obj)) {
     return currentPath;
   }
 
   if (typeof obj === 'object' && obj !== null) {
     for (const key in obj) {
       const newPath = [...currentPath, key];
-      const result = findValuePath(obj[key], target, compare, newPath, visited);
+      const result = findValuePath(obj[key], compare, newPath, visited);
       if (result) {
         return result;
       }

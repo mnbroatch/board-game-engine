@@ -1,4 +1,4 @@
-import isMatch from 'lodash/isMatch'
+import matches from 'lodash/matches'
 import Condition from '../condition/condition'
 
 export default class DoesNotContainCondition extends Condition {
@@ -12,6 +12,6 @@ export default class DoesNotContainCondition extends Condition {
   }
 
   filterPieces (piece) {
-    return this.rules.piece === 'any' || isMatch(piece, this.rules.piece = {})
+    return this.rules.piece === 'any' || matches(piece, this.rules.piece = {})
   }
 }

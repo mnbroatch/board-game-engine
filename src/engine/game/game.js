@@ -1,4 +1,4 @@
-import isMatch from 'lodash/isMatch'
+import matches from 'lodash/matches'
 import merge from 'lodash/merge'
 import get from 'lodash/get'
 import boardFactory from '../board/board-factory'
@@ -190,12 +190,11 @@ export default class Game {
   }
 
   getPiece (pieceMatcher) {
-    return this.get(findValuePath(this, pieceMatcher, isMatch))
+    return this.get(findValuePath(this, matches(pieceMatcher)))
   }
 
   getBoardContaining (piece) {
-    const path = findValuePath(this, piece, isMatch)
-    return this.get(path)
+    return findValuePath(this, matches(piece))
   }
 }
 

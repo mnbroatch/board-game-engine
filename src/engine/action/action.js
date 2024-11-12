@@ -22,9 +22,9 @@ export default class Action {
   assertIsValid (actionPayload) {
     const unmetConditions = this.conditions.filter(condition => !condition.isMet(actionPayload))
     if (unmetConditions.length) {
-      // console.log('==================')
-      // console.log('unmetConditions', unmetConditions)
-      // console.log('actionPayload', actionPayload)
+      console.log('==================')
+      console.log('unmetConditions', unmetConditions)
+      console.log('actionPayload', actionPayload)
       throw new Error('conditions not met ^')
     }
   }

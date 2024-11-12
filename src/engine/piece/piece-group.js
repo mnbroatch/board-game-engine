@@ -5,7 +5,9 @@ class Pile {
   constructor (pieceRule, options = {}) {
     this.pieceRule = pieceRule
     this.name = pieceRule.name
-    this.player = options.player
+    if (options.player) {
+      this.player = options.player
+    }
     this.options = options
     this.pool = (pieceRule.variants ? Object.entries(pieceRule.variants) : []).reduce((acc, [variantId, variant]) => {
       const count = variant.count || 1
