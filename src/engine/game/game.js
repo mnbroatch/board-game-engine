@@ -151,7 +151,7 @@ export default class Game {
   }
 
   get (path, options = {}, debug) {
-    return get(this, normalizePath(path, options))
+    return get(this, this.normalizePath(path, options))
   }
 
   expandActionPayload (actionPayload, player) {
@@ -179,22 +179,55 @@ export default class Game {
     }
 
     if (!actionPayload.board) {
-      actionPayload.board = this.getBoardContaining(actionPayload.piece)
+      actionPayload.board = this.getBoardPathContaining(actionPayload.piece)
     }
 
     const merged = merge({}, defaultActionPayload, actionPayload)
     
-    merged.board = normalizePath(actionPayload.board, { player })
+    merged.board = this.normalizePath(actionPayload.board, { player })
 
     return merged
   }
 
+  getPiecePaths (matcher, options) {
+    const placesPiecesCanBe = {
+      personalBoards: this.personalBoards,
+      sharedBoard: this.sharedBoard,
+      pieces: this.pieces,
+    }
+    return Array.from(findValuePath(placesPiecesCanBe, matches(matcher)))
+      .filter((a, b) => a[a.length - 1] !== 'rule')
+      .sort((a, b) => a[0] === 'pieces' ? 1 : -1)
+      .map(path => this.normalizePath(path, options))
+  }
+
+  getPieces (pieceMatcher, options) {
+    return this.getPiecePaths(pieceMatcher, options)
+      .map(path => this.get(path))
+  }
+
   getPiece (pieceMatcher) {
-    return this.get(findValuePath(this, matches(pieceMatcher)))
+    const match = this.getPieces(pieceMatcher)[0]
+    return match instanceof PieceGroup ? match.getOne() : match
+  }
+
+  getBoardPathContaining (piece, options) {
+    return this.getPiecePaths(piece, options)[0]
   }
 
   getBoardContaining (piece) {
-    return findValuePath(this, matches(piece))
+    const path = this.getBoardPathContaining(piece)
+    return path ? this.get(path.slice(0, path.length - 1)) : null
+  }
+
+  normalizePath (path, options = {}) {
+    return path[0] === 'personalBoard'
+      ? [
+        'personalBoards',
+        options.player.id,
+        ...path.slice(1)
+      ]
+      : path
   }
 }
 
@@ -209,14 +242,3 @@ function expandOptions (rules, options) {
   }
   return merge({}, defaultOptions, options)
 }
-
-function normalizePath (path, options = {}) {
-  return path[0] === 'personalBoard'
-    ? [
-      'personalBoards',
-      options.player.id,
-      ...path.slice(1)
-    ]
-    : path
-}
-

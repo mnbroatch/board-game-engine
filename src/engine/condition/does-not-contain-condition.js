@@ -12,6 +12,6 @@ export default class DoesNotContainCondition extends Condition {
   }
 
   filterPieces (piece) {
-    return this.rules.piece === 'any' || matches(piece, this.rules.piece = {})
+    return this.rules.piece === 'any' || matches(piece, this.rules.piece || {})
   }
 }

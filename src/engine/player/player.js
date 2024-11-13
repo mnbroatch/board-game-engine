@@ -3,7 +3,7 @@ class Player {
     if (rules) {
       this.rules = rules
     }
-    this.id = Math.random()
+    this.id = `${Math.random()}`
     this.index = index
   }
 }

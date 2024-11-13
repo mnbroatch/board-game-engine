@@ -7,8 +7,8 @@ import Game from './src/engine/game/game.js'
 import GameContext from './src/context/game-context'
 
 export default function App () {
-  // const [ game, doAction ] = useGame(ticTacToeVerbose)
-  const [ game, doAction ] = useGame(onitamaVerbose)
+  const [ game, doAction ] = useGame(ticTacToeVerbose)
+  /* const [ game, doAction ] = useGame(onitamaVerbose) */
 
   const onPieceClick = (piece) => {
     doAction({

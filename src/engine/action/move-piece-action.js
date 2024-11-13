@@ -1,6 +1,4 @@
-import matches from 'lodash/matches'
 import Action from './action'
-import PieceGroup from '../piece/piece-group'
 
 export default class MovePieceAction extends Action {
   do (actionPayload) {
@@ -36,8 +34,7 @@ export default class MovePieceAction extends Action {
         id: actionPayload.piece.player.id
       }
     }
-    const match = this.game.pieces.find(piece => matches(matcher)(piece))
-    return match instanceof PieceGroup ? match.getOne() : match
+    return this.game.getPiece(matcher)
   }
 }
 
