@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from "react";
 
-export default function useForceUpdate () {
-  const [value, setValue] = useState(false)
-  return () => setValue(value => !value)
+export default function useForceUpdate() {
+  const [, setValue] = useState(false);
+  return () => setValue((value) => !value);
 }

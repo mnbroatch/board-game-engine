@@ -1,43 +1,46 @@
-import React, { useState } from 'react'
-import useGame from './src/hooks/use-game'
-import Layout from './src/components/layout'
-import ticTacToeVerbose from './src/tic-tac-toe-verbose.json'
-import onitamaVerbose from './src/onitama-verbose.json'
-import Game from './src/engine/game/game.js'
-import GameContext from './src/context/game-context'
+import React from "react";
+import useGame from "./src/hooks/use-game.js";
+import Layout from "./src/components/layout.js";
+import ticTacToeVerbose from "./src/tic-tac-toe-verbose.json";
+// import onitamaVerbose from './src/onitama-verbose.json'
+import GameContext from "./src/context/game-context.js";
 
-export default function App () {
-  const [ game, doAction ] = useGame(ticTacToeVerbose)
+export default function App() {
+  const [game, doAction] = useGame(ticTacToeVerbose);
   /* const [ game, doAction ] = useGame(onitamaVerbose) */
 
   const onPieceClick = (piece) => {
     doAction({
-      type: 'selectPiece',
+      type: "selectPiece",
       playerId: game.currentRound.currentPlayer.id,
       piece: {
         name: piece.rule.name,
-        id: piece.id
-      }
-    })
-  }
+        id: piece.id,
+      },
+    });
+  };
 
   const onSpaceClick = (cell, board) => {
-    const currentPlayer = game.currentRound.currentPlayer
+    const currentPlayer = game.currentRound.currentPlayer;
     const actionPayload = {
       playerId: currentPlayer.id,
-      type: 'movePiece',
+      type: "movePiece",
       board: board.rule.path,
-      target: cell.coordinates
-    }
+      target: cell.coordinates,
+    };
     if (game.context.selectedPiece) {
-      action.piece = { name: game.context.selectedPiece.name }
+      actionPayload.piece = { name: game.context.selectedPiece.name };
     }
-    doAction(actionPayload)
-  }
+    doAction(actionPayload);
+  };
 
   return (
     <GameContext.Provider value={game}>
-      <Layout game={game} onSpaceClick={onSpaceClick} onPieceClick={onPieceClick} />
+      <Layout
+        game={game}
+        onSpaceClick={onSpaceClick}
+        onPieceClick={onPieceClick}
+      />
     </GameContext.Provider>
-  )
+  );
 }

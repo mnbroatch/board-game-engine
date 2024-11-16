@@ -1,14 +1,14 @@
-export default class Space  {
-  constructor (coordinates, startingPieces) {
-    this.coordinates = coordinates 
-    this.pieces = startingPieces || []
+export default class Space {
+  constructor(coordinates, startingPieces) {
+    this.coordinates = coordinates;
+    this.pieces = startingPieces || [];
   }
 
-  placePiece (piece) {
-    this.pieces.push(piece)
+  placePiece(piece) {
+    this.pieces.push(piece);
   }
 
-  isEmpty () {
-    return !this.pieces.length
+  isEmpty() {
+    return !this.pieces.length;
   }
 }

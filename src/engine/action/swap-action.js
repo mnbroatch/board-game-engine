@@ -1,18 +1,14 @@
-import Action from './action'
+import Action from "./action.js";
 
 export default class SwapAction extends Action {
-  do (actionPayload) {
-    let piece
-    if (actionPayload.from === 'player') {
+  do(actionPayload) {
+    let piece;
+    if (actionPayload.from === "player") {
       piece = this.game.players
-        .find(player => player.id === actionPayload.playerId).pieces
-        .find(piece => piece.name === actionPayload.piece.name)
-        .getOne()
+        .find((player) => player.id === actionPayload.playerId)
+        .pieces.find((piece) => piece.name === actionPayload.piece.name)
+        .getOne();
     }
-    this.game.get(actionPayload.board)
-    .placePiece(
-      actionPayload.target,
-      piece
-    )
+    this.game.get(actionPayload.board).placePiece(actionPayload.target, piece);
   }
 }

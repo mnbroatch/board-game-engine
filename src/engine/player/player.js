@@ -1,11 +1,11 @@
 class Player {
-  constructor (rules, index) {
+  constructor(rules, index) {
     if (rules) {
-      this.rules = rules
+      this.rules = rules;
     }
-    this.id = `${Math.random()}`
-    this.index = index
+    this.id = `${Math.random()}`;
+    this.index = index;
   }
 }
 
-export default Player
+export default Player;

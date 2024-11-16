@@ -1,7 +1,7 @@
-const config = require('./webpack.config.js')
+import config from "./webpack.config.js";
 
-module.exports = {
+export default {
   ...config,
-  mode: 'development'
+  mode: "development",
   // mode: 'production'
-}
+};

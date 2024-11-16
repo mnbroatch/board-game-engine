@@ -1,18 +1,18 @@
-const HtmlWebPackPlugin = require('html-webpack-plugin')
+import HtmlWebPackPlugin from "html-webpack-plugin";
 
-module.exports = {
-  entry: './index.js',
+export default {
+  entry: "./index.js",
   output: {
-    filename: 'build.js'
+    filename: "build.js",
   },
   optimization: {
-    minimize: false
+    minimize: false,
   },
   plugins: [
     new HtmlWebPackPlugin({
-      title: 'React Template',
-      template: './index.html'
-    })
+      title: "React Template",
+      template: "./index.html",
+    }),
   ],
   module: {
     rules: [
@@ -20,23 +20,23 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /(node_modules)/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
-          }
-        }
+            presets: ["@babel/preset-env", "@babel/preset-react"],
+          },
+        },
       },
       {
         test: /\.s?[ac]ss$/i,
         use: [
           // Creates `style` nodes from JS strings
-          'style-loader',
+          "style-loader",
           // Translates CSS into CommonJS
-          'css-loader',
+          "css-loader",
           // Compiles Sass to CSS
-          'sass-loader'
-        ]
-      }
-    ]
-  }
-}
+          "sass-loader",
+        ],
+      },
+    ],
+  },
+};

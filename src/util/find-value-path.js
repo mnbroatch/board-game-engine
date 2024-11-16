@@ -1,10 +1,10 @@
 // todo: return found object along w/ path
-export default function findValuePath (
+export default function findValuePath(
   obj,
   compare,
   currentPath = [],
   visited = new Set(),
-  results = new Set()
+  results = new Set(),
 ) {
   // Check for circular reference
   if (visited.has(obj)) {
@@ -17,10 +17,16 @@ export default function findValuePath (
     results.add(currentPath);
   }
 
-  if (typeof obj === 'object' && obj !== null) {
+  if (typeof obj === "object" && obj !== null) {
     for (const key in obj) {
       const newPath = [...currentPath, key];
-      const result = findValuePath(obj[key], compare, newPath, visited, results);
+      const result = findValuePath(
+        obj[key],
+        compare,
+        newPath,
+        visited,
+        results,
+      );
       if (result.length) {
         results.add(currentPath);
       }

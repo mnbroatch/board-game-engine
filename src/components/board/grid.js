@@ -1,20 +1,24 @@
-import React from 'react'
-import Piece from '../piece/piece'
+import React from "react";
+import Piece from "../piece/piece.js";
 
-export default function Grid ({ board, onPieceClick, onSpaceClick }) {
+export default function Grid({ board, onPieceClick, onSpaceClick }) {
   return (
     <div className="board--grid">
-      { board.grid.map((row, i) => (
+      {board.grid.map((row, i) => (
         <div className="grid__row" key={i}>
           {row.map((cell, i) => (
-            <div className="grid__cell" key={i} onClick={() => {
-              onSpaceClick?.(cell, board)
-            }}>
+            <div
+              className="grid__cell"
+              key={i}
+              onClick={() => {
+                onSpaceClick?.(cell, board);
+              }}
+            >
               {cell.pieces.map((piece, j) => (
                 <Piece
                   piece={piece}
                   onClick={() => {
-                    onPieceClick?.(cell, board)
+                    onPieceClick?.(cell, board);
                   }}
                   key={j}
                 />
@@ -22,7 +26,7 @@ export default function Grid ({ board, onPieceClick, onSpaceClick }) {
             </div>
           ))}
         </div>
-      )) }
+      ))}
     </div>
-  )
+  );
 }
