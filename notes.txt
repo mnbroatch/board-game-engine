@@ -1,3 +1,14 @@
+UI elements (buttons) need to know if and in what way they are interactable
+This needs to be based on the possible actions
+
+
+
+
+===============================
+
+
+
+
 Why is there Game under currentPlayer?
   - make hidden?
   - hard to serialize

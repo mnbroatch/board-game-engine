@@ -1,15 +1,17 @@
 import React from "react";
-import useGame from "./src/hooks/use-game.js";
+import type { FC } from "react";
+import useGame from "./src/hooks/use-game";
 import Layout from "./src/components/layout.js";
-import ticTacToeVerbose from "./src/tic-tac-toe-verbose.json";
-// import onitamaVerbose from './src/onitama-verbose.json'
+import gameRules from "./src/tic-tac-toe-verbose.json";
+// import gameRules from "./src/onitama-verbose.json";
 import GameContext from "./src/context/game-context.js";
+import type { OnPieceClick, OnSpaceClick } from "./src/types";
 
-export default function App() {
-  const [game, doAction] = useGame(ticTacToeVerbose);
-  /* const [ game, doAction ] = useGame(onitamaVerbose) */
+const App: FC<void> = () => {
+  const [game, doAction] = useGame(gameRules);
 
-  const onPieceClick = (piece) => {
+  const onPieceClick: OnPieceClick = (piece) => {
+    console.log("piece", piece);
     doAction({
       type: "selectPiece",
       playerId: game.currentRound.currentPlayer.id,
@@ -20,8 +22,8 @@ export default function App() {
     });
   };
 
-  const onSpaceClick = (cell, board) => {
-    const currentPlayer = game.currentRound.currentPlayer;
+  const onSpaceClick: OnSpaceClick = (cell, board) => {
+    const { currentPlayer } = game.currentRound;
     const actionPayload = {
       playerId: currentPlayer.id,
       type: "movePiece",
@@ -43,4 +45,6 @@ export default function App() {
       />
     </GameContext.Provider>
   );
-}
+};
+
+export default App;

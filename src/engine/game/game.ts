@@ -2,7 +2,7 @@ import matches from "lodash/matches.js";
 import merge from "lodash/merge.js";
 import get from "lodash/get.js";
 import boardFactory from "../board/board-factory.js";
-import Player from "../player/player.js";
+import Player from "../player/player";
 import roundFactory from "../round/round-factory.js";
 import conditionFactory from "../condition/condition-factory.js";
 import actionFactory from "../action/action-factory.js";

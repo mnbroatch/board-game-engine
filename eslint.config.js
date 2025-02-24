@@ -12,7 +12,7 @@ const __dirname = path.resolve();
 export default [
   {
     ...love,
-    files: ["**/*.js", "**/*.ts"],
+    files: ["**/*.js", "**/*.ts", "**/*.tsx"],
   },
   js.configs.recommended,
   json.configs.recommended,
@@ -20,7 +20,7 @@ export default [
   react.configs.flat["jsx-runtime"],
   prettier,
   {
-    files: ["**/*.ts", "**/*.js"],
+    files: ["**/*.ts", "**/*.js", "**/*.tsx"],
     languageOptions: {
       parserOptions: {
         project: path.join(__dirname, "tsconfig.json"),
@@ -43,6 +43,12 @@ export default [
       "operator-linebreak": ["error", "before"],
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",
+      "@typescript-eslint/no-magic-numbers": [
+        "warn",
+        {
+          ignore: [0, 1],
+        },
+      ],
     },
   },
   {

@@ -1,13 +1,25 @@
+.layout {
+  text-align: center;
+}
+
 .layout__shared-board {
+  display: inline-flex;
+  align-items: center;
   border: 4px solid black;
+  padding: 5px;
   margin: 4px;
+}
+
+.board--grid {
+  border: 2px solid black;
+  padding: 3px;
 }
 
 .grid__row {
   display: flex;
 }
 
-.grid__cell {
+.grid__space {
   border: 1px solid black;
   height: 50px;
   margin: 1px;
@@ -18,11 +30,19 @@
 .piece--blah {
   box-sizing: border-box;
   font-size: .6em;
-  width: 100%;
   height: 100%;
+  margin-left: 3px;
 }
 
 .piece--blah--selected, .piece--blah--selected:focus {
   border: 2px solid red;
   outline: none;
+}
+
+.board--stack {
+  display: inline-block;
+}
+
+.board--grid {
+  display: inline-block;
 }

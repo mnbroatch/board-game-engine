@@ -1,6 +1,9 @@
 import get from "lodash/get.js";
 import Board from "./board.js";
-import Space from "../space/space.js";
+import Space from "../space/space.ts";
+
+const INITIAL_ROTATION = 0;
+const FLIPPED_ROTATION = 180;
 
 export default class Grid extends Board {
   constructor(boardRule, options) {
@@ -10,9 +13,8 @@ export default class Grid extends Board {
 
   getEmptySpaces() {
     const emptySpaces = [];
-    for (let i = 0; i < this.grid.length; i++) {
-      for (let j = 0; j < this.grid[i].length; j++) {
-        const space = this.grid[i][j];
+    for (const row of this.grid) {
+      for (const space of row) {
         if (space.isEmpty()) {
           emptySpaces.push(space);
         }
@@ -29,17 +31,17 @@ export default class Grid extends Board {
     return this.getSpace(target).pieces;
   }
 
-  placePiece(target, piece, rotation) {
+  placePiece(target, piece) {
     this.getSpace(target).placePiece(piece);
   }
 
-  getTargetAfterRotation(target, rotation = 0) {
-    if (rotation === 180) {
-      const length = this.grid.length;
-      const width = this.grid[0].length;
-      return [length - target[0] - 1, width - target[1] - 1];
+  getTargetAfterRotation([targetX, targetY], rotation = INITIAL_ROTATION) {
+    if (rotation === FLIPPED_ROTATION) {
+      const gridLength = this.grid.length;
+      const gridWidth = this.grid[targetY].length;
+      return [gridLength - targetX - 1, gridWidth - targetY - 1];
     } else {
-      return target;
+      return [targetX, targetY];
     }
   }
 }

@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "allowJs": true,
     "module": "system",
+    "moduleResolution":"node",
     "noImplicitAny": true,
     "removeComments": true,
+    "resolveJsonModule": true, 
     "preserveConstEnums": true,
     "outFile": "../../built/local/tsc.js",
+    "strictNullChecks": true,
     "sourceMap": true,
     "types": []
   },
-  "include": ["**/*.js", "**/*.ts"],
+  "include": ["**/*.js", "**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules"]
 }

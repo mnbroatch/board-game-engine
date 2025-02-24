@@ -1,5 +1,5 @@
 import React from "react";
-import GridComponent from "./grid.js";
+import GridComponent from "./grid.tsx";
 import Grid from "../../engine/board/grid.js";
 import StackComponent from "./stack.js";
 import Stack from "../../engine/board/stack.js";

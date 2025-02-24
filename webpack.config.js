@@ -17,7 +17,7 @@ export default {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(js|ts)x?$/,
         exclude: /(node_modules)/,
         use: {
           loader: "babel-loader",
@@ -38,5 +38,8 @@ export default {
         ],
       },
     ],
+  },
+  resolve: {
+    extensions: [".js", ".json", ".ts", ".tsx"],
   },
 };
