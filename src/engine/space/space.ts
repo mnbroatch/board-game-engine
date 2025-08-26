@@ -16,6 +16,6 @@ export default class Space {
   }
 
   isEmpty(): boolean {
-    return this.pieces.length !== 0;
+    return this.pieces.length === 0;
   }
 }
