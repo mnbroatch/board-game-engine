@@ -9,248 +9,309 @@ import actionFactory from "../action/action-factory.js";
 import PieceGroup from "../piece/piece-group.js";
 import findValuePath from "../../util/find-value-path.js";
 
-export default class Game {
-  constructor(rules, options) {
-    this.rules = expandRules(rules, options);
-    this.options = expandOptions(options);
-    this.initialize();
-    this.generator = this.createRoundGenerator(this.rules.round);
-    this.advance();
-    this.context = {};
-  }
+export interface GameRules {
+  round: any;
+  player: any;
+  pieces: any[];
+  sharedBoard: Record<string, any>;
+  personalBoard?: Record<string, any>;
+  initialPlacements?: any[];
+  winCondition: any;
+  drawCondition?: any;
+}
 
-  // TODO: DRY this up
-  initialize() {
-    this.sharedBoard = Object.entries(this.rules.sharedBoard).reduce(
-      (acc, [id, board]) => {
-        const path = ["sharedBoard", id];
-        return {
-          ...acc,
-          [id]: boardFactory({ ...board, path }, this.options),
-        };
-      },
-      {},
-    );
+export interface GameOptions {
+  playerCount: number;
+  [key: string]: any;
+}
 
-    this.players = Array.from(Array(this.options.playerCount)).map(
-      (_, i) => new Player(this.rules.player, i),
-    );
-    this.personalBoards = this.players.reduce(
-      (acc, player) => ({
-        ...acc,
-        [player.id]: Object.entries(this.rules.personalBoard || []).reduce(
-          (acc, [id, board]) => {
-            const path = ["sharedBoard", id];
-            return {
-              ...acc,
-              [id]: boardFactory(
-                { ...board, path },
-                { ...this.options, player },
-              ),
-            };
-          },
-          {},
-        ),
-      }),
-      {},
-    );
-
-    this.pieces = this.rules.pieces.reduce((acc, pieceRule) => {
-      if (pieceRule.perPlayer) {
-        return [
-          ...acc,
-          ...this.players.map(
-            (player) => new PieceGroup(pieceRule, { player }),
-          ),
-        ];
-      } else {
-        return [...acc, new PieceGroup(pieceRule)];
-      }
-    }, []);
-
-    this.rules.initialPlacements?.forEach((placement) => {
-      if (placement.perPlayer) {
-        this.players.forEach((player) => {
-          // player specifies both the piece owner (if relevant) and personalBoard
-          this.doInitialPlacement(placement, player);
-        });
-      } else {
-        this.doInitialPlacement(placement);
-      }
-    });
-  }
-
-  doInitialPlacement(placement, player) {
-    const actionRule = { type: "movePiece" };
-    if (placement.playerPerspective) {
-      actionRule.playerPerspective = placement.playerPerspective;
-    }
-    const actionPayload = {
-      piece: placement.piece,
-      board: placement.board,
+export interface Move {
+  playerId: number;
+  type?: string;
+  piece?: {
+    id?: string;
+    name?: string;
+    player?: {
+      id: number;
     };
-    if (placement.targets) {
-      placement.targets.forEach((target) => {
-        actionFactory(actionRule, this).do(
-          this.expandActionPayload({ ...actionPayload, target }, player),
-        );
+  };
+  board?: string[];
+  [key: string]: any;
+}
+
+export interface GameState {
+  currentPhaseIndex: number;
+  currentRoundIndex: number;
+  context: Record<string, any>;
+  gameOver: boolean;
+  winner: Player | null;
+  sharedBoard: Record<string, any>;
+  players: Player[];
+  personalBoards: Record<string, any>;
+  pieces: PieceGroup[];
+}
+
+function createInitialState(rules: GameRules, options: GameOptions): GameState {
+  const sharedBoard = Object.entries(rules.sharedBoard).reduce(
+    (acc, [id, board]) => ({
+      ...acc,
+      [id]: boardFactory(
+        { ...board, path: ["sharedBoard", id] },
+        options,
+      ),
+    }),
+    {},
+  );
+
+  const players = Array.from(Array(options.playerCount)).map(
+    (_, i) => new Player(rules.player, i),
+  );
+
+  const personalBoards = players.reduce(
+    (acc, player) => ({
+      ...acc,
+      [player.id]: Object.entries(rules.personalBoard || []).reduce(
+        (acc, [id, board]) => ({
+          ...acc,
+          [id]: boardFactory(
+            { ...board, path: ["sharedBoard", id] },
+            { ...options, player },
+          ),
+        }),
+        {},
+      ),
+    }),
+    {},
+  );
+
+  const pieces = rules.pieces.reduce((acc, pieceRule) => {
+    if (pieceRule.perPlayer) {
+      return [
+        ...acc,
+        ...players.map((player) => new PieceGroup(pieceRule, { player })),
+      ];
+    } else {
+      return [...acc, new PieceGroup(pieceRule)];
+    }
+  }, []);
+
+  // Apply initial placements
+  rules.initialPlacements?.forEach((placement) => {
+    if (placement.perPlayer) {
+      players.forEach((player) => {
+        doInitialPlacement(placement, player, {
+          sharedBoard,
+          personalBoards,
+          pieces,
+        });
       });
     } else {
-      Array.from(new Array(placement.count)).forEach(() => {
-        actionFactory(actionRule, this).do(
-          this.expandActionPayload(actionPayload, player),
-        );
+      doInitialPlacement(placement, null, {
+        sharedBoard,
+        personalBoards,
+        pieces,
       });
     }
-  }
+  });
 
-  doAction(actionPayload) {
-    if (this.gameOver) {
-      throw new Error("game is over!");
-    }
-    const player = this.players.find(
-      (player) => player.id === actionPayload.playerId,
-    );
-    this.currentRound.doAction(this.expandActionPayload(actionPayload, player));
-    this.advance();
-  }
+  return {
+    currentPhaseIndex: 0,
+    currentRoundIndex: 0,
+    context: {},
+    gameOver: false,
+    winner: null,
+    sharedBoard,
+    players,
+    personalBoards,
+    pieces,
+  };
+}
 
-  advance() {
-    let next = this.generator.next();
-    if (next.done) {
-      this.generator = this.createRoundGenerator(this.rules.round);
-      next = this.generator.next();
-    }
-    this.currentRound = next.value;
-    const winner = this.getWinner();
-    const isDraw = this.isDraw();
-    if (winner) {
-      this.winner = winner;
-    }
-    if (winner || isDraw) {
-      this.gameOver = true;
-    }
-  }
-
-  getWinner() {
-    // probably ought to do this expansion at game start, with separate
-    // runtime-only expansion and compile-time-possible expansions
-    return this.players.find((player) => {
+function checkWinner(state: GameState, rules: GameRules): Player | null {
+  return (
+    state.players.find((player) => {
       const winCondition = {
-        ...this.rules.winCondition,
+        ...rules.winCondition,
         piece: {
-          ...this.rules.winCondition.piece,
+          ...rules.winCondition.piece,
           player,
         },
       };
-      const condition = conditionFactory(winCondition, this);
+      const condition = conditionFactory(winCondition, state);
       return condition.isMet();
-    });
-  }
-
-  isDraw() {
-    return !!(
-      this.rules.drawCondition
-      && conditionFactory(this.rules.drawCondition, this).isMet()
-    );
-  }
-
-  *createRoundGenerator(roundRule) {
-    const round = roundFactory(roundRule, this);
-    if (!roundRule.phases) {
-      do {
-        yield round;
-      } while (!round.isOver());
-    } else {
-      for (const phaseRule of roundRule.phases) {
-        yield* this.createRoundGenerator(phaseRule);
-      }
-    }
-  }
-
-  get(path, options = {}) {
-    return get(this, this.normalizePath(path, options));
-  }
-
-  expandActionPayload(actionPayload, player) {
-    const pieceName = actionPayload.piece?.name || "playerMarker";
-    const pieceRule = this.rules.pieces.find(
-      (piece) => piece.name === pieceName,
-    );
-
-    let piece;
-    if (actionPayload.piece?.id) {
-      piece = { id: actionPayload.piece.id };
-    } else if (actionPayload.piece?.name) {
-      piece = actionPayload.piece;
-    } else {
-      piece = { name: "playerMarker" };
-    }
-
-    const defaultActionPayload = {
-      type: "movePiece",
-      player,
-    };
-
-    actionPayload.piece = piece;
-
-    if (pieceRule.perPlayer && !actionPayload.player) {
-      actionPayload.piece.player = { id: player.id };
-    }
-
-    if (!actionPayload.board) {
-      actionPayload.board = this.getBoardPathContaining(actionPayload.piece);
-    }
-
-    const merged = merge({}, defaultActionPayload, actionPayload);
-
-    merged.board = this.normalizePath(actionPayload.board, { player });
-
-    return merged;
-  }
-
-  getPiecePaths(matcher, options) {
-    const placesPiecesCanBe = {
-      personalBoards: this.personalBoards,
-      sharedBoard: this.sharedBoard,
-      pieces: this.pieces,
-    };
-    return Array.from(findValuePath(placesPiecesCanBe, matches(matcher)))
-      .filter((a) => a[a.length - 1] !== "rule")
-      .sort((a) => (a[0] === "pieces" ? 1 : -1))
-      .map((path) => this.normalizePath(path, options));
-  }
-
-  getPieces(pieceMatcher, options) {
-    return this.getPiecePaths(pieceMatcher, options).map((path) =>
-      this.get(path),
-    );
-  }
-
-  getPiece(pieceMatcher) {
-    const match = this.getPieces(pieceMatcher)[0];
-    return match instanceof PieceGroup ? match.getOne() : match;
-  }
-
-  getBoardPathContaining(piece, options) {
-    return this.getPiecePaths(piece, options)[0];
-  }
-
-  getBoardContaining(piece) {
-    const path = this.getBoardPathContaining(piece);
-    return path ? this.get(path.slice(0, path.length - 1)) : null;
-  }
-
-  normalizePath(path, options = {}) {
-    return path[0] === "personalBoard"
-      ? ["personalBoards", options.player.id, ...path.slice(1)]
-      : path;
-  }
+    }) || null
+  );
 }
 
-// todo. will allow smaller rulesets
-function expandRules(rules) {
-  return rules;
+function checkDraw(state: GameState, rules: GameRules): boolean {
+  return !!(
+    rules.drawCondition && conditionFactory(rules.drawCondition, state).isMet()
+  );
+}
+
+function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
+  const player = state.players.find((p) => p.id === move.playerId);
+  if (!player) {
+    throw new Error("Invalid player ID");
+  }
+
+  const pieceName = move.piece?.name || "playerMarker";
+  const pieceRule = rules.pieces.find((piece) => piece.name === pieceName);
+
+  const piece = move.piece?.id
+    ? { id: move.piece.id }
+    : move.piece?.name
+      ? move.piece
+      : { name: "playerMarker" };
+
+  const defaultMove = {
+    type: "movePiece",
+    player,
+  };
+
+  const expandedMove = {
+    ...defaultMove,
+    ...move,
+    piece,
+  };
+
+  if (pieceRule?.perPlayer && !expandedMove.player) {
+    expandedMove.piece.player = { id: player.id };
+  }
+
+  if (!expandedMove.board) {
+    expandedMove.board = getBoardPathContaining(expandedMove.piece, state);
+  }
+
+  expandedMove.board = normalizePath(expandedMove.board, { player });
+
+  return expandedMove;
+}
+
+export function makeMove(
+  rules: GameRules,
+  options: GameOptions,
+  state?: GameState,
+  move?: Move,
+): GameState {
+  // Initialize state if none provided
+  if (!state) {
+    state = createInitialState(rules, options);
+  }
+
+  if (state.gameOver) {
+    throw new Error("Game is over!");
+  }
+
+  // Expand the move payload with defaults and normalizations
+  const expandedMove = expandActionPayload(move, state, rules);
+
+  // Get the appropriate round rule based on current phase
+  const currentRoundRule = rules.round.phases
+    ? rules.round.phases[state.currentPhaseIndex]
+    : rules.round;
+
+  // Create round handler and apply move
+  const round = roundFactory(currentRoundRule, state);
+  let newState = round.doAction(state, expandedMove);
+
+  // Check if round is over and advance if needed
+  if (round.isOver(newState)) {
+    newState = { ...newState };
+
+    if (rules.round.phases) {
+      // Get current phase rule
+      const currentPhaseRule = rules.round.phases[newState.currentPhaseIndex];
+
+      // Create round for current phase
+      const phaseRound = roundFactory(currentPhaseRule, newState);
+
+      // If this phase is over, move to next phase
+      if (phaseRound.isOver(newState)) {
+        newState.currentPhaseIndex++;
+
+        // If we've completed all phases, start new round
+        if (newState.currentPhaseIndex >= rules.round.phases.length) {
+          newState.currentPhaseIndex = 0;
+          newState.currentRoundIndex++;
+        }
+      }
+    } else {
+      // No phases, just increment round
+      newState.currentRoundIndex++;
+    }
+  }
+
+  // Check win/draw conditions
+  const winner = checkWinner(newState, rules);
+  const isDraw = checkDraw(newState, rules);
+
+  if (winner || isDraw) {
+    newState = {
+      ...newState,
+      gameOver: true,
+      winner,
+    };
+  }
+
+  return newState;
+}
+
+function doInitialPlacement(
+  placement: {
+    action: any;
+    payload?: any;
+    count?: number;
+    rules: GameRules;
+  },
+  player: Player | null,
+  state: GameState,
+) {
+  const actionRule = placement.action;
+  const actionPayload = placement.payload || {};
+
+  if (player) {
+    actionPayload.player = player;
+  }
+
+  Array.from(new Array(placement.count || 1)).forEach(() => {
+    const action = actionFactory(actionRule, state);
+    action.do(expandActionPayload(actionPayload, state, rules));
+  });
+}
+
+function getBoardPathContaining(
+  piece: any,
+  state: GameState,
+  options?: any,
+): string[] {
+  return getPiecePaths(piece, state, options)[0];
+}
+
+function normalizePath(
+  path: string[],
+  options: { player?: Player } = {},
+): string[] {
+  return path[0] === "personalBoard" && options.player
+    ? ["personalBoards", options.player.id.toString(), ...path.slice(1)]
+    : path;
+}
+
+function getPiecePaths(
+  matcher: any,
+  state: GameState,
+  options?: any,
+): string[][] {
+  const placesPiecesCanBe = {
+    personalBoards: state.personalBoards,
+    sharedBoard: state.sharedBoard,
+    pieces: state.pieces,
+  };
+
+  return Array.from(findValuePath(placesPiecesCanBe, matches(matcher)))
+    .filter((a) => a[a.length - 1] !== "rule")
+    .sort((a) => (a[0] === "pieces" ? 1 : -1))
+    .map((path) => normalizePath(path, options));
 }
 
 function expandOptions(options) {
