@@ -55,10 +55,7 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
   const sharedBoard = Object.entries(rules.sharedBoard).reduce(
     (acc, [id, board]) => ({
       ...acc,
-      [id]: boardFactory(
-        { ...board, path: ["sharedBoard", id] },
-        options,
-      ),
+      [id]: boardFactory({ ...board, path: ["sharedBoard", id] }, options),
     }),
     {},
   );
@@ -114,9 +111,13 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
     }
   });
 
+  const currentRoundRule = rules.round.phases
+    ? rules.round.phases[0]
+    : rules.round;
+  const currentRound = roundFactory(currentRoundRule);
+
   return {
-    currentPhaseIndex: 0,
-    currentRoundIndex: 0,
+    currentRound,
     context: {},
     gameOver: false,
     winner: null,
@@ -194,25 +195,31 @@ export function makeMove(
   state?: GameState,
   move?: Move,
 ): GameState {
-  // Initialize state if none provided
   if (!state) {
-    state = createInitialState(rules, options);
+    return createInitialState(rules, options);
   }
 
   if (state.gameOver) {
     throw new Error("Game is over!");
   }
 
+  if (move === undefined) {
+    return state;
+  }
+
   // Expand the move payload with defaults and normalizations
   const expandedMove = expandActionPayload(move, state, rules);
 
   // Get the appropriate round rule based on current phase
+  console.log('rules.round', rules.round)
+  console.log('state.currentRound', state.currentRound)
   const currentRoundRule = rules.round.phases
-    ? rules.round.phases[state.currentPhaseIndex]
+    ? rules.round.phases[state.currentRound.currentPhaseIndex]
     : rules.round;
+  console.log('currentRoundRule', currentRoundRule)
 
   // Create round handler and apply move
-  const round = roundFactory(currentRoundRule, state);
+  newState.currentRound = roundFactory(currentRoundRule, state);
   let newState = round.doAction(state, expandedMove);
 
   // Check if round is over and advance if needed
@@ -221,24 +228,24 @@ export function makeMove(
 
     if (rules.round.phases) {
       // Get current phase rule
-      const currentPhaseRule = rules.round.phases[newState.currentPhaseIndex];
+      const currentPhaseRule = rules.round.phases[newState.currentRound.currentPhaseIndex];
 
       // Create round for current phase
       const phaseRound = roundFactory(currentPhaseRule, newState);
 
       // If this phase is over, move to next phase
       if (phaseRound.isOver(newState)) {
-        newState.currentPhaseIndex++;
+        newState.currentRound.currentPhaseIndex++;
 
         // If we've completed all phases, start new round
-        if (newState.currentPhaseIndex >= rules.round.phases.length) {
-          newState.currentPhaseIndex = 0;
-          newState.currentRoundIndex++;
+        if (newState.currentRound.currentPhaseIndex >= rules.round.phases.length) {
+          newState.currentRound.currentPhaseIndex = 0;
+          newState.currentRound.currentRoundIndex++;
         }
       }
     } else {
       // No phases, just increment round
-      newState.currentRoundIndex++;
+      newState.currentRound.currentRoundIndex++;
     }
   }
 

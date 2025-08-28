@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FC } from "react";
 import useGame from "./src/hooks/use-game";
 import Layout from "./src/components/layout.js";
@@ -9,32 +9,32 @@ import type { OnPieceClick, OnSpaceClick } from "./src/types";
 
 const App: FC<void> = () => {
   const [game, doAction] = useGame(gameRules);
+  const [selectedPiece, setSelectedPiece] = useState(null);
 
   const onPieceClick: OnPieceClick = (piece) => {
-    console.log("piece", piece);
-    doAction({
-      type: "selectPiece",
-      playerId: game.currentRound.currentPlayer.id,
-      piece: {
-        name: piece.rule.name,
-        id: piece.id,
-      },
-    });
+    // todo: multiselect
+    if (!selectedPiece) {
+      setSelectedPiece(piece)
+    } else {
+      setSelectedPiece(null)
+    }
   };
 
   const onSpaceClick: OnSpaceClick = (cell, board) => {
-    const { currentPlayer } = game.currentRound;
+    const { currentPlayerIndex } = game.currentRound;
+    const currentPlayer = game.players[currentPlayerIndex]
     const actionPayload = {
       playerId: currentPlayer.id,
-      type: "movePiece",
+      type: 'movePiece',
       board: board.rule.path,
       target: cell.coordinates,
     };
-    if (game.context.selectedPiece) {
-      actionPayload.piece = { name: game.context.selectedPiece.name };
+    if (selectedPiece) {
+      actionPayload.piece = { name: selectedPiece.name };
     }
     doAction(actionPayload);
   };
+  console.log('game', game)
 
   return (
     <GameContext.Provider value={game}>
