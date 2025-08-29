@@ -15,7 +15,7 @@
   ],
   "winCondition": {
     "type": "bingo",
-    "board": ["sharedBoard", "grid"],
+    "boardPath": ["sharedBoard", "grid"],
     "piece": {
       "name": "playerMarker"
     }
@@ -46,7 +46,7 @@
   },
   "drawCondition": {
     "type": "blackout",
-    "board": ["sharedBoard", "grid"],
+    "boardPath": ["sharedBoard", "grid"],
     "piece": {
       "name": "playerMarker"
     }

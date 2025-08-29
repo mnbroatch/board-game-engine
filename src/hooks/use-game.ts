@@ -10,7 +10,8 @@ export default function useGame(gameRules: GameRules): [any, DoAction] {
   const [game, setGame] = useState(() => makeMove(gameRules, options));
 
   const doAction: DoAction = (action) => {
-    setGame(makeMove(gameRules, options, game, action))
+    // weird parsing is temp to test serialization
+    setGame(makeMove(gameRules, options, JSON.parse(JSON.stringify(game)), action))
   };
 
   useEffect(() => {

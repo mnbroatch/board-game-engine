@@ -1,11 +1,11 @@
 import Action from "./action.js";
+import resolveBoard from "../utils/resolve-board.ts";
+import resolvePiece from "../utils/resolve-piece.ts";
 
 export default class MovePieceAction extends Action {
   do(actionPayload) {
-    const piece = this.targetPiece(actionPayload);
-    const board = this.game.get(actionPayload.board, {
-      player: actionPayload.player,
-    });
+    const piece = resolvePiece(actionPayload.piece, this.game);
+    const board = resolveBoard(actionPayload.board, this.game)
     const target = this.rules.playerPerspective
       ? board.getTargetAfterRotation(
           actionPayload.target,
@@ -20,19 +20,5 @@ export default class MovePieceAction extends Action {
     return player && this.game.options.playerCount === 2 && player.index === 1
       ? 180
       : 0;
-  }
-
-  // move this?
-  // add invariant condition for taking from a depleted pile
-  targetPiece(actionPayload) {
-    const matcher = {
-      name: actionPayload.piece.name,
-    };
-    if (actionPayload.piece.player) {
-      matcher.player = {
-        id: actionPayload.piece.player.id,
-      };
-    }
-    return this.game.getPiece(matcher);
   }
 }

@@ -6,7 +6,7 @@ import Player from "../player/player";
 import roundFactory from "../round/round-factory.js";
 import conditionFactory from "../condition/condition-factory.js";
 import actionFactory from "../action/action-factory.js";
-import PieceGroup from "../piece/piece-group.js";
+import Pile from "../piece/pile.js";
 import findValuePath from "../../util/find-value-path.js";
 
 export interface GameRules {
@@ -48,10 +48,11 @@ export interface GameState {
   sharedBoard: Record<string, any>;
   players: Player[];
   personalBoards: Record<string, any>;
-  pieces: PieceGroup[];
+  pieces: Pile[];
 }
 
 function createInitialState(rules: GameRules, options: GameOptions): GameState {
+  expandRules(rules)
   const sharedBoard = Object.entries(rules.sharedBoard).reduce(
     (acc, [id, board]) => ({
       ...acc,
@@ -85,10 +86,10 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
     if (pieceRule.perPlayer) {
       return [
         ...acc,
-        ...players.map((player) => new PieceGroup(pieceRule, { player })),
+        ...players.map((player) => new Pile(pieceRule, { player })),
       ];
     } else {
-      return [...acc, new PieceGroup(pieceRule)];
+      return [...acc, new Pile(pieceRule)];
     }
   }, []);
 
@@ -139,6 +140,7 @@ function checkWinner(state: GameState, rules: GameRules): Player | null {
         },
       };
       const condition = conditionFactory(winCondition, state);
+      console.log('condition', condition)
       return condition.isMet();
     }) || null
   );
@@ -159,11 +161,13 @@ function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
   const pieceName = move.piece?.name || "playerMarker";
   const pieceRule = rules.pieces.find((piece) => piece.name === pieceName);
 
-  const piece = move.piece?.id
-    ? { id: move.piece.id }
-    : move.piece?.name
-      ? move.piece
-      : { name: "playerMarker" };
+  let piece = move.piece
+  if (!piece) {
+    piece = {
+      name: 'playerMarker',
+      player: { id: move.playerId }
+    }
+  }
 
   const defaultMove = {
     type: "movePiece",
@@ -210,58 +214,48 @@ export function makeMove(
   // Expand the move payload with defaults and normalizations
   const expandedMove = expandActionPayload(move, state, rules);
 
-  // Get the appropriate round rule based on current phase
-  console.log('rules.round', rules.round)
-  console.log('state.currentRound', state.currentRound)
-  const currentRoundRule = rules.round.phases
-    ? rules.round.phases[state.currentRound.currentPhaseIndex]
-    : rules.round;
-  console.log('currentRoundRule', currentRoundRule)
+  const round = roundFactory(get(rules, state.currentRound.rules.path), state)
 
-  // Create round handler and apply move
-  newState.currentRound = roundFactory(currentRoundRule, state);
-  let newState = round.doAction(state, expandedMove);
-
+  round.doAction(expandedMove);
   // Check if round is over and advance if needed
-  if (round.isOver(newState)) {
-    newState = { ...newState };
-
+  if (round.isOver(state)) {
     if (rules.round.phases) {
       // Get current phase rule
-      const currentPhaseRule = rules.round.phases[newState.currentRound.currentPhaseIndex];
+      const currentPhaseRule = rules.round.phases[state.currentRound.currentPhaseIndex];
 
       // Create round for current phase
-      const phaseRound = roundFactory(currentPhaseRule, newState);
+      const phaseRound = roundFactory(currentPhaseRule, state);
 
       // If this phase is over, move to next phase
-      if (phaseRound.isOver(newState)) {
-        newState.currentRound.currentPhaseIndex++;
+      if (phaseRound.isOver(state)) {
+        state.currentRound.currentPhaseIndex++;
 
         // If we've completed all phases, start new round
-        if (newState.currentRound.currentPhaseIndex >= rules.round.phases.length) {
-          newState.currentRound.currentPhaseIndex = 0;
-          newState.currentRound.currentRoundIndex++;
+        if (state.currentRound.currentPhaseIndex >= rules.round.phases.length) {
+          state.currentRound.currentPhaseIndex = 0;
+          state.currentRound.currentRoundIndex++;
         }
       }
     } else {
       // No phases, just increment round
-      newState.currentRound.currentRoundIndex++;
+      state.currentRound.currentRoundIndex++;
     }
   }
 
   // Check win/draw conditions
-  const winner = checkWinner(newState, rules);
-  const isDraw = checkDraw(newState, rules);
+  const winner = checkWinner(state, rules);
+  const isDraw = checkDraw(state, rules);
 
   if (winner || isDraw) {
-    newState = {
-      ...newState,
+    state = {
+      ...state,
       gameOver: true,
       winner,
     };
   }
 
-  return newState;
+  // weird parsing is temp to test serialization
+  return JSON.parse(JSON.stringify(state))
 }
 
 function doInitialPlacement(
@@ -326,4 +320,39 @@ function expandOptions(options) {
     playerCount: 2,
   };
   return merge({}, defaultOptions, options);
+}
+
+// mutates rules
+function expandRules (rules) {
+  addPathToRules(rules)
+}
+
+// mutates rules
+export function addPathToRules (rules): void {
+  const CHILD_KEYS = ['phases', 'rounds'];
+
+  function annotate(node, pathSegs) {
+    if (!node || typeof node !== 'object') return;
+
+    // lodash.get path string, e.g. "round.phases.0.rounds.2"
+    node.path = pathSegs.join('.');
+
+    // recurse into either "phases" or "rounds" arrays if present
+    for (const key of CHILD_KEYS) {
+      const kids = node[key];
+      if (Array.isArray(kids)) {
+        kids.forEach((child, idx) => {
+          annotate(child, pathSegs.concat(key, idx));
+        });
+      }
+    }
+  }
+
+  // Top-level: support either "round" (object) or "rounds" (array), or both.
+  if (rules.round && typeof rules.round === 'object') {
+    annotate(rules.round, ['round']);
+  }
+  if (Array.isArray(rules.rounds)) {
+    rules.rounds.forEach((r, i) => annotate(r, ['rounds', i]));
+  }
 }

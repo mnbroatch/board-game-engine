@@ -1,10 +1,10 @@
 import matches from "lodash/matches.js";
 import Condition from "../condition/condition.js";
+import resolvePiece from "../utils/resolve-piece.ts";
 
 export default class PieceMatchesCondition extends Condition {
   isMet(actionPayload) {
-    const piece = this.game.getPiece(actionPayload.piece);
-    const board = this.game.getBoardPathContaining(piece);
+    const piece = resolvePiece(actionPayload.piece, this.game);
 
     if (this.rules.actionRule?.piece && !piece) {
       console.error("no piece found");
@@ -15,17 +15,7 @@ export default class PieceMatchesCondition extends Condition {
       const matcher = {
         ...this.rules.actionRule.piece,
       };
-
-      // probably going to want to move this
-      if (this.rules.actionRule.piece.board) {
-        matcher.board = this.game.normalizePath(
-          this.rules.actionRule.piece.board,
-          { player: this.game.currentRound.currentPlayer },
-        );
-      }
-
-      const toMatch = { ...piece.rule, board };
-      return matches(matcher)(toMatch);
+      return matches(matcher)(piece.rule);
     }
 
     return true;

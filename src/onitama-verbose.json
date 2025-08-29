@@ -142,36 +142,25 @@
         "type": "sequentialPlayerTurn",
         "actions": [
           {
-            "type": "selectPiece",
-
+            "type": "movePiece",
             "piece": {
-              "name": "animalCard",
-              "board": ["personalBoard", "cards"]
+              "board": ["sharedBoard", "grid"],
+              "player": "currentPlayer"
             },
-
-            "then": [
+            "capture": true,
+            "conditions": [
               {
-                "type": "movePiece",
+                "type": "doesNotContain",
                 "piece": {
-                  "board": ["sharedBoard", "grid"],
                   "player": "currentPlayer"
-                },
-                "capture": true,
-                "conditions": [
-                  {
-                    "type": "doesNotContain",
-                    "piece": {
-                      "player": "currentPlayer"
-                    }
-                  },
-                  {
-                    "type": "relativeMove",
-                    "playerPerspective": true,
-                    "moves": {
-                      "replace": ["thisPiece", "moves"]
-                    }
-                  }
-                ]
+                }
+              },
+              {
+                "type": "relativeMove",
+                "playerPerspective": true,
+                "moves": {
+                  "replace": ["thisPiece", "moves"]
+                }
               }
             ]
           }

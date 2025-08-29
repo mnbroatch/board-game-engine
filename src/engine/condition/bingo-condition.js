@@ -1,8 +1,9 @@
 import Condition from "../condition/condition.js";
+import resolveBoard from "../utils/resolve-board.ts";
 
 export default class BingoCondition extends Condition {
   isMet() {
-    const grid = this.game.get(this.rules.board).grid;
+    const grid = resolveBoard(this.rules.boardPath, this.game).grid;
 
     // TODO: handle rectangles in addition to squares
     const size = grid.length;

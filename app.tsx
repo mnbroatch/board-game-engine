@@ -26,7 +26,7 @@ const App: FC<void> = () => {
     const actionPayload = {
       playerId: currentPlayer.id,
       type: 'movePiece',
-      board: board.rule.path,
+      board: board,
       target: cell.coordinates,
     };
     if (selectedPiece) {
@@ -34,7 +34,6 @@ const App: FC<void> = () => {
     }
     doAction(actionPayload);
   };
-  console.log('game', game)
 
   return (
     <GameContext.Provider value={game}>
