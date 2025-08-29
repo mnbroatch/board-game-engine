@@ -5,7 +5,7 @@ import StackComponent from "./stack.js";
 import Stack from "../../engine/board/stack.js";
 
 export default function Board(props) {
-  if (props.board instanceof Grid) {
+  if (props.board.constructor === 'Grid') {
     return <GridComponent {...props} />;
   } else if (props.board instanceof Stack) {
     return <StackComponent {...props} />;

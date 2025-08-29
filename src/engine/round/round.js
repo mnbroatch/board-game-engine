@@ -1,9 +1,11 @@
 import actionFactory from "../action/action-factory.js";
+import Serializable from "../serializable.js";
 
 const DEBUG = true;
 
-export default class Round {
+export default class Round extends Serializable {
   constructor(rules, game) {
+    super(rules, game);
     this.rules = rules;
     this.game = game;
     this.history = [];

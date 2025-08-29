@@ -6271,354 +6271,6 @@ function styleTagTransform(css, styleElement) {
 }
 module.exports = styleTagTransform;
 
-/***/ }),
-
-/***/ 4633:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var _typeof = (__webpack_require__(3738)["default"]);
-function _regeneratorRuntime() {
-  "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
-    return e;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  var t,
-    e = {},
-    r = Object.prototype,
-    n = r.hasOwnProperty,
-    o = Object.defineProperty || function (t, e, r) {
-      t[e] = r.value;
-    },
-    i = "function" == typeof Symbol ? Symbol : {},
-    a = i.iterator || "@@iterator",
-    c = i.asyncIterator || "@@asyncIterator",
-    u = i.toStringTag || "@@toStringTag";
-  function define(t, e, r) {
-    return Object.defineProperty(t, e, {
-      value: r,
-      enumerable: !0,
-      configurable: !0,
-      writable: !0
-    }), t[e];
-  }
-  try {
-    define({}, "");
-  } catch (t) {
-    define = function define(t, e, r) {
-      return t[e] = r;
-    };
-  }
-  function wrap(t, e, r, n) {
-    var i = e && e.prototype instanceof Generator ? e : Generator,
-      a = Object.create(i.prototype),
-      c = new Context(n || []);
-    return o(a, "_invoke", {
-      value: makeInvokeMethod(t, r, c)
-    }), a;
-  }
-  function tryCatch(t, e, r) {
-    try {
-      return {
-        type: "normal",
-        arg: t.call(e, r)
-      };
-    } catch (t) {
-      return {
-        type: "throw",
-        arg: t
-      };
-    }
-  }
-  e.wrap = wrap;
-  var h = "suspendedStart",
-    l = "suspendedYield",
-    f = "executing",
-    s = "completed",
-    y = {};
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-  var p = {};
-  define(p, a, function () {
-    return this;
-  });
-  var d = Object.getPrototypeOf,
-    v = d && d(d(values([])));
-  v && v !== r && n.call(v, a) && (p = v);
-  var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
-  function defineIteratorMethods(t) {
-    ["next", "throw", "return"].forEach(function (e) {
-      define(t, e, function (t) {
-        return this._invoke(e, t);
-      });
-    });
-  }
-  function AsyncIterator(t, e) {
-    function invoke(r, o, i, a) {
-      var c = tryCatch(t[r], t, o);
-      if ("throw" !== c.type) {
-        var u = c.arg,
-          h = u.value;
-        return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
-          invoke("next", t, i, a);
-        }, function (t) {
-          invoke("throw", t, i, a);
-        }) : e.resolve(h).then(function (t) {
-          u.value = t, i(u);
-        }, function (t) {
-          return invoke("throw", t, i, a);
-        });
-      }
-      a(c.arg);
-    }
-    var r;
-    o(this, "_invoke", {
-      value: function value(t, n) {
-        function callInvokeWithMethodAndArg() {
-          return new e(function (e, r) {
-            invoke(t, n, e, r);
-          });
-        }
-        return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-      }
-    });
-  }
-  function makeInvokeMethod(e, r, n) {
-    var o = h;
-    return function (i, a) {
-      if (o === f) throw Error("Generator is already running");
-      if (o === s) {
-        if ("throw" === i) throw a;
-        return {
-          value: t,
-          done: !0
-        };
-      }
-      for (n.method = i, n.arg = a;;) {
-        var c = n.delegate;
-        if (c) {
-          var u = maybeInvokeDelegate(c, n);
-          if (u) {
-            if (u === y) continue;
-            return u;
-          }
-        }
-        if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
-          if (o === h) throw o = s, n.arg;
-          n.dispatchException(n.arg);
-        } else "return" === n.method && n.abrupt("return", n.arg);
-        o = f;
-        var p = tryCatch(e, r, n);
-        if ("normal" === p.type) {
-          if (o = n.done ? s : l, p.arg === y) continue;
-          return {
-            value: p.arg,
-            done: n.done
-          };
-        }
-        "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
-      }
-    };
-  }
-  function maybeInvokeDelegate(e, r) {
-    var n = r.method,
-      o = e.iterator[n];
-    if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
-    var i = tryCatch(o, e.iterator, r.arg);
-    if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
-    var a = i.arg;
-    return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
-  }
-  function pushTryEntry(t) {
-    var e = {
-      tryLoc: t[0]
-    };
-    1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
-  }
-  function resetTryEntry(t) {
-    var e = t.completion || {};
-    e.type = "normal", delete e.arg, t.completion = e;
-  }
-  function Context(t) {
-    this.tryEntries = [{
-      tryLoc: "root"
-    }], t.forEach(pushTryEntry, this), this.reset(!0);
-  }
-  function values(e) {
-    if (e || "" === e) {
-      var r = e[a];
-      if (r) return r.call(e);
-      if ("function" == typeof e.next) return e;
-      if (!isNaN(e.length)) {
-        var o = -1,
-          i = function next() {
-            for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
-            return next.value = t, next.done = !0, next;
-          };
-        return i.next = i;
-      }
-    }
-    throw new TypeError(_typeof(e) + " is not iterable");
-  }
-  return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
-    value: GeneratorFunctionPrototype,
-    configurable: !0
-  }), o(GeneratorFunctionPrototype, "constructor", {
-    value: GeneratorFunction,
-    configurable: !0
-  }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
-    var e = "function" == typeof t && t.constructor;
-    return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
-  }, e.mark = function (t) {
-    return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
-  }, e.awrap = function (t) {
-    return {
-      __await: t
-    };
-  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
-    return this;
-  }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
-    void 0 === i && (i = Promise);
-    var a = new AsyncIterator(wrap(t, r, n, o), i);
-    return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
-      return t.done ? t.value : a.next();
-    });
-  }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
-    return this;
-  }), define(g, "toString", function () {
-    return "[object Generator]";
-  }), e.keys = function (t) {
-    var e = Object(t),
-      r = [];
-    for (var n in e) r.push(n);
-    return r.reverse(), function next() {
-      for (; r.length;) {
-        var t = r.pop();
-        if (t in e) return next.value = t, next.done = !1, next;
-      }
-      return next.done = !0, next;
-    };
-  }, e.values = values, Context.prototype = {
-    constructor: Context,
-    reset: function reset(e) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
-    },
-    stop: function stop() {
-      this.done = !0;
-      var t = this.tryEntries[0].completion;
-      if ("throw" === t.type) throw t.arg;
-      return this.rval;
-    },
-    dispatchException: function dispatchException(e) {
-      if (this.done) throw e;
-      var r = this;
-      function handle(n, o) {
-        return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
-      }
-      for (var o = this.tryEntries.length - 1; o >= 0; --o) {
-        var i = this.tryEntries[o],
-          a = i.completion;
-        if ("root" === i.tryLoc) return handle("end");
-        if (i.tryLoc <= this.prev) {
-          var c = n.call(i, "catchLoc"),
-            u = n.call(i, "finallyLoc");
-          if (c && u) {
-            if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-            if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-          } else if (c) {
-            if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-          } else {
-            if (!u) throw Error("try statement without catch or finally");
-            if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-          }
-        }
-      }
-    },
-    abrupt: function abrupt(t, e) {
-      for (var r = this.tryEntries.length - 1; r >= 0; --r) {
-        var o = this.tryEntries[r];
-        if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
-          var i = o;
-          break;
-        }
-      }
-      i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
-      var a = i ? i.completion : {};
-      return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
-    },
-    complete: function complete(t, e) {
-      if ("throw" === t.type) throw t.arg;
-      return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
-    },
-    finish: function finish(t) {
-      for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-        var r = this.tryEntries[e];
-        if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
-      }
-    },
-    "catch": function _catch(t) {
-      for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-        var r = this.tryEntries[e];
-        if (r.tryLoc === t) {
-          var n = r.completion;
-          if ("throw" === n.type) {
-            var o = n.arg;
-            resetTryEntry(r);
-          }
-          return o;
-        }
-      }
-      throw Error("illegal catch attempt");
-    },
-    delegateYield: function delegateYield(e, r, n) {
-      return this.delegate = {
-        iterator: values(e),
-        resultName: r,
-        nextLoc: n
-      }, "next" === this.method && (this.arg = t), y;
-    }
-  }, e;
-}
-module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 3738:
-/***/ ((module) => {
-
-function _typeof(o) {
-  "@babel/helpers - typeof";
-
-  return module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-    return typeof o;
-  } : function (o) {
-    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports, _typeof(o);
-}
-module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 4756:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(4633)();
-module.exports = runtime;
-
-// Copied from https://github.com/facebook/regenerator/blob/main/packages/runtime/runtime.js#L736=
-try {
-  regeneratorRuntime = runtime;
-} catch (accidentalStrictMode) {
-  if (typeof globalThis === "object") {
-    globalThis.regeneratorRuntime = runtime;
-  } else {
-    Function("r", "regeneratorRuntime = r")(runtime);
-  }
-}
-
-
 /***/ })
 
 /******/ 	});
@@ -6781,19 +6433,6 @@ function _slicedToArray(r, e) {
   return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
 }
 
-;// ./src/hooks/use-force-update.js
-
-
-function useForceUpdate() {
-  var _useState = (0,react.useState)(false),
-    _useState2 = _slicedToArray(_useState, 2),
-    setValue = _useState2[1];
-  return function () {
-    return setValue(function (value) {
-      return !value;
-    });
-  };
-}
 ;// ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
 function _classCallCheck(a, n) {
   if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -6890,27 +6529,8 @@ function _inherits(t, e) {
 }
 
 // EXTERNAL MODULE: ./node_modules/lodash/get.js
-var lodash_get = __webpack_require__(8156);
-var get_default = /*#__PURE__*/__webpack_require__.n(lodash_get);
-;// ./src/engine/board/board.js
-
-
-var Board = /*#__PURE__*/function () {
-  function Board(boardRule) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    _classCallCheck(this, Board);
-    this.id = "".concat(Math.random());
-    this.rule = boardRule;
-    if (this.player) {
-      this.player = options.player;
-    }
-  }
-  return _createClass(Board, [{
-    key: "placePiece",
-    value: function placePiece(target, piece) {}
-  }]);
-}();
-
+var get = __webpack_require__(8156);
+var get_default = /*#__PURE__*/__webpack_require__.n(get);
 ;// ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
 
 function _defineProperty(e, r, t) {
@@ -6922,19 +6542,80 @@ function _defineProperty(e, r, t) {
   }) : e[r] = t, e;
 }
 
+;// ./src/engine/serializable.js
+
+
+
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+var Serializable = /*#__PURE__*/function () {
+  function Serializable() {
+    _classCallCheck(this, Serializable);
+    // arguments must be simple objects
+    this.args = JSON.parse(JSON.stringify(Array.prototype.slice.call(arguments)));
+  }
+  return _createClass(Serializable, [{
+    key: "toJSON",
+    value: function toJSON() {
+      return _objectSpread(_objectSpread({}, this), {}, {
+        constructor: this.constructor.name
+      });
+    }
+  }]);
+}();
+
+;// ./src/engine/board/board.js
+
+
+
+
+
+function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+var Board = /*#__PURE__*/function (_Serializable) {
+  function Board(boardRule) {
+    var _this;
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    _classCallCheck(this, Board);
+    _this = _callSuper(this, Board, [boardRule, options]);
+    _this.id = "".concat(Math.random());
+    _this.rule = boardRule;
+    if (_this.player) {
+      _this.player = options.player;
+    }
+    return _this;
+  }
+  _inherits(Board, _Serializable);
+  return _createClass(Board, [{
+    key: "placePiece",
+    value: function placePiece(target, piece) {}
+  }]);
+}(Serializable);
+
 ;// ./src/engine/space/space.ts
 
 
 
-var Space = /*#__PURE__*/function () {
+
+
+
+function space_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, space_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function space_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (space_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+var Space = /*#__PURE__*/function (_Serializable) {
   function Space(coordinates) {
+    var _this;
     var startingPieces = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
     _classCallCheck(this, Space);
-    _defineProperty(this, "coordinates", void 0);
-    _defineProperty(this, "pieces", void 0);
-    this.coordinates = coordinates;
-    this.pieces = startingPieces;
+    _this = space_callSuper(this, Space, [coordinates, startingPieces]);
+    _defineProperty(_this, "coordinates", void 0);
+    _defineProperty(_this, "pieces", void 0);
+    _this.coordinates = coordinates;
+    _this.pieces = startingPieces;
+    return _this;
   }
+  _inherits(Space, _Serializable);
   return _createClass(Space, [{
     key: "placePiece",
     value: function placePiece(piece) {
@@ -6943,10 +6624,10 @@ var Space = /*#__PURE__*/function () {
   }, {
     key: "isEmpty",
     value: function isEmpty() {
-      return this.pieces.length !== 0;
+      return this.pieces.length === 0;
     }
   }]);
-}();
+}(Serializable);
 
 ;// ./src/engine/board/grid.js
 
@@ -6958,8 +6639,8 @@ var Space = /*#__PURE__*/function () {
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = grid_unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function grid_unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return grid_arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? grid_arrayLikeToArray(r, a) : void 0; } }
 function grid_arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+function grid_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, grid_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function grid_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (grid_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 
 
 
@@ -6969,7 +6650,7 @@ var Grid = /*#__PURE__*/function (_Board) {
   function Grid(boardRule, options) {
     var _this;
     _classCallCheck(this, Grid);
-    _this = _callSuper(this, Grid, [boardRule, options]);
+    _this = grid_callSuper(this, Grid, [boardRule, options]);
     _this.grid = makeGrid(boardRule);
     return _this;
   }
@@ -7008,7 +6689,7 @@ var Grid = /*#__PURE__*/function (_Board) {
   }, {
     key: "getSpace",
     value: function getSpace(target) {
-      return lodash_get(this.grid, target);
+      return get(this.grid, target);
     }
   }, {
     key: "getPieces",
@@ -7079,86 +6760,85 @@ function _toConsumableArray(r) {
   return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
 }
 
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(4756);
-var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./node_modules/lodash/matches.js
 var matches = __webpack_require__(1505);
 var matches_default = /*#__PURE__*/__webpack_require__.n(matches);
-// EXTERNAL MODULE: ./node_modules/lodash/merge.js
-var merge = __webpack_require__(5364);
-var merge_default = /*#__PURE__*/__webpack_require__.n(merge);
-;// ./src/engine/board/stack.js
-
-
-
-
-
-function stack_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, stack_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function stack_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (stack_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-
-var Stack = /*#__PURE__*/function (_Board) {
-  function Stack(boardRule, options) {
-    var _this;
-    _classCallCheck(this, Stack);
-    _this = stack_callSuper(this, Stack, [boardRule, options]);
-    _this.stack = [];
-    return _this;
-  }
-  _inherits(Stack, _Board);
-  return _createClass(Stack, [{
-    key: "placePiece",
-    value: function placePiece(target, piece) {
-      if (target) {
-        // insert by index?
-      } else {
-        this.stack.push(piece);
-      }
-    }
-  }]);
-}(Board);
-
-;// ./src/engine/board/board-factory.js
-
-
-function boardFactory(boardRule, options) {
-  if (boardRule.type === "grid") {
-    return new Grid(boardRule, options);
-  } else if (boardRule.type === "stack") {
-    return new Stack(boardRule, options);
-  } else {
-    console.log("missing board type:", boardRule);
-  }
-}
-;// ./src/engine/player/player.ts
-
-
-
-var Player = /*#__PURE__*/_createClass(function Player(rule, index) {
-  _classCallCheck(this, Player);
-  _defineProperty(this, "rule", void 0);
-  _defineProperty(this, "id", void 0);
-  _defineProperty(this, "index", void 0);
-  this.rule = rule;
-  this.id = "".concat(Math.random());
-  this.index = index;
-});
-/* harmony default export */ const player = (Player);
 ;// ./src/engine/condition/condition.js
 
 
-var Condition = /*#__PURE__*/function () {
+
+
+
+function condition_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, condition_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function condition_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (condition_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+var Condition = /*#__PURE__*/function (_Serializable) {
   function Condition(rules, game) {
+    var _this;
     _classCallCheck(this, Condition);
-    this.rules = rules;
-    this.game = game;
+    _this = condition_callSuper(this, Condition, [rules, game]);
+    _this.rules = rules;
+    _this.game = game;
+    return _this;
   }
+  _inherits(Condition, _Serializable);
   return _createClass(Condition, [{
     key: "isMet",
     value: function isMet(actionPayload) {}
   }]);
-}();
+}(Serializable);
 
+;// ./src/engine/utils/resolve-board.ts
+
+function resolve_board_createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = resolve_board_unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function resolve_board_unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return resolve_board_arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? resolve_board_arrayLikeToArray(r, a) : void 0; } }
+function resolve_board_arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+function resolveBoard(board, gameState) {
+  // Case 1: if board is an array treat it as a path
+  console.log('board', board);
+  console.log('gameState', gameState);
+  if (Array.isArray(board)) {
+    return get_default()(gameState, board);
+  }
+  function search(node) {
+    if (!node || _typeof(node) !== "object") return null;
+    if (node.id === board.id) return node;
+    if (node.grid && Array.isArray(node.grid)) {
+      var _iterator = resolve_board_createForOfIteratorHelper(node.grid),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var row = _step.value;
+          var _iterator2 = resolve_board_createForOfIteratorHelper(row),
+            _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+              var cell = _step2.value;
+              var found = search(cell);
+              if (found) return found;
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    for (var _i = 0, _Object$values = Object.values(node); _i < _Object$values.length; _i++) {
+      var value = _Object$values[_i];
+      var _found = search(value);
+      if (_found) return _found;
+    }
+    return null;
+  }
+  return search(gameState);
+}
 ;// ./src/engine/condition/does-not-contain-condition.js
 
 
@@ -7167,6 +6847,7 @@ var Condition = /*#__PURE__*/function () {
 
 function does_not_contain_condition_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, does_not_contain_condition_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function does_not_contain_condition_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (does_not_contain_condition_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
 
 
 var DoesNotContainCondition = /*#__PURE__*/function (_Condition) {
@@ -7178,10 +6859,7 @@ var DoesNotContainCondition = /*#__PURE__*/function (_Condition) {
   return _createClass(DoesNotContainCondition, [{
     key: "isMet",
     value: function isMet(actionPayload) {
-      var board = this.game.get(actionPayload.board);
-      if (!board) {
-        console.log("111actionPayload", actionPayload);
-      }
+      var board = resolveBoard(actionPayload.board, this.game);
       var pieces = board.getPieces(actionPayload.target);
       return !pieces.filter(this.filterPieces.bind(this)).length;
     }
@@ -7233,6 +6911,7 @@ var ContainsCondition = /*#__PURE__*/function (_Condition) {
 function bingo_condition_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, bingo_condition_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function bingo_condition_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (bingo_condition_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 
+
 var BingoCondition = /*#__PURE__*/function (_Condition) {
   function BingoCondition() {
     _classCallCheck(this, BingoCondition);
@@ -7242,7 +6921,7 @@ var BingoCondition = /*#__PURE__*/function (_Condition) {
   return _createClass(BingoCondition, [{
     key: "isMet",
     value: function isMet() {
-      var grid = this.game.get(this.rules.board).grid;
+      var grid = resolveBoard(this.rules.boardPath, this.game).grid;
 
       // TODO: handle rectangles in addition to squares
       var size = grid.length;
@@ -7299,6 +6978,7 @@ var BingoCondition = /*#__PURE__*/function (_Condition) {
 function blackout_condition_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, blackout_condition_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function blackout_condition_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (blackout_condition_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 
+
 var BlackoutCondition = /*#__PURE__*/function (_Condition) {
   function BlackoutCondition() {
     _classCallCheck(this, BlackoutCondition);
@@ -7308,7 +6988,7 @@ var BlackoutCondition = /*#__PURE__*/function (_Condition) {
   return _createClass(BlackoutCondition, [{
     key: "isMet",
     value: function isMet() {
-      var grid = this.game.get(this.rules.board).grid;
+      var grid = resolveBoard(this.rules.boardPath, this.game).grid;
       return grid.every(function (row) {
         return row.every(function (space) {
           return !space.isEmpty();
@@ -7416,11 +7096,61 @@ var IsValidPlayerCondition = /*#__PURE__*/function (_Condition) {
   return _createClass(IsValidPlayerCondition, [{
     key: "isMet",
     value: function isMet(actionPayload) {
-      return this.game.currentRound.currentPlayer.id === actionPayload.playerId;
+      return this.game.players[this.game.currentRound.currentPlayerIndex].id === actionPayload.playerId;
     }
   }]);
 }(Condition);
 
+;// ./src/engine/utils/resolve-piece.ts
+
+
+function resolve_piece_createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = resolve_piece_unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function resolve_piece_unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return resolve_piece_arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? resolve_piece_arrayLikeToArray(r, a) : void 0; } }
+function resolve_piece_arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function resolvePiece(piece, gameState) {
+  // Case 1: existing piece with id - search boards
+  if (piece !== null && piece !== void 0 && piece.id) {
+    var queue = [gameState.sharedBoard, gameState.personalBoards];
+    while (queue.length) {
+      var node = queue.pop();
+      if (!node) continue;
+      if (Array.isArray(node)) {
+        queue.push.apply(queue, _toConsumableArray(node));
+      } else if (node.grid) {
+        var _iterator = resolve_piece_createForOfIteratorHelper(node.grid),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var row = _step.value;
+            queue.push.apply(queue, _toConsumableArray(row));
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      } else if (node.coordinates && node.pieces) {
+        var found = node.pieces.find(function (p) {
+          return p.id === piece.id;
+        });
+        if (found) return found;
+      } else if (_typeof(node) === "object") {
+        queue.push.apply(queue, _toConsumableArray(Object.values(node)));
+      }
+    }
+    return null; // piece.id was given but not found
+  }
+
+  // Case 2: no id - pull fresh piece from the matching piece group (pile)
+  var pieceGroup = gameState.pieces.find(function (p) {
+    var _piece$player;
+    return p.name === piece.name && (!p.player || p.player.id === ((_piece$player = piece.player) === null || _piece$player === void 0 ? void 0 : _piece$player.id));
+  });
+  if (!pieceGroup) {
+    throw new Error("No piece group found for ".concat(piece.name));
+  }
+  return pieceGroup.getOne();
+}
 ;// ./src/engine/condition/piece-matches-condition.js
 
 
@@ -7428,10 +7158,11 @@ var IsValidPlayerCondition = /*#__PURE__*/function (_Condition) {
 
 
 
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function piece_matches_condition_ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function piece_matches_condition_objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? piece_matches_condition_ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : piece_matches_condition_ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function piece_matches_condition_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, piece_matches_condition_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function piece_matches_condition_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (piece_matches_condition_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
 
 
 var PieceMatchesCondition = /*#__PURE__*/function (_Condition) {
@@ -7444,25 +7175,14 @@ var PieceMatchesCondition = /*#__PURE__*/function (_Condition) {
     key: "isMet",
     value: function isMet(actionPayload) {
       var _this$rules$actionRul, _this$rules$actionRul2;
-      var piece = this.game.getPiece(actionPayload.piece);
-      var board = this.game.getBoardPathContaining(piece);
+      var piece = resolvePiece(actionPayload.piece, this.game);
       if ((_this$rules$actionRul = this.rules.actionRule) !== null && _this$rules$actionRul !== void 0 && _this$rules$actionRul.piece && !piece) {
         console.error("no piece found");
         return false;
       }
       if ((_this$rules$actionRul2 = this.rules.actionRule) !== null && _this$rules$actionRul2 !== void 0 && _this$rules$actionRul2.piece) {
-        var matcher = _objectSpread({}, this.rules.actionRule.piece);
-
-        // probably going to want to move this
-        if (this.rules.actionRule.piece.board) {
-          matcher.board = this.game.normalizePath(this.rules.actionRule.piece.board, {
-            player: this.game.currentRound.currentPlayer
-          });
-        }
-        var toMatch = _objectSpread(_objectSpread({}, piece.rule), {}, {
-          board: board
-        });
-        return matches(matcher)(toMatch);
+        var matcher = piece_matches_condition_objectSpread({}, this.rules.actionRule.piece);
+        return matches(matcher)(piece.rule);
       }
       return true;
     }
@@ -7505,24 +7225,34 @@ function conditionFactory(conditionRule, game) {
 
 
 
-var Action = /*#__PURE__*/function () {
+
+
+function action_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, action_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function action_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (action_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+
+var Action = /*#__PURE__*/function (_Serializable) {
   function Action(rules, game) {
+    var _this;
     _classCallCheck(this, Action);
-    this.game = game;
-    this.rules = rules;
+    _this = action_callSuper(this, Action, [rules, game]);
+    _this.game = game;
+    _this.rules = rules;
     var invariantConditionRules = [{
       type: "actionTypeMatches",
-      actionRule: this.rules
+      actionRule: _this.rules
     }, {
       type: "pieceMatches",
-      actionRule: this.rules
+      actionRule: _this.rules
     }, {
       type: "isValidPlayer"
     }];
-    this.conditions = [].concat(invariantConditionRules, _toConsumableArray(this.rules.conditions || [])).map(function (conditionRule) {
+    _this.conditions = [].concat(invariantConditionRules, _toConsumableArray(_this.rules.conditions || [])).map(function (conditionRule) {
       return conditionFactory(conditionRule, game);
     });
+    return _this;
   }
+  _inherits(Action, _Serializable);
   return _createClass(Action, [{
     key: "assertIsValid",
     value: function assertIsValid(actionPayload) {
@@ -7540,8 +7270,84 @@ var Action = /*#__PURE__*/function () {
     key: "do",
     value: function _do() {}
   }]);
-}();
+}(Serializable);
 
+;// ./node_modules/@babel/runtime/helpers/esm/readOnlyError.js
+function _readOnlyError(r) {
+  throw new TypeError('"' + r + '" is read-only');
+}
+
+// EXTERNAL MODULE: ./node_modules/lodash/merge.js
+var lodash_merge = __webpack_require__(5364);
+;// ./src/engine/board/stack.js
+
+
+
+
+
+function stack_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, stack_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function stack_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (stack_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+var Stack = /*#__PURE__*/function (_Board) {
+  function Stack(boardRule, options) {
+    var _this;
+    _classCallCheck(this, Stack);
+    _this = stack_callSuper(this, Stack, [boardRule, options]);
+    _this.stack = [];
+    return _this;
+  }
+  _inherits(Stack, _Board);
+  return _createClass(Stack, [{
+    key: "placePiece",
+    value: function placePiece(target, piece) {
+      if (target) {
+        // insert by index?
+      } else {
+        this.stack.push(piece);
+      }
+    }
+  }]);
+}(Board);
+
+;// ./src/engine/board/board-factory.js
+
+
+function boardFactory(boardRule, options) {
+  if (boardRule.type === "grid") {
+    return new Grid(boardRule, options);
+  } else if (boardRule.type === "stack") {
+    return new Stack(boardRule, options);
+  } else {
+    console.log("missing board type:", boardRule);
+  }
+}
+;// ./src/engine/player/player.ts
+
+
+
+
+
+
+function player_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, player_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function player_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (player_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+var Player = /*#__PURE__*/function (_Serializable) {
+  function Player(rule, index) {
+    var _this;
+    _classCallCheck(this, Player);
+    _this = player_callSuper(this, Player, [rule, index]);
+    _defineProperty(_this, "rule", void 0);
+    _defineProperty(_this, "id", void 0);
+    _defineProperty(_this, "index", void 0);
+    _this.rule = rule;
+    _this.id = "".concat(Math.random());
+    _this.index = index;
+    return _this;
+  }
+  _inherits(Player, _Serializable);
+  return _createClass(Player);
+}(Serializable);
+/* harmony default export */ const player = (Player);
 ;// ./src/engine/action/move-piece-action.js
 
 
@@ -7550,6 +7356,8 @@ var Action = /*#__PURE__*/function () {
 
 function move_piece_action_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, move_piece_action_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function move_piece_action_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (move_piece_action_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+
 
 var MovePieceAction = /*#__PURE__*/function (_Action) {
   function MovePieceAction() {
@@ -7560,10 +7368,8 @@ var MovePieceAction = /*#__PURE__*/function (_Action) {
   return _createClass(MovePieceAction, [{
     key: "do",
     value: function _do(actionPayload) {
-      var piece = this.targetPiece(actionPayload);
-      var board = this.game.get(actionPayload.board, {
-        player: actionPayload.player
-      });
+      var piece = resolvePiece(actionPayload.piece, this.game);
+      var board = resolveBoard(actionPayload.board, this.game);
       var target = this.rules.playerPerspective ? board.getTargetAfterRotation(actionPayload.target, this.getRotation(actionPayload.player)) : actionPayload.target;
       board.placePiece(target, piece);
     }
@@ -7571,22 +7377,6 @@ var MovePieceAction = /*#__PURE__*/function (_Action) {
     key: "getRotation",
     value: function getRotation(player) {
       return player && this.game.options.playerCount === 2 && player.index === 1 ? 180 : 0;
-    }
-
-    // move this?
-    // add invariant condition for taking from a depleted pile
-  }, {
-    key: "targetPiece",
-    value: function targetPiece(actionPayload) {
-      var matcher = {
-        name: actionPayload.piece.name
-      };
-      if (actionPayload.piece.player) {
-        matcher.player = {
-          id: actionPayload.piece.player.id
-        };
-      }
-      return this.game.getPiece(matcher);
     }
   }]);
 }(Action);
@@ -7677,23 +7467,32 @@ function actionFactory(actionPayload, game) {
 ;// ./src/engine/round/round.js
 
 
+
+
+
 function round_createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = round_unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function round_unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return round_arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? round_arrayLikeToArray(r, a) : void 0; } }
 function round_arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function round_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, round_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function round_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (round_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
 
 var DEBUG = true;
-var Round = /*#__PURE__*/function () {
+var Round = /*#__PURE__*/function (_Serializable) {
   function Round(rules, game) {
-    var _rules$actions,
-      _this = this;
+    var _rules$actions;
+    var _this;
     _classCallCheck(this, Round);
-    this.rules = rules;
-    this.game = game;
-    this.history = [];
-    this.actions = (_rules$actions = rules.actions) === null || _rules$actions === void 0 ? void 0 : _rules$actions.map(function (actionRule) {
+    _this = round_callSuper(this, Round, [rules, game]);
+    _this.rules = rules;
+    _this.game = game;
+    _this.history = [];
+    _this.actions = (_rules$actions = rules.actions) === null || _rules$actions === void 0 ? void 0 : _rules$actions.map(function (actionRule) {
       return actionFactory(actionRule, _this.game);
     });
+    return _this;
   }
+  _inherits(Round, _Serializable);
   return _createClass(Round, [{
     key: "getCorrectAction",
     value: function getCorrectAction(actionPayload) {
@@ -7734,7 +7533,7 @@ var Round = /*#__PURE__*/function () {
     key: "afterDoAction",
     value: function afterDoAction() {}
   }]);
-}();
+}(Serializable);
 
 ;// ./src/engine/round/sequential-player-turn.js
 
@@ -7747,18 +7546,17 @@ function sequential_player_turn_isNativeReflectConstruct() { try { var t = !Bool
 
 var SequentialPlayerTurn = /*#__PURE__*/function (_Round) {
   function SequentialPlayerTurn(rules, game, options) {
-    var _this$game$currentRou;
     var _this;
     _classCallCheck(this, SequentialPlayerTurn);
     _this = sequential_player_turn_callSuper(this, SequentialPlayerTurn, [rules, game]);
-    _this.currentPlayer = ((_this$game$currentRou = _this.game.currentRound) === null || _this$game$currentRou === void 0 ? void 0 : _this$game$currentRou.currentPlayer) || _this.game.players[0];
+    _this.currentPlayerIndex = (options === null || options === void 0 ? void 0 : options.firstPlayer) || 0;
     return _this;
   }
   _inherits(SequentialPlayerTurn, _Round);
   return _createClass(SequentialPlayerTurn, [{
     key: "afterDoAction",
     value: function afterDoAction() {
-      this.currentPlayer = this.game.players[(this.game.players.indexOf(this.currentPlayer) + 1) % this.game.players.length];
+      this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.game.players.length;
     }
   }, {
     key: "isOver",
@@ -7784,18 +7582,28 @@ function roundFactory(roundRule, game) {
 
 
 
-var Piece = /*#__PURE__*/function () {
+
+
+
+function piece_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, piece_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function piece_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (piece_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
+var Piece = /*#__PURE__*/function (_Serializable) {
   function Piece(pieceRule, options) {
+    var _this;
     _classCallCheck(this, Piece);
-    _defineProperty(this, "id", void 0);
-    _defineProperty(this, "rule", void 0);
-    _defineProperty(this, "player", void 0);
-    this.id = "".concat(Math.random());
-    this.rule = pieceRule;
+    _this = piece_callSuper(this, Piece, [pieceRule, options]);
+    _defineProperty(_this, "id", void 0);
+    _defineProperty(_this, "rule", void 0);
+    _defineProperty(_this, "player", void 0);
+    _this.id = "".concat(Math.random());
+    _this.rule = pieceRule;
     if (options.player !== undefined) {
-      this.player = options.player;
+      _this.player = options.player;
     }
+    return _this;
   }
+  _inherits(Piece, _Serializable);
   return _createClass(Piece, [{
     key: "doesRuleMatch",
     value: function doesRuleMatch(matcher) {
@@ -7805,48 +7613,55 @@ var Piece = /*#__PURE__*/function () {
       return true;
     }
   }]);
-}();
+}(Serializable);
 
 ;// ./src/engine/piece/piece-factory.js
 
 function pieceFactory(pieceRule, options) {
   return new Piece(pieceRule, options);
 }
-;// ./src/engine/piece/piece-group.js
+;// ./src/engine/piece/pile.js
 
 
 
 
 
-function piece_group_ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function piece_group_objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? piece_group_ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : piece_group_ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+
+
+
+function pile_ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function pile_objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? pile_ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : pile_ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function pile_callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, pile_isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function pile_isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (pile_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+
 
 
 // all this extra complication is to support arbitrary (infinite) piles of pieces
-var Pile = /*#__PURE__*/function () {
+var Pile = /*#__PURE__*/function (_Serializable) {
   function Pile(pieceRule) {
-    var _this = this;
+    var _this;
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     _classCallCheck(this, Pile);
-    this.pieceRule = pieceRule;
-    this.name = pieceRule.name;
+    _this = pile_callSuper(this, Pile, [pieceRule, options]);
+    _this.pieceRule = pieceRule;
+    _this.name = pieceRule.name;
     if (options.player) {
-      this.player = options.player;
+      _this.player = options.player;
     }
-    this.options = options;
-    this.pool = (pieceRule.variants ? Object.entries(pieceRule.variants) : []).reduce(function (acc, _ref) {
+    _this.options = options;
+    _this.pool = (pieceRule.variants ? Object.entries(pieceRule.variants) : []).reduce(function (acc, _ref) {
       var _ref2 = _slicedToArray(_ref, 2),
         variantId = _ref2[0],
         variant = _ref2[1];
       var count = variant.count || 1;
       return [].concat(_toConsumableArray(acc), _toConsumableArray(Array.from(Array(count)).map(function (_) {
-        return pieceFactory(piece_group_objectSpread(piece_group_objectSpread({}, piece_group_objectSpread(piece_group_objectSpread({}, pieceRule), {}, {
+        return pieceFactory(pile_objectSpread(pile_objectSpread({}, pile_objectSpread(pile_objectSpread({}, pieceRule), {}, {
           variantId: variantId
         })), variant), _this.options);
       })));
     }, []);
     if (pieceRule.shuffled) {
-      this.pool = this.pool.map(function (value) {
+      _this.pool = _this.pool.map(function (value) {
         return {
           value: value,
           sort: Math.random()
@@ -7858,11 +7673,13 @@ var Pile = /*#__PURE__*/function () {
         return value;
       });
     }
-    this.count = this.pool.length || +pieceRule.count;
-    if (typeof this.count === "undefined") {
+    _this.count = _this.pool.length || +pieceRule.count;
+    if (typeof _this.count === "undefined") {
       throw new Error("Piece has no count: ", pieceRule.id);
     }
+    return _this;
   }
+  _inherits(Pile, _Serializable);
   return _createClass(Pile, [{
     key: "getOne",
     value: function getOne() {
@@ -7892,8 +7709,8 @@ var Pile = /*#__PURE__*/function () {
       this.pool.push(piece);
     }
   }]);
-}();
-/* harmony default export */ const piece_group = (Pile);
+}(Serializable);
+/* harmony default export */ const pile = (Pile);
 ;// ./src/util/find-value-path.js
 
 
@@ -7928,7 +7745,6 @@ function findValuePath(obj, compare) {
 
 
 
-
 function game_createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = game_unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function game_unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return game_arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? game_arrayLikeToArray(r, a) : void 0; } }
 function game_arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -7944,305 +7760,280 @@ function game_objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var
 
 
 
-var Game = /*#__PURE__*/function () {
-  function Game(rules, options) {
-    _classCallCheck(this, Game);
-    this.rules = expandRules(rules, options);
-    this.options = expandOptions(options);
-    this.initialize();
-    this.generator = this.createRoundGenerator(this.rules.round);
-    this.advance();
-    this.context = {};
+function createInitialState(rules, options) {
+  var _rules$initialPlaceme;
+  expandRules(rules);
+  var sharedBoard = Object.entries(rules.sharedBoard).reduce(function (acc, _ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+      id = _ref2[0],
+      board = _ref2[1];
+    return game_objectSpread(game_objectSpread({}, acc), {}, _defineProperty({}, id, boardFactory(game_objectSpread(game_objectSpread({}, board), {}, {
+      path: ["sharedBoard", id]
+    }), options)));
+  }, {});
+  var players = Array.from(Array(options.playerCount)).map(function (_, i) {
+    return new player(rules.player, i);
+  });
+  var personalBoards = players.reduce(function (acc, player) {
+    return game_objectSpread(game_objectSpread({}, acc), {}, _defineProperty({}, player.id, Object.entries(rules.personalBoard || []).reduce(function (acc, _ref3) {
+      var _ref4 = _slicedToArray(_ref3, 2),
+        id = _ref4[0],
+        board = _ref4[1];
+      return game_objectSpread(game_objectSpread({}, acc), {}, _defineProperty({}, id, boardFactory(game_objectSpread(game_objectSpread({}, board), {}, {
+        path: ["sharedBoard", id]
+      }), game_objectSpread(game_objectSpread({}, options), {}, {
+        player: player
+      }))));
+    }, {})));
+  }, {});
+  var pieces = rules.pieces.reduce(function (acc, pieceRule) {
+    if (pieceRule.perPlayer) {
+      return [].concat(_toConsumableArray(acc), _toConsumableArray(players.map(function (player) {
+        return new pile(pieceRule, {
+          player: player
+        });
+      })));
+    } else {
+      return [].concat(_toConsumableArray(acc), [new pile(pieceRule)]);
+    }
+  }, []);
+
+  // Apply initial placements
+  (_rules$initialPlaceme = rules.initialPlacements) === null || _rules$initialPlaceme === void 0 || _rules$initialPlaceme.forEach(function (placement) {
+    if (placement.perPlayer) {
+      players.forEach(function (player) {
+        doInitialPlacement(placement, player, {
+          sharedBoard: sharedBoard,
+          personalBoards: personalBoards,
+          pieces: pieces
+        });
+      });
+    } else {
+      doInitialPlacement(placement, null, {
+        sharedBoard: sharedBoard,
+        personalBoards: personalBoards,
+        pieces: pieces
+      });
+    }
+  });
+  var currentRoundRule = rules.round.phases ? rules.round.phases[0] : rules.round;
+  var currentRound = roundFactory(currentRoundRule);
+  return {
+    currentRound: currentRound,
+    context: {},
+    gameOver: false,
+    winner: null,
+    sharedBoard: sharedBoard,
+    players: players,
+    personalBoards: personalBoards,
+    pieces: pieces
+  };
+}
+function checkWinner(state, rules) {
+  return state.players.find(function (player) {
+    var winCondition = game_objectSpread(game_objectSpread({}, rules.winCondition), {}, {
+      piece: game_objectSpread(game_objectSpread({}, rules.winCondition.piece), {}, {
+        player: player
+      })
+    });
+    var condition = conditionFactory(winCondition, state);
+    console.log('condition', condition);
+    return condition.isMet();
+  }) || null;
+}
+function checkDraw(state, rules) {
+  return !!(rules.drawCondition && conditionFactory(rules.drawCondition, state).isMet());
+}
+function expandActionPayload(move, state, rules) {
+  var _move$piece;
+  var player = state.players.find(function (p) {
+    return p.id === move.playerId;
+  });
+  console.log('state.players', state.players);
+  if (!player) {
+    throw new Error("Invalid player ID");
+  }
+  var pieceName = ((_move$piece = move.piece) === null || _move$piece === void 0 ? void 0 : _move$piece.name) || "playerMarker";
+  var pieceRule = rules.pieces.find(function (piece) {
+    return piece.name === pieceName;
+  });
+  var piece = move.piece;
+  if (!piece) {
+    piece = {
+      name: 'playerMarker',
+      player: {
+        id: move.playerId
+      }
+    };
+  }
+  var defaultMove = {
+    type: "movePiece",
+    player: player
+  };
+  var expandedMove = game_objectSpread(game_objectSpread(game_objectSpread({}, defaultMove), move), {}, {
+    piece: piece
+  });
+  if (pieceRule !== null && pieceRule !== void 0 && pieceRule.perPlayer && !expandedMove.player) {
+    expandedMove.piece.player = {
+      id: player.id
+    };
+  }
+  if (!expandedMove.board) {
+    expandedMove.board = getBoardPathContaining(expandedMove.piece, state);
+  }
+  expandedMove.board = normalizePath(expandedMove.board, {
+    player: player
+  });
+  return expandedMove;
+}
+function makeMove(rules, options, _state, move) {
+  console.log('globalThis', globalThis['Player']);
+  if (!_state) {
+    var ret = makeSerializable(createInitialState(rules, options));
+    console.log('ret', ret);
+    return ret;
+  }
+  var state = deserialize(_state);
+  if (state.gameOver) {
+    throw new Error("Game is over!");
+  }
+  if (move === undefined) {
+    return state;
   }
 
-  // TODO: DRY this up
-  return _createClass(Game, [{
-    key: "initialize",
-    value: function initialize() {
-      var _this = this,
-        _this$rules$initialPl;
-      this.sharedBoard = Object.entries(this.rules.sharedBoard).reduce(function (acc, _ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-          id = _ref2[0],
-          board = _ref2[1];
-        var path = ["sharedBoard", id];
-        return game_objectSpread(game_objectSpread({}, acc), {}, _defineProperty({}, id, boardFactory(game_objectSpread(game_objectSpread({}, board), {}, {
-          path: path
-        }), _this.options)));
-      }, {});
-      this.players = Array.from(Array(this.options.playerCount)).map(function (_, i) {
-        return new player(_this.rules.player, i);
-      });
-      this.personalBoards = this.players.reduce(function (acc, player) {
-        return game_objectSpread(game_objectSpread({}, acc), {}, _defineProperty({}, player.id, Object.entries(_this.rules.personalBoard || []).reduce(function (acc, _ref3) {
-          var _ref4 = _slicedToArray(_ref3, 2),
-            id = _ref4[0],
-            board = _ref4[1];
-          var path = ["sharedBoard", id];
-          return game_objectSpread(game_objectSpread({}, acc), {}, _defineProperty({}, id, boardFactory(game_objectSpread(game_objectSpread({}, board), {}, {
-            path: path
-          }), game_objectSpread(game_objectSpread({}, _this.options), {}, {
-            player: player
-          }))));
-        }, {})));
-      }, {});
-      this.pieces = this.rules.pieces.reduce(function (acc, pieceRule) {
-        if (pieceRule.perPlayer) {
-          return [].concat(_toConsumableArray(acc), _toConsumableArray(_this.players.map(function (player) {
-            return new piece_group(pieceRule, {
-              player: player
-            });
-          })));
-        } else {
-          return [].concat(_toConsumableArray(acc), [new piece_group(pieceRule)]);
-        }
-      }, []);
-      (_this$rules$initialPl = this.rules.initialPlacements) === null || _this$rules$initialPl === void 0 || _this$rules$initialPl.forEach(function (placement) {
-        if (placement.perPlayer) {
-          _this.players.forEach(function (player) {
-            // player specifies both the piece owner (if relevant) and personalBoard
-            _this.doInitialPlacement(placement, player);
-          });
-        } else {
-          _this.doInitialPlacement(placement);
-        }
-      });
-    }
-  }, {
-    key: "doInitialPlacement",
-    value: function doInitialPlacement(placement, player) {
-      var _this2 = this;
-      var actionRule = {
-        type: "movePiece"
-      };
-      if (placement.playerPerspective) {
-        actionRule.playerPerspective = placement.playerPerspective;
-      }
-      var actionPayload = {
-        piece: placement.piece,
-        board: placement.board
-      };
-      if (placement.targets) {
-        placement.targets.forEach(function (target) {
-          actionFactory(actionRule, _this2)["do"](_this2.expandActionPayload(game_objectSpread(game_objectSpread({}, actionPayload), {}, {
-            target: target
-          }), player));
-        });
-      } else {
-        Array.from(new Array(placement.count)).forEach(function () {
-          actionFactory(actionRule, _this2)["do"](_this2.expandActionPayload(actionPayload, player));
-        });
-      }
-    }
-  }, {
-    key: "doAction",
-    value: function doAction(actionPayload) {
-      if (this.gameOver) {
-        throw new Error("game is over!");
-      }
-      var player = this.players.find(function (player) {
-        return player.id === actionPayload.playerId;
-      });
-      this.currentRound.doAction(this.expandActionPayload(actionPayload, player));
-      this.advance();
-    }
-  }, {
-    key: "advance",
-    value: function advance() {
-      var next = this.generator.next();
-      if (next.done) {
-        this.generator = this.createRoundGenerator(this.rules.round);
-        next = this.generator.next();
-      }
-      this.currentRound = next.value;
-      var winner = this.getWinner();
-      var isDraw = this.isDraw();
-      if (winner) {
-        this.winner = winner;
-      }
-      if (winner || isDraw) {
-        this.gameOver = true;
-      }
-    }
-  }, {
-    key: "getWinner",
-    value: function getWinner() {
-      var _this3 = this;
-      // probably ought to do this expansion at game start, with separate
-      // runtime-only expansion and compile-time-possible expansions
-      return this.players.find(function (player) {
-        var winCondition = game_objectSpread(game_objectSpread({}, _this3.rules.winCondition), {}, {
-          piece: game_objectSpread(game_objectSpread({}, _this3.rules.winCondition.piece), {}, {
-            player: player
-          })
-        });
-        var condition = conditionFactory(winCondition, _this3);
-        return condition.isMet();
-      });
-    }
-  }, {
-    key: "isDraw",
-    value: function isDraw() {
-      return !!(this.rules.drawCondition && conditionFactory(this.rules.drawCondition, this).isMet());
-    }
-  }, {
-    key: "createRoundGenerator",
-    value: /*#__PURE__*/regenerator_default().mark(function createRoundGenerator(roundRule) {
-      var round, _iterator, _step, phaseRule;
-      return regenerator_default().wrap(function createRoundGenerator$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            round = roundFactory(roundRule, this);
-            if (roundRule.phases) {
-              _context.next = 7;
-              break;
-            }
-          case 2:
-            _context.next = 4;
-            return round;
-          case 4:
-            if (!round.isOver()) {
-              _context.next = 2;
-              break;
-            }
-          case 5:
-            _context.next = 23;
-            break;
-          case 7:
-            _iterator = game_createForOfIteratorHelper(roundRule.phases);
-            _context.prev = 8;
-            _iterator.s();
-          case 10:
-            if ((_step = _iterator.n()).done) {
-              _context.next = 15;
-              break;
-            }
-            phaseRule = _step.value;
-            return _context.delegateYield(this.createRoundGenerator(phaseRule), "t0", 13);
-          case 13:
-            _context.next = 10;
-            break;
-          case 15:
-            _context.next = 20;
-            break;
-          case 17:
-            _context.prev = 17;
-            _context.t1 = _context["catch"](8);
-            _iterator.e(_context.t1);
-          case 20:
-            _context.prev = 20;
-            _iterator.f();
-            return _context.finish(20);
-          case 23:
-          case "end":
-            return _context.stop();
-        }
-      }, createRoundGenerator, this, [[8, 17, 20, 23]]);
-    })
-  }, {
-    key: "get",
-    value: function get(path) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      return get_default()(this, this.normalizePath(path, options));
-    }
-  }, {
-    key: "expandActionPayload",
-    value: function expandActionPayload(actionPayload, player) {
-      var _actionPayload$piece, _actionPayload$piece2, _actionPayload$piece3;
-      var pieceName = ((_actionPayload$piece = actionPayload.piece) === null || _actionPayload$piece === void 0 ? void 0 : _actionPayload$piece.name) || "playerMarker";
-      var pieceRule = this.rules.pieces.find(function (piece) {
-        return piece.name === pieceName;
-      });
-      var piece;
-      if ((_actionPayload$piece2 = actionPayload.piece) !== null && _actionPayload$piece2 !== void 0 && _actionPayload$piece2.id) {
-        piece = {
-          id: actionPayload.piece.id
-        };
-      } else if ((_actionPayload$piece3 = actionPayload.piece) !== null && _actionPayload$piece3 !== void 0 && _actionPayload$piece3.name) {
-        piece = actionPayload.piece;
-      } else {
-        piece = {
-          name: "playerMarker"
-        };
-      }
-      var defaultActionPayload = {
-        type: "movePiece",
-        player: player
-      };
-      actionPayload.piece = piece;
-      if (pieceRule.perPlayer && !actionPayload.player) {
-        actionPayload.piece.player = {
-          id: player.id
-        };
-      }
-      if (!actionPayload.board) {
-        actionPayload.board = this.getBoardPathContaining(actionPayload.piece);
-      }
-      var merged = merge_default()({}, defaultActionPayload, actionPayload);
-      merged.board = this.normalizePath(actionPayload.board, {
-        player: player
-      });
-      return merged;
-    }
-  }, {
-    key: "getPiecePaths",
-    value: function getPiecePaths(matcher, options) {
-      var _this4 = this;
-      var placesPiecesCanBe = {
-        personalBoards: this.personalBoards,
-        sharedBoard: this.sharedBoard,
-        pieces: this.pieces
-      };
-      return Array.from(findValuePath(placesPiecesCanBe, matches_default()(matcher))).filter(function (a) {
-        return a[a.length - 1] !== "rule";
-      }).sort(function (a) {
-        return a[0] === "pieces" ? 1 : -1;
-      }).map(function (path) {
-        return _this4.normalizePath(path, options);
-      });
-    }
-  }, {
-    key: "getPieces",
-    value: function getPieces(pieceMatcher, options) {
-      var _this5 = this;
-      return this.getPiecePaths(pieceMatcher, options).map(function (path) {
-        return _this5.get(path);
-      });
-    }
-  }, {
-    key: "getPiece",
-    value: function getPiece(pieceMatcher) {
-      var match = this.getPieces(pieceMatcher)[0];
-      return match instanceof piece_group ? match.getOne() : match;
-    }
-  }, {
-    key: "getBoardPathContaining",
-    value: function getBoardPathContaining(piece, options) {
-      return this.getPiecePaths(piece, options)[0];
-    }
-  }, {
-    key: "getBoardContaining",
-    value: function getBoardContaining(piece) {
-      var path = this.getBoardPathContaining(piece);
-      return path ? this.get(path.slice(0, path.length - 1)) : null;
-    }
-  }, {
-    key: "normalizePath",
-    value: function normalizePath(path) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      return path[0] === "personalBoard" ? ["personalBoards", options.player.id].concat(_toConsumableArray(path.slice(1))) : path;
-    }
-  }]);
-}(); // todo. will allow smaller rulesets
+  // Expand the move payload with defaults and normalizations
+  var expandedMove = expandActionPayload(move, state, rules);
+  var round = roundFactory(get_default()(rules, state.currentRound.rules.path), state);
+  round.doAction(expandedMove);
+  // Check if round is over and advance if needed
+  if (round.isOver(state)) {
+    if (rules.round.phases) {
+      // Get current phase rule
+      var currentPhaseRule = rules.round.phases[state.currentRound.currentPhaseIndex];
 
-function expandRules(rules) {
-  return rules;
+      // Create round for current phase
+      var phaseRound = roundFactory(currentPhaseRule, state);
+
+      // If this phase is over, move to next phase
+      if (phaseRound.isOver(state)) {
+        state.currentRound.currentPhaseIndex++;
+
+        // If we've completed all phases, start new round
+        if (state.currentRound.currentPhaseIndex >= rules.round.phases.length) {
+          state.currentRound.currentPhaseIndex = 0;
+          state.currentRound.currentRoundIndex++;
+        }
+      }
+    } else {
+      // No phases, just increment round
+      state.currentRound.currentRoundIndex++;
+    }
+  }
+
+  // Check win/draw conditions
+  var winner = checkWinner(state, rules);
+  var isDraw = checkDraw(state, rules);
+  if (winner || isDraw) {
+    game_objectSpread(game_objectSpread({}, state), {}, {
+      gameOver: true,
+      winner: winner
+    }), _readOnlyError("state");
+  }
+
+  // weird parsing is temp to test serialization
+  return makeSerializable(state);
+}
+function doInitialPlacement(placement, player, state) {
+  var actionRule = placement.action;
+  var actionPayload = placement.payload || {};
+  if (player) {
+    actionPayload.player = player;
+  }
+  Array.from(new Array(placement.count || 1)).forEach(function () {
+    var action = actionFactory(actionRule, state);
+    action["do"](expandActionPayload(actionPayload, state, rules));
+  });
+}
+function getBoardPathContaining(piece, state, options) {
+  return getPiecePaths(piece, state, options)[0];
+}
+function normalizePath(path) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  return path[0] === "personalBoard" && options.player ? ["personalBoards", options.player.id.toString()].concat(_toConsumableArray(path.slice(1))) : path;
+}
+function getPiecePaths(matcher, state, options) {
+  var placesPiecesCanBe = {
+    personalBoards: state.personalBoards,
+    sharedBoard: state.sharedBoard,
+    pieces: state.pieces
+  };
+  return Array.from(findValuePath(placesPiecesCanBe, matches_default()(matcher))).filter(function (a) {
+    return a[a.length - 1] !== "rule";
+  }).sort(function (a) {
+    return a[0] === "pieces" ? 1 : -1;
+  }).map(function (path) {
+    return normalizePath(path, options);
+  });
 }
 function expandOptions(options) {
   var defaultOptions = {
     playerCount: 2
   };
-  return merge_default()({}, defaultOptions, options);
+  return merge({}, defaultOptions, options);
+}
+
+// mutates rules
+function expandRules(rules) {
+  addPathToRules(rules);
+}
+
+// mutates rules
+function addPathToRules(rules) {
+  var CHILD_KEYS = ['phases', 'rounds'];
+  function annotate(node, pathSegs) {
+    if (!node || _typeof(node) !== 'object') return;
+
+    // lodash.get path string, e.g. "round.phases.0.rounds.2"
+    node.path = pathSegs.join('.');
+
+    // recurse into either "phases" or "rounds" arrays if present
+    var _iterator = game_createForOfIteratorHelper(CHILD_KEYS),
+      _step;
+    try {
+      var _loop = function _loop() {
+        var key = _step.value;
+        var kids = node[key];
+        if (Array.isArray(kids)) {
+          kids.forEach(function (child, idx) {
+            annotate(child, pathSegs.concat(key, idx));
+          });
+        }
+      };
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        _loop();
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+
+  // Top-level: support either "round" (object) or "rounds" (array), or both.
+  if (rules.round && _typeof(rules.round) === 'object') {
+    annotate(rules.round, ['round']);
+  }
+  if (Array.isArray(rules.rounds)) {
+    rules.rounds.forEach(function (r, i) {
+      return annotate(r, ['rounds', i]);
+    });
+  }
+}
+function makeSerializable(state) {
+  return JSON.parse(JSON.stringify(state));
+}
+function deserialize(state) {
+  return state;
 }
 ;// ./src/engine/index.ts
 
@@ -8256,21 +8047,23 @@ function expandOptions(options) {
 
 
 
+var options = {
+  playerCount: 2
+}; //temp, refactor out once stable
 
 function useGame(gameRules) {
-  var forceUpdate = useForceUpdate();
   var _useState = (0,react.useState)(function () {
-      return new Game(gameRules);
+      return makeMove(gameRules, options);
     }),
     _useState2 = _slicedToArray(_useState, 2),
     game = _useState2[0],
     setGame = _useState2[1];
   var doAction = function doAction(action) {
-    game.doAction(action);
-    forceUpdate();
+    // weird parsing is temp to test serialization
+    setGame(makeMove(gameRules, options, JSON.parse(JSON.stringify(game)), action));
   };
   (0,react.useEffect)(function () {
-    setGame(new Game(gameRules));
+    makeMove(gameRules, options);
   }, [gameRules]);
   return [game, doAction];
 }
@@ -8357,7 +8150,7 @@ function stack_Stack(_ref) {
 
 
 function board_Board(props) {
-  if (props.board instanceof Grid) {
+  if (props.board.constructor === 'Grid') {
     return /*#__PURE__*/react.createElement(grid, props);
   } else if (props.board instanceof Stack) {
     return /*#__PURE__*/react.createElement(stack_Stack, props);
@@ -8427,7 +8220,7 @@ function Layout(_ref) {
   })));
 }
 ;// ./src/tic-tac-toe-verbose.json
-const tic_tac_toe_verbose_namespaceObject = /*#__PURE__*/JSON.parse('{"sharedBoard":{"grid":{"type":"grid","width":3,"height":3}},"pieces":[{"name":"playerMarker","count":"Infinity","perPlayer":true}],"winCondition":{"type":"bingo","board":["sharedBoard","grid"],"piece":{"name":"playerMarker"}},"round":{"loopUntil":false,"phases":[{"type":"sequentialPlayerTurn","actions":[{"type":"movePiece","piece":{"name":"playerMarker"},"from":"player","to":["sharedBoard","grid"],"conditions":[{"type":"doesNotContain","piece":"any"}]}]}]},"drawCondition":{"type":"blackout","board":["sharedBoard","grid"],"piece":{"name":"playerMarker"}}}');
+const tic_tac_toe_verbose_namespaceObject = /*#__PURE__*/JSON.parse('{"sharedBoard":{"grid":{"type":"grid","width":3,"height":3}},"pieces":[{"name":"playerMarker","count":"Infinity","perPlayer":true}],"winCondition":{"type":"bingo","boardPath":["sharedBoard","grid"],"piece":{"name":"playerMarker"}},"round":{"loopUntil":false,"phases":[{"type":"sequentialPlayerTurn","actions":[{"type":"movePiece","piece":{"name":"playerMarker"},"from":"player","to":["sharedBoard","grid"],"conditions":[{"type":"doesNotContain","piece":"any"}]}]}]},"drawCondition":{"type":"blackout","boardPath":["sharedBoard","grid"],"piece":{"name":"playerMarker"}}}');
 ;// ./app.tsx
 
 
@@ -8441,28 +8234,30 @@ var App = function App() {
     _useGame2 = _slicedToArray(_useGame, 2),
     game = _useGame2[0],
     doAction = _useGame2[1];
+  var _useState = (0,react.useState)(null),
+    _useState2 = _slicedToArray(_useState, 2),
+    selectedPiece = _useState2[0],
+    setSelectedPiece = _useState2[1];
   var onPieceClick = function onPieceClick(piece) {
-    console.log("piece", piece);
-    doAction({
-      type: "selectPiece",
-      playerId: game.currentRound.currentPlayer.id,
-      piece: {
-        name: piece.rule.name,
-        id: piece.id
-      }
-    });
+    // todo: multiselect
+    if (!selectedPiece) {
+      setSelectedPiece(piece);
+    } else {
+      setSelectedPiece(null);
+    }
   };
   var onSpaceClick = function onSpaceClick(cell, board) {
-    var currentPlayer = game.currentRound.currentPlayer;
+    var currentPlayerIndex = game.currentRound.currentPlayerIndex;
+    var currentPlayer = game.players[currentPlayerIndex];
     var actionPayload = {
       playerId: currentPlayer.id,
-      type: "movePiece",
-      board: board.rule.path,
+      type: 'movePiece',
+      board: board,
       target: cell.coordinates
     };
-    if (game.context.selectedPiece) {
+    if (selectedPiece) {
       actionPayload.piece = {
-        name: game.context.selectedPiece.name
+        name: selectedPiece.name
       };
     }
     doAction(actionPayload);
@@ -8508,15 +8303,15 @@ var cjs_js_styles = __webpack_require__(5392);
       
       
 
-var options = {};
+var styles_options = {};
 
-options.styleTagTransform = (styleTagTransform_default());
-options.setAttributes = (setAttributesWithoutAttributes_default());
-options.insert = insertBySelector_default().bind(null, "head");
-options.domAPI = (styleDomAPI_default());
-options.insertStyleElement = (insertStyleElement_default());
+styles_options.styleTagTransform = (styleTagTransform_default());
+styles_options.setAttributes = (setAttributesWithoutAttributes_default());
+styles_options.insert = insertBySelector_default().bind(null, "head");
+styles_options.domAPI = (styleDomAPI_default());
+styles_options.insertStyleElement = (insertStyleElement_default());
 
-var update = injectStylesIntoStyleTag_default()(cjs_js_styles/* default */.A, options);
+var update = injectStylesIntoStyleTag_default()(cjs_js_styles/* default */.A, styles_options);
 
 
 

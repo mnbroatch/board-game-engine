@@ -1,4 +1,6 @@
 import HtmlWebPackPlugin from "html-webpack-plugin";
+import EmitRegistryPlugin from "./emit-serializable.js";
+import collectSerializable from "./collect-serializable.js";
 
 export default {
   entry: "./index.js",
@@ -13,6 +15,7 @@ export default {
       title: "React Template",
       template: "./index.html",
     }),
+    new EmitRegistryPlugin({ outputFile: "./src/registry.js" }) // <-- add this
   ],
   module: {
     rules: [
@@ -23,6 +26,7 @@ export default {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env", "@babel/preset-react"],
+            plugins: [collectSerializable]
           },
         },
       },

@@ -1,8 +1,10 @@
 import pieceFactory from "./piece-factory.js";
+import Serializable from "../serializable.js";
 
 // all this extra complication is to support arbitrary (infinite) piles of pieces
-class Pile {
+class Pile extends Serializable {
   constructor(pieceRule, options = {}) {
+    super(pieceRule, options)
     this.pieceRule = pieceRule;
     this.name = pieceRule.name;
     if (options.player) {

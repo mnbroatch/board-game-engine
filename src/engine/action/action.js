@@ -1,7 +1,9 @@
 import conditionFactory from "../condition/condition-factory.js";
+import Serializable from "../serializable.js";
 
-export default class Action {
+export default class Action extends Serializable {
   constructor(rules, game) {
+    super(rules, game);
     this.game = game;
     this.rules = rules;
 

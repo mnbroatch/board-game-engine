@@ -154,6 +154,7 @@ function checkDraw(state: GameState, rules: GameRules): boolean {
 
 function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
   const player = state.players.find((p) => p.id === move.playerId);
+  console.log('state.players', state.players)
   if (!player) {
     throw new Error("Invalid player ID");
   }
@@ -196,12 +197,17 @@ function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
 export function makeMove(
   rules: GameRules,
   options: GameOptions,
-  state?: GameState,
+  _state?: GameState,
   move?: Move,
 ): GameState {
-  if (!state) {
-    return createInitialState(rules, options);
+  console.log('globalThis', globalThis['Player'])
+  if (!_state) {
+    const ret = makeSerializable(createInitialState(rules, options))
+    console.log('ret', ret)
+    return ret
   }
+
+  const state = deserialize(_state)
 
   if (state.gameOver) {
     throw new Error("Game is over!");
@@ -255,7 +261,7 @@ export function makeMove(
   }
 
   // weird parsing is temp to test serialization
-  return JSON.parse(JSON.stringify(state))
+  return makeSerializable(state)
 }
 
 function doInitialPlacement(
@@ -355,4 +361,12 @@ export function addPathToRules (rules): void {
   if (Array.isArray(rules.rounds)) {
     rules.rounds.forEach((r, i) => annotate(r, ['rounds', i]));
   }
+}
+
+function makeSerializable (state) {
+  return JSON.parse(JSON.stringify(state))
+}
+
+function deserialize (state) {
+  return state
 }
