@@ -7739,6 +7739,8 @@ function findValuePath(obj, compare) {
   }
   return results;
 }
+;// ./src/registry.js
+var registry = {};
 ;// ./src/engine/game/game.ts
 
 
@@ -7750,6 +7752,7 @@ function game_unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof
 function game_arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function game_ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function game_objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? game_ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : game_ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+
 
 
 
@@ -7849,7 +7852,6 @@ function expandActionPayload(move, state, rules) {
   var player = state.players.find(function (p) {
     return p.id === move.playerId;
   });
-  console.log('state.players', state.players);
   if (!player) {
     throw new Error("Invalid player ID");
   }
@@ -7887,13 +7889,13 @@ function expandActionPayload(move, state, rules) {
   return expandedMove;
 }
 function makeMove(rules, options, _state, move) {
-  console.log('globalThis', globalThis['Player']);
   if (!_state) {
     var ret = makeSerializable(createInitialState(rules, options));
     console.log('ret', ret);
     return ret;
   }
   var state = deserialize(_state);
+  console.log('state', state);
   if (state.gameOver) {
     throw new Error("Game is over!");
   }
@@ -8033,7 +8035,14 @@ function makeSerializable(state) {
   return JSON.parse(JSON.stringify(state));
 }
 function deserialize(state) {
-  return state;
+  return JSON.parse(JSON.stringify(state), function (value) {
+    if (value.constructor) {
+      var obj = new registry[value.constructor](value.args);
+      return Object.assign(obj, value);
+    } else {
+      return value;
+    }
+  });
 }
 ;// ./src/engine/index.ts
 

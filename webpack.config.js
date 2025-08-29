@@ -15,7 +15,7 @@ export default {
       title: "React Template",
       template: "./index.html",
     }),
-    new EmitRegistryPlugin({ outputFile: "./src/registry.js" }) // <-- add this
+    new EmitRegistryPlugin({ outputFile: "./src/registry.ts" })
   ],
   module: {
     rules: [

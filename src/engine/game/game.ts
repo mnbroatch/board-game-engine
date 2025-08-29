@@ -8,6 +8,7 @@ import conditionFactory from "../condition/condition-factory.js";
 import actionFactory from "../action/action-factory.js";
 import Pile from "../piece/pile.js";
 import findValuePath from "../../util/find-value-path.js";
+import { registry } from "../../registry.ts";
 
 export interface GameRules {
   round: any;
@@ -154,7 +155,6 @@ function checkDraw(state: GameState, rules: GameRules): boolean {
 
 function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
   const player = state.players.find((p) => p.id === move.playerId);
-  console.log('state.players', state.players)
   if (!player) {
     throw new Error("Invalid player ID");
   }
@@ -200,7 +200,6 @@ export function makeMove(
   _state?: GameState,
   move?: Move,
 ): GameState {
-  console.log('globalThis', globalThis['Player'])
   if (!_state) {
     const ret = makeSerializable(createInitialState(rules, options))
     console.log('ret', ret)
@@ -208,6 +207,7 @@ export function makeMove(
   }
 
   const state = deserialize(_state)
+  console.log('state', state)
 
   if (state.gameOver) {
     throw new Error("Game is over!");
@@ -368,5 +368,12 @@ function makeSerializable (state) {
 }
 
 function deserialize (state) {
-  return state
+  return JSON.parse(JSON.stringify(state), (value) => {
+    if (value.constructor) {
+      const obj = new registry[value.constructor](value.args)
+      return Object.assign(obj, value)
+    } else {
+      return value
+    }
+  })
 }

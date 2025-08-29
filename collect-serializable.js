@@ -1,36 +1,45 @@
-// collect-serializable.js
-globalThis.__SERIALIZABLE_CLASSES__ = globalThis.__SERIALIZABLE_CLASSES__ || new Set();
+let collected = [];
 
-export default function ({ types: t }) {
-  const classMap = {}; // className -> superClassName
+export function getCollected() {
+  return collected;
+}
 
+export function resetCollected() {
+  collected = [];
+}
+
+export default function CollectSerializablePlugin() {
   return {
     visitor: {
       ClassDeclaration(path, state) {
-        const className = path.node.id?.name;
-        const superClass = path.node.superClass;
+        const node = path.node;
+        if (!node.superClass) return;
 
-        if (!className) return;
+        function extendsSerializable(p) {
+          let superPath = p.get("superClass");
+          while (superPath && superPath.node) {
+            const name = superPath.node.name;
+            if (name === "Serializable") return true;
 
-        if (superClass && t.isIdentifier(superClass)) {
-          classMap[className] = superClass.name;
+            const binding = p.scope.getBinding(name);
+            if (binding && binding.path.isClassDeclaration()) {
+              p = binding.path;
+              superPath = p.get("superClass");
+            } else {
+              break;
+            }
+          }
+          return false;
         }
 
-        // helper: check if this class ultimately extends Serializable
-        function extendsSerializable(cls) {
-          if (!cls) return false;
-          if (cls === "Serializable") return true;
-          return extendsSerializable(classMap[cls]);
-        }
-
-        if (extendsSerializable(className)) {
-          // add class name + absolute file path to global set
-          globalThis.__SERIALIZABLE_CLASSES__.add({
-            name: className,
-            filePath: state.file.opts.filename,
-          });
+        if (extendsSerializable(path)) {
+          const filePath = state.file.opts.filename;
+          const className = node.id?.name;
+          if (filePath && className) {
+            collected.push({ className, filePath });
+          }
         }
       },
     },
   };
-};
+}

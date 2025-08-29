@@ -1,45 +1,72 @@
 import fs from "fs";
 import path from "path";
+import { getCollected, resetCollected } from "./collect-serializable.js";
 
 export default class EmitRegistryPlugin {
   constructor(options = {}) {
-    this.outputFile = options.outputFile || "src/registry.js";
+    this.outputFile = options.outputFile || "./src/registry.ts";
   }
 
   apply(compiler) {
     compiler.hooks.done.tap("EmitRegistryPlugin", () => {
-      const allClasses = Array.from(globalThis.__SERIALIZABLE_CLASSES__ || []);
+      const collected = getCollected();
+      resetCollected();
 
-      if (!allClasses.length) {
-        console.warn("⚠️ No Serializable classes found");
-        return;
+      const unique = new Map();
+      for (const entry of collected) {
+        unique.set(`${entry.className}@${entry.filePath}`, entry);
       }
 
-      const imports = allClasses
-        .map(cls => {
-          if (!cls.filePath) {
-            console.warn(`⚠️ No filePath for class ${cls.name}`);
-            return "";
-          }
-          let relPath = path.relative(path.dirname(this.outputFile), cls.filePath);
-          if (!relPath.startsWith(".")) relPath = "./" + relPath;
-          relPath = relPath.replace(/\\/g, "/"); // Windows compatibility
-          return `import ${cls.name} from '${relPath}';`;
-        })
-        .filter(Boolean)
-        .join("\n");
+      const imports = [];
+      const exports = [];
+      let i = 0;
 
-      const registry = "export const registry = new Map([\n" +
-        allClasses.map(cls => `  ['${cls.name}', ${cls.name}],`).join("\n") +
-        "\n]);\n";
+      for (const { className, filePath } of unique.values()) {
+        if (!filePath) continue;
 
-      const content = `// This file is generated, so don't change it.\n${imports}\n\n${registry}`;
+        // Resolve relative path from ./src and normalize for TS/JS
+        const relPath =
+          "./" +
+          path
+            .relative("./src", filePath)
+            .replace(/\\/g, "/")
+            .replace(/\.[tj]sx?$/, "");
+
+        const importName = `Cls${i++}`;
+
+        // Detect if default export
+        const fileContent = fs.readFileSync(filePath, "utf-8");
+        const defaultClassRegex = new RegExp(
+          `export\\s+default\\s+class\\s+${className}\\b`,
+          "m"
+        );
+        const isDefaultExport = defaultClassRegex.test(fileContent);
+
+        if (isDefaultExport) {
+          imports.push(`import ${importName} from "${relPath}";`);
+        } else {
+          imports.push(`import { ${className} as ${importName} } from "${relPath}";`);
+        }
+
+        exports.push(`  "${className}": ${importName}`);
+      }
+
+      const content = `${imports.join("\n")}
+
+export const registry: Record<string, any> = {
+${exports.join(",\n")}
+};
+`;
 
       const outPath = path.resolve(this.outputFile);
-      fs.mkdirSync(path.dirname(outPath), { recursive: true });
-      fs.writeFileSync(outPath, content, "utf8");
+      const oldContent = fs.existsSync(outPath) ? fs.readFileSync(outPath, "utf-8") : null;
 
-      console.log(`✅ registry.js generated with ${allClasses.length} Serializable classes`);
+      if (oldContent !== content) {
+        fs.writeFileSync(outPath, content, "utf-8");
+        console.log(`✅ registry.ts generated with ${unique.size} Serializable classes`);
+      } else {
+        console.log(`ℹ️ registry.ts unchanged (${unique.size} Serializable classes)`);
+      }
     });
   }
 }
