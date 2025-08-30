@@ -6344,6 +6344,17 @@ module.exports = styleTagTransform;
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__webpack_require__.nmd = (module) => {
@@ -6363,6 +6374,20 @@ var __webpack_exports__ = {};
 // This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
 (() => {
 "use strict";
+
+// NAMESPACE OBJECT: ./src/engine/player/player.ts
+var player_namespaceObject = {};
+__webpack_require__.r(player_namespaceObject);
+__webpack_require__.d(player_namespaceObject, {
+  A: () => (player)
+});
+
+// NAMESPACE OBJECT: ./src/engine/piece/pile.js
+var pile_namespaceObject = {};
+__webpack_require__.r(pile_namespaceObject);
+__webpack_require__.d(pile_namespaceObject, {
+  A: () => (pile)
+});
 
 // EXTERNAL MODULE: ./node_modules/react/index.js
 var react = __webpack_require__(6540);
@@ -7739,8 +7764,57 @@ function findValuePath(obj, compare) {
   }
   return results;
 }
-;// ./src/registry.js
-var registry = {};
+;// ./src/registry.ts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var registry = {
+  "Grid": Grid,
+  "Stack": Stack,
+  "Board": Board,
+  "Action": Action,
+  "Space": Space,
+  "Player": player_namespaceObject.Player,
+  "Piece": Piece,
+  "Serializable": Serializable,
+  "Pile": pile_namespaceObject.Pile,
+  "ContainsCondition": ContainsCondition,
+  "BingoCondition": BingoCondition,
+  "BlackoutCondition": BlackoutCondition,
+  "SomeCondition": SomeCondition,
+  "RelativeMoveCondition": RelativeMoveCondition,
+  "ActionTypeMatchesCondition": ActionTypeMatchesCondition,
+  "IsValidPlayerCondition": IsValidPlayerCondition,
+  "PieceMatchesCondition": PieceMatchesCondition,
+  "MovePieceAction": MovePieceAction,
+  "SelectPieceAction": SelectPieceAction,
+  "SwapAction": SwapAction,
+  "DoesNotContainCondition": DoesNotContainCondition,
+  "SequentialPlayerTurn": SequentialPlayerTurn,
+  "Condition": Condition,
+  "Round": Round
+};
 ;// ./src/engine/game/game.ts
 
 
