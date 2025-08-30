@@ -1,78 +1,42 @@
-import fs from "fs";
-import path from "path";
-import { getCollected, resetCollected } from "./collect-serializable.js";
+import actionFactory from "../action/action-factory.js";
+import Serializable from "../serializable.js";
 
-export default class EmitRegistryPlugin {
-  constructor(options = {}) {
-    this.outputFile = options.outputFile || "./src/registry.ts";
+const DEBUG = true;
+
+export default class Round extends Serializable {
+  constructor(rules, game) {
+    super(rules, game);
+    this.rules = rules;
+    this.game = game;
+    this.history = [];
+    this.actions = rules.actions?.map((actionRule) =>
+      actionFactory(actionRule, this.game),
+    );
   }
 
-  apply(compiler) {
-    compiler.hooks.done.tap("EmitRegistryPlugin", () => {
-      const collected = getCollected();
-      resetCollected();
-
-      const unique = new Map();
-      for (const entry of collected) {
-        // key includes className + filePath to avoid duplicates
-        if (!entry.filePath || !entry.className) continue;
-        unique.set(`${entry.className}@${entry.filePath}`, entry);
-      }
-
-      const imports = [];
-      const exports = [];
-      let i = 0;
-
-      for (const { className, filePath } of unique.values()) {
-        if (!filePath) continue;
-
-        // relative path from src, normalized
-        const relPath =
-          "./" +
-          path
-            .relative("./src", filePath)
-            .replace(/\\/g, "/")
-            .replace(/\.[tj]sx?$/, "") +
-          ".ts";
-
-        const importName = `Cls${i++}`;
-        const fileContent = fs.readFileSync(filePath, "utf-8");
-
-        // Detect if the class is exported as default
-        const defaultClassRegex = new RegExp(
-          `export\\s+default\\s+class\\s+${className}(\\s+extends\\s+\\w+)?\\b`,
-          "m"
-        );
-
-        const isDefaultExport =
-          defaultClassRegex.test(fileContent) ||
-          new RegExp(`export\\s+default\\s+${className}\\b`).test(fileContent);
-
-        if (isDefaultExport) {
-          imports.push(`import ${importName} from "${relPath}";`);
-        } else {
-          imports.push(`import { ${className} as ${importName} } from "${relPath}";`);
+  getCorrectAction(actionPayload) {
+    for (const action of this.actions) {
+      try {
+        action.assertIsValid(actionPayload);
+        return action;
+      } catch (e) {
+        if (DEBUG) {
+          throw e;
         }
-
-        exports.push(`  "${className}": ${importName}`);
       }
-
-      const content = `${imports.join("\n")}
-
-export const registry: Record<string, any> = {
-${exports.join(",\n")}
-};
-`;
-
-      const outPath = path.resolve(this.outputFile);
-      const oldContent = fs.existsSync(outPath) ? fs.readFileSync(outPath, "utf-8") : null;
-
-      if (oldContent !== content) {
-        fs.writeFileSync(outPath, content, "utf-8");
-        console.log(`✅ registry.ts generated with ${unique.size} Serializable classes`);
-      } else {
-        console.log(`ℹ️ registry.ts unchanged (${unique.size} Serializable classes)`);
-      }
-    });
+    }
+    throw new Error(`Invalid Action: ${JSON.stringify(actionPayload)}`);
   }
+
+  doAction(actionPayload) {
+    this.getCorrectAction(actionPayload).do(actionPayload, this.game);
+    this.afterDoAction();
+    this.history.push(actionPayload);
+  }
+
+  isOver() {
+    return true;
+  }
+
+  afterDoAction() {}
 }
