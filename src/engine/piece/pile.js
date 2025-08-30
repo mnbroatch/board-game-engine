@@ -33,10 +33,7 @@ class Pile extends Serializable {
         .map(({ value }) => value);
     }
 
-    this.count = this.pool.length || +pieceRule.count;
-    if (typeof this.count === "undefined") {
-      throw new Error("Piece has no count: ", pieceRule.id);
-    }
+    this.count = this.pool.length || pieceRule.count;
   }
 
   getOne() {
@@ -45,8 +42,10 @@ class Pile extends Serializable {
 
   getMultiple(count) {
     const toReturn = [];
-    if (this.count >= count) {
-      this.count -= count;
+    if (this.count === undefined || this.count >= count) {
+      if (this.count) {
+        this.count -= count;
+      }
       const remainder = count - this.pool.length;
       toReturn.push(...this.pool.splice(0, count));
 
@@ -62,7 +61,9 @@ class Pile extends Serializable {
   }
 
   put(piece) {
-    this.count += 1;
+    if (this.count !== undefined) {
+      this.count += 1;
+    }
     this.pool.push(piece);
   }
 }

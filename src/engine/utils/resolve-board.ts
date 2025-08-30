@@ -2,8 +2,6 @@ import get from "lodash/get.js";
 
 export default function resolveBoard(board, gameState) {
   // Case 1: if board is an array treat it as a path
-  console.log('board', board)
-  console.log('gameState', gameState)
   if (Array.isArray(board)) {
     return get(gameState, board);
   }

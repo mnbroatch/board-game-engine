@@ -202,12 +202,10 @@ export function makeMove(
 ): GameState {
   if (!_state) {
     const ret = makeSerializable(createInitialState(rules, options))
-    console.log('ret', ret)
     return ret
   }
 
   const state = deserialize(_state)
-  console.log('state', state)
 
   if (state.gameOver) {
     throw new Error("Game is over!");
@@ -220,7 +218,7 @@ export function makeMove(
   // Expand the move payload with defaults and normalizations
   const expandedMove = expandActionPayload(move, state, rules);
 
-  const round = roundFactory(get(rules, state.currentRound.rules.path), state)
+  const round = state.currentRound
 
   round.doAction(expandedMove);
   // Check if round is over and advance if needed
@@ -260,6 +258,7 @@ export function makeMove(
     };
   }
 
+  console.log('state', state)
   // weird parsing is temp to test serialization
   return makeSerializable(state)
 }
@@ -364,14 +363,19 @@ export function addPathToRules (rules): void {
 }
 
 function makeSerializable (state) {
-  return JSON.parse(JSON.stringify(state))
+  console.log('state', state)
+  return JSON.parse(JSON.stringify(state, (key, value) => {
+    console.log('1111key', key)
+    console.log('111value', value)
+    return value
+  }))
 }
 
 function deserialize (state) {
   return JSON.parse(JSON.stringify(state), (key, value) => {
     if (value?.constructorName) {
-      console.log('registry', registry)
       console.log('value', value)
+      console.log('value.args', value.args)
       const obj = new registry[value.constructorName](...value.args)
       return Object.assign(obj, value)
     } else {

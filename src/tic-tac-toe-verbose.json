@@ -9,7 +9,6 @@
   "pieces": [
     {
       "name": "playerMarker",
-      "count": "Infinity",
       "perPlayer": true
     }
   ],
