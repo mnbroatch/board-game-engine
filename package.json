@@ -8,7 +8,6 @@
     "start": "webpack-dev-server --config ./webpack.config.dev.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "prebuild": "node generate-class-registry.js",
     "build": "node_modules/.bin/webpack"
   },
   "author": "",
@@ -44,7 +43,6 @@
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0",
-    "webpack-virtual-modules": "^0.6.2",
     "yarn-bound": "^0.5.4"
   },
   "dependencies": {
