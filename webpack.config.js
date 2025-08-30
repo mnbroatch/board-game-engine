@@ -1,49 +1,22 @@
 import HtmlWebPackPlugin from "html-webpack-plugin";
-import EmitRegistryPlugin from "./emit-serializable.js";
-import collectSerializable from "./collect-serializable.js";
+import PrebuildRegistryPlugin from "./webpack-prebuild-registry.js";
 
 export default {
   entry: "./index.js",
-  output: {
-    filename: "build.js",
-  },
-  optimization: {
-    minimize: false,
-  },
+  output: { filename: "build.js" },
   plugins: [
-    new HtmlWebPackPlugin({
-      title: "React Template",
-      template: "./index.html",
-    }),
-    new EmitRegistryPlugin({ outputFile: "./src/registry.ts" })
+    new HtmlWebPackPlugin({ template: "./index.html" }),
+    new PrebuildRegistryPlugin(),
   ],
   module: {
     rules: [
       {
         test: /\.(js|ts)x?$/,
-        exclude: /(node_modules)/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
-            plugins: [collectSerializable]
-          },
-        },
+        exclude: /node_modules/,
+        use: { loader: "babel-loader", options: { presets: ["@babel/preset-env","@babel/preset-react"] } },
       },
-      {
-        test: /\.s?[ac]ss$/i,
-        use: [
-          // Creates `style` nodes from JS strings
-          "style-loader",
-          // Translates CSS into CommonJS
-          "css-loader",
-          // Compiles Sass to CSS
-          "sass-loader",
-        ],
-      },
+      { test: /\.s?[ac]ss$/i, use: ["style-loader","css-loader","sass-loader"] },
     ],
   },
-  resolve: {
-    extensions: [".js", ".json", ".ts", ".tsx"],
-  },
+  resolve: { extensions: [".js",".ts",".tsx",".jsx",".json"] },
 };

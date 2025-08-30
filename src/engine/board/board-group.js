@@ -1,4 +1,4 @@
-import Board from "./board";
+import Board from "./board.js";
 
 export default class BoardGroup extends Board {
   constructor(boardRule, options) {

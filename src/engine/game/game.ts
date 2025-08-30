@@ -368,9 +368,11 @@ function makeSerializable (state) {
 }
 
 function deserialize (state) {
-  return JSON.parse(JSON.stringify(state), (value) => {
-    if (value.constructor) {
-      const obj = new registry[value.constructor](value.args)
+  return JSON.parse(JSON.stringify(state), (key, value) => {
+    if (value?.constructorName) {
+      console.log('registry', registry)
+      console.log('value', value)
+      const obj = new registry[value.constructorName](...value.args)
       return Object.assign(obj, value)
     } else {
       return value

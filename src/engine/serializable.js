@@ -5,6 +5,6 @@ export default class Serializable {
   }
 
   toJSON () {
-    return { ...this, constructor: this.constructor.name }
+    return { ...this, constructorName: this.constructor.name }
   }
 }
