@@ -54,7 +54,13 @@ export interface GameState {
 
 function createInitialState(rules: GameRules, options: GameOptions): GameState {
   expandRules(rules)
-  const sharedBoard = Object.entries(rules.sharedBoard).reduce(
+  let state = {
+    context: {},
+    gameOver: false,
+    winner: null,
+  } as GameState
+
+  state.sharedBoard = Object.entries(rules.sharedBoard).reduce(
     (acc, [id, board]) => ({
       ...acc,
       [id]: boardFactory({ ...board, path: ["sharedBoard", id] }, options),
@@ -62,11 +68,11 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
     {},
   );
 
-  const players = Array.from(Array(options.playerCount)).map(
+  state.players = Array.from(Array(options.playerCount)).map(
     (_, i) => new Player(rules.player, i),
   );
 
-  const personalBoards = players.reduce(
+  state.personalBoards = state.players.reduce(
     (acc, player) => ({
       ...acc,
       [player.id]: Object.entries(rules.personalBoard || []).reduce(
@@ -83,11 +89,11 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
     {},
   );
 
-  const pieces = rules.pieces.reduce((acc, pieceRule) => {
+  state.pieces = rules.pieces.reduce((acc, pieceRule) => {
     if (pieceRule.perPlayer) {
       return [
         ...acc,
-        ...players.map((player) => new Pile(pieceRule, { player })),
+        ...state.players.map((player) => new Pile(pieceRule, { player })),
       ];
     } else {
       return [...acc, new Pile(pieceRule)];
@@ -97,18 +103,18 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
   // Apply initial placements
   rules.initialPlacements?.forEach((placement) => {
     if (placement.perPlayer) {
-      players.forEach((player) => {
+      state.players.forEach((player) => {
         doInitialPlacement(placement, player, {
-          sharedBoard,
-          personalBoards,
-          pieces,
+          sharedBoard: state.sharedBoard,
+          personalBoards: state.personalBoards,
+          pieces: state.pieces,
         });
       });
     } else {
       doInitialPlacement(placement, null, {
-        sharedBoard,
-        personalBoards,
-        pieces,
+        sharedBoard: state.sharedBoard,
+        personalBoards: state.personalBoards,
+        pieces: state.pieces,
       });
     }
   });
@@ -116,18 +122,9 @@ function createInitialState(rules: GameRules, options: GameOptions): GameState {
   const currentRoundRule = rules.round.phases
     ? rules.round.phases[0]
     : rules.round;
-  const currentRound = roundFactory(currentRoundRule);
+  state.currentRound = roundFactory(currentRoundRule, state);
 
-  return {
-    currentRound,
-    context: {},
-    gameOver: false,
-    winner: null,
-    sharedBoard,
-    players,
-    personalBoards,
-    pieces,
-  };
+  return state;
 }
 
 function checkWinner(state: GameState, rules: GameRules): Player | null {
@@ -141,7 +138,6 @@ function checkWinner(state: GameState, rules: GameRules): Player | null {
         },
       };
       const condition = conditionFactory(winCondition, state);
-      console.log('condition', condition)
       return condition.isMet();
     }) || null
   );
@@ -251,14 +247,10 @@ export function makeMove(
   const isDraw = checkDraw(state, rules);
 
   if (winner || isDraw) {
-    state = {
-      ...state,
-      gameOver: true,
-      winner,
-    };
+    state.gameOver = true
+    state.winner = winner
   }
 
-  console.log('state', state)
   // weird parsing is temp to test serialization
   return makeSerializable(state)
 }
@@ -363,23 +355,34 @@ export function addPathToRules (rules): void {
 }
 
 function makeSerializable (state) {
-  console.log('state', state)
+  // see Serializable toJSON for stringification behavior
   return JSON.parse(JSON.stringify(state, (key, value) => {
-    console.log('1111key', key)
-    console.log('111value', value)
     return value
   }))
 }
 
 function deserialize (state) {
-  return JSON.parse(JSON.stringify(state), (key, value) => {
+  const newState = {}
+  const instanceMap = new Map()
+  const deserialized = JSON.parse(JSON.stringify(state), function (key, value) {
     if (value?.constructorName) {
-      console.log('value', value)
-      console.log('value.args', value.args)
-      const obj = new registry[value.constructorName](...value.args)
-      return Object.assign(obj, value)
+      // don't create multiple instances for objects with same ID, use canonical instance
+      const existingInstance = instanceMap.get(value.id)
+      if (existingInstance) {
+        console.log('existingInstance', existingInstance)
+        return existingInstance
+      } else {
+        // by convention, state is last arg to classes that need it
+        // it is filtered out of serialization-safe args because it's circular
+        const obj = new registry[value.constructorName](...value.args, newState)
+        Object.assign(obj, value) // re-populate instance properties
+        instanceMap.set(obj.id, obj)
+        return obj
+      }
     } else {
       return value
     }
   })
+  // re-establish circular reference
+  return Object.assign(newState, deserialized)
 }

@@ -1,7 +1,6 @@
 import Pile from "../piece/pile.js";
 
 export default function resolvePiece(piece, gameState) {
-  console.log('piece', piece)
   // Case 1: existing piece with id - search boards
   if (piece?.id) {
     const queue = [gameState.sharedBoard, gameState.personalBoards];

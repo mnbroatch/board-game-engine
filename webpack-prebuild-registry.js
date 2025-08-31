@@ -19,6 +19,7 @@ function getAllFiles(dir) {
   return files;
 }
 
+// so incredibly broken lol, breaks if even a comment says "class" anywhere
 function parseClasses(filePath) {
   const content = fs.readFileSync(filePath, "utf-8");
   const classes = [];
