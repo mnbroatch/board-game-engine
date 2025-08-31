@@ -34,16 +34,6 @@ export default class Grid extends Board {
   placePiece(target, piece) {
     this.getSpace(target).placePiece(piece);
   }
-
-  getTargetAfterRotation([targetX, targetY], rotation = INITIAL_ROTATION) {
-    if (rotation === FLIPPED_ROTATION) {
-      const gridLength = this.grid.length;
-      const gridWidth = this.grid[targetY].length;
-      return [gridLength - targetX - 1, gridWidth - targetY - 1];
-    } else {
-      return [targetX, targetY];
-    }
-  }
 }
 
 function makeGrid(boardRule) {

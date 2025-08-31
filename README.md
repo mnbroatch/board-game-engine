@@ -1,1 +1,1 @@
-Quick react/webpack template circa April 2022
+WIP object oriented board game engine with serializable game state for use in stateless backends

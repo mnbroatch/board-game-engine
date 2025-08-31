@@ -52,14 +52,8 @@ export interface GameState {
   pieces: Pile[];
 }
 
-function createInitialState(rules: GameRules, options: GameOptions): GameState {
+function initializeState(state: GameState, rules: GameRules, options: GameOptions): GameState {
   expandRules(rules)
-  let state = {
-    context: {},
-    gameOver: false,
-    winner: null,
-  } as GameState
-
   state.sharedBoard = Object.entries(rules.sharedBoard).reduce(
     (acc, [id, board]) => ({
       ...acc,
@@ -197,8 +191,12 @@ export function makeMove(
   move?: Move,
 ): GameState {
   if (!_state) {
-    const ret = makeSerializable(createInitialState(rules, options))
-    return ret
+    return {
+      context: {},
+      gameOver: false,
+      winner: null,
+      players: [],
+    }
   }
 
   const state = deserialize(_state)

@@ -4,10 +4,8 @@ import type { GameRules, ActionPayload } from "../types";
 
 type DoAction = (action: ActionPayload) => void;
 
-const options = { playerCount: 2 } //temp, refactor out once stable
-
 export default function useGame(gameRules: GameRules): [any, DoAction] {
-  const baseGame = useMemo(() => makeMove(gameRules, options), [gameRules]);
+  const baseGame = useMemo(() => makeGame(gameRules), [gameRules]);
   
   const [game, setGame] = useState(() => baseGame);
   
@@ -21,8 +19,15 @@ export default function useGame(gameRules: GameRules): [any, DoAction] {
 
   const doAction: DoAction = (action) => {
     // weird parsing is temp to test serialization
-    setGame(currentGame => makeMove(gameRules, options, JSON.parse(JSON.stringify(currentGame)), action))
+    setGame(currentGame => makeMove(gameRules, JSON.parse(JSON.stringify(currentGame)), action))
   };
 
   return [game, doAction];
+}
+
+function makeGame (gameRules) {
+  let baseGame = useMemo(() => makeMove(gameRules), [gameRules])
+  baseGame = makeMove(gameRules, baseGame, { playerId: 1, type: 'join' })
+  baseGame = makeMove(gameRules, baseGame, { playerId: 2, type: 'join' })
+  return baseGame
 }

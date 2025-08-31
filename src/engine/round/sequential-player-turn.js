@@ -1,9 +1,9 @@
 import Round from "./round.js";
 
 export default class SequentialPlayerTurn extends Round {
-  constructor(rules, game, options) {
+  constructor(rules, game) {
     super(rules, game);
-    this.currentPlayerIndex = options?.firstPlayer || 0;
+    this.currentPlayerIndex = 0;
   }
 
   afterDoAction() {
