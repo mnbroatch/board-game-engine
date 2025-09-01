@@ -1,7 +1,7 @@
 export default class Serializable {
   constructor () {
     // arguments must be simple objects, duck type gamestate object out
-    this.args = [...arguments].filter(arg => !arg || arg.gameOver === undefined)
+    this.args = [...arguments].filter(arg => !arg || arg.status === undefined)
     this.id = `${Math.random()}`
   }
 

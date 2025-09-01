@@ -1,4 +1,5 @@
 {
+  "playerCountRange": [2, 2],
   "sharedBoard": {
     "grid": {
       "type": "grid",

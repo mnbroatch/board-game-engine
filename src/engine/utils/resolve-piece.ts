@@ -1,7 +1,7 @@
 import Pile from "../piece/pile.js";
 
 export default function resolvePiece(piece, gameState) {
-  // Case 1: existing piece with id - search boards
+  // todo: should not be specific to grids
   if (piece?.id) {
     const queue = [gameState.sharedBoard, gameState.personalBoards];
     while (queue.length) {
@@ -22,12 +22,20 @@ export default function resolvePiece(piece, gameState) {
     return null; // piece.id was given but not found
   }
 
-  // Case 2: no id - pull fresh piece from the matching piece group (pile)
-  const pieceGroup = gameState.pieces.find(
-    (p) =>
-      p.name === piece.name &&
-      (!p.player || p.player.id === piece.player?.id)
-  );
+  let pieceGroup
+  if (!piece) {
+    pieceGroup = gameState.pieces.find(
+      (p) =>
+        p.name === 'playerMarker' &&
+        (!p.player || p.player.id === gameState.players[gameState.currentRound.currentPlayerIndex].id)
+    );
+  } else {
+    pieceGroup = gameState.pieces.find(
+      (p) =>
+        p.name === piece.name &&
+        (!p.player || p.player.id === piece.player?.id)
+    );
+  }
   if (!pieceGroup) {
     throw new Error(`No piece group found for ${piece.name}`);
   }

@@ -1,3 +1,4 @@
+import cloneDeep from "lodash/cloneDeep.js";
 import matches from "lodash/matches.js";
 import merge from "lodash/merge.js";
 import get from "lodash/get.js";
@@ -44,7 +45,7 @@ export interface GameState {
   currentPhaseIndex: number;
   currentRoundIndex: number;
   context: Record<string, any>;
-  gameOver: boolean;
+  status: 'waiting' | 'active' | 'done';
   winner: Player | null;
   sharedBoard: Record<string, any>;
   players: Player[];
@@ -52,18 +53,14 @@ export interface GameState {
   pieces: Pile[];
 }
 
-function initializeState(state: GameState, rules: GameRules, options: GameOptions): GameState {
+function initializeState(state: GameState, rules: GameRules): GameState {
   expandRules(rules)
   state.sharedBoard = Object.entries(rules.sharedBoard).reduce(
     (acc, [id, board]) => ({
       ...acc,
-      [id]: boardFactory({ ...board, path: ["sharedBoard", id] }, options),
+      [id]: boardFactory({ ...board, path: ["sharedBoard", id] }),
     }),
     {},
-  );
-
-  state.players = Array.from(Array(options.playerCount)).map(
-    (_, i) => new Player(rules.player, i),
   );
 
   state.personalBoards = state.players.reduce(
@@ -74,7 +71,7 @@ function initializeState(state: GameState, rules: GameRules, options: GameOption
           ...acc,
           [id]: boardFactory(
             { ...board, path: ["sharedBoard", id] },
-            { ...options, player },
+            { player },
           ),
         }),
         {},
@@ -118,6 +115,8 @@ function initializeState(state: GameState, rules: GameRules, options: GameOption
     : rules.round;
   state.currentRound = roundFactory(currentRoundRule, state);
 
+  state.status = 'active'
+
   return state;
 }
 
@@ -145,32 +144,13 @@ function checkDraw(state: GameState, rules: GameRules): boolean {
 
 function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
   const player = state.players.find((p) => p.id === move.playerId);
-  if (!player) {
+  if (!player && move.type !== 'join' && move.type !== 'start') {
     throw new Error("Invalid player ID");
   }
 
-  const pieceName = move.piece?.name || "playerMarker";
-  const pieceRule = rules.pieces.find((piece) => piece.name === pieceName);
+  const pieceRule = rules.pieces.find((piece) => piece.name === move.piece?.name);
 
-  let piece = move.piece
-  if (!piece) {
-    piece = {
-      name: 'playerMarker',
-      player: { id: move.playerId }
-    }
-  }
-
-  const defaultMove = {
-    type: "movePiece",
-    player,
-  };
-
-  const expandedMove = {
-    ...defaultMove,
-    ...move,
-    piece,
-  };
-
+  const expandedMove = cloneDeep(move)
   if (pieceRule?.perPlayer && !expandedMove.player) {
     expandedMove.piece.player = { id: player.id };
   }
@@ -184,30 +164,52 @@ function expandActionPayload(move: Move, state: GameState, rules: GameRules) {
   return expandedMove;
 }
 
+function handlePlayerJoin(state, rules, move) {
+  if (state.players.length < rules.playerCountRange[1]) {
+    state.players.push(new Player(rules.player, state.players.length, move.playerId))
+  } else {
+    throw new Error('game is full!')
+  }
+}
+
+function handleStartGame(state,rules) {
+  if (state.players.length >= rules.playerCountRange[0]) {
+    initializeState(state, rules)
+  } else {
+    throw new Error('not enough players')
+  }
+}
+
 export function makeMove(
   rules: GameRules,
-  options: GameOptions,
   _state?: GameState,
   move?: Move,
 ): GameState {
   if (!_state) {
     return {
       context: {},
-      gameOver: false,
       winner: null,
+      status: 'waiting',
       players: [],
     }
-  }
+  } 
 
   const state = deserialize(_state)
 
-  if (state.gameOver) {
+  if (state.status === 'done') {
     throw new Error("Game is over!");
   }
 
   if (move === undefined) {
     return state;
+  } else if (move?.type === 'join') {
+    handlePlayerJoin(state, rules, move)
+    return makeSerializable(state)
+  } else if (move.type === 'start') {
+    handleStartGame(state, rules)
+    return makeSerializable(state)
   }
+
 
   // Expand the move payload with defaults and normalizations
   const expandedMove = expandActionPayload(move, state, rules);
@@ -245,11 +247,10 @@ export function makeMove(
   const isDraw = checkDraw(state, rules);
 
   if (winner || isDraw) {
-    state.gameOver = true
+    state.status = 'done'
     state.winner = winner
   }
 
-  // weird parsing is temp to test serialization
   return makeSerializable(state)
 }
 

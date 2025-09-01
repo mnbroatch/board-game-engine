@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { makeMove } from "../engine/index";
 import type { GameRules, ActionPayload } from "../types";
+import gameContext from "../context/game-context";
 
 type DoAction = (action: ActionPayload) => void;
 
@@ -26,8 +27,10 @@ export default function useGame(gameRules: GameRules): [any, DoAction] {
 }
 
 function makeGame (gameRules) {
-  let baseGame = useMemo(() => makeMove(gameRules), [gameRules])
+  let baseGame = makeMove(gameRules)
   baseGame = makeMove(gameRules, baseGame, { playerId: 1, type: 'join' })
   baseGame = makeMove(gameRules, baseGame, { playerId: 2, type: 'join' })
+  baseGame = makeMove(gameRules, baseGame, { type: 'start' })
+  console.log('baseGame', baseGame)
   return baseGame
 }
