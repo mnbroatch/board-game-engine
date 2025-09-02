@@ -1,6 +1,6 @@
 {
   "name": "board-game-engine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WIP object oriented board game engine with serializable game state for use in stateless backends",
   "main": "dist/board-game-engine.js",
   "type": "module",
