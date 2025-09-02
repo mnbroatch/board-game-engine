@@ -1,16 +1,16 @@
 {
   "name": "board-game-engine",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "WIP object oriented board game engine with serializable game state for use in stateless backends",
+  "main": "dist/board-game-engine.js",
   "type": "module",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.dev.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "build": "node_modules/.bin/webpack"
+    "build": "webpack"
   },
-  "author": "",
+  "author": "Matthew Broatch",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.26.0",
@@ -62,5 +62,13 @@
     "@babel/plugin-transform-classes": {
       "globals": ">=14"
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnbroatch/board-game-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mnbroatch/board-game-engine/issues"
+  },
+  "homepage": "https://github.com/mnbroatch/board-game-engine#readme"
 }

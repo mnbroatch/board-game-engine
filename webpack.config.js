@@ -3,7 +3,7 @@ import PrebuildRegistryPlugin from "./webpack-prebuild-registry.js";
 
 export default {
   entry: "./index.js",
-  output: { filename: "build.js" },
+  output: { filename: "board-game-engine.js" },
   plugins: [
     new HtmlWebPackPlugin({ template: "./index.html" }),
     new PrebuildRegistryPlugin(),
