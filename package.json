@@ -26,7 +26,9 @@
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "wackson": "^1.1.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mnbroatch/board-game-engine.git"

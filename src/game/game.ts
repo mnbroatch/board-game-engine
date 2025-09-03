@@ -9,7 +9,7 @@ import conditionFactory from "../condition/condition-factory.js";
 import actionFactory from "../action/action-factory.js";
 import Pile from "../piece/pile.js";
 import findValuePath from "../utils/find-value-path.js";
-import { serialize, deserialize } from "../wackson/wackson.js";
+import { serialize, deserialize } from "wackson";
 import { registry } from "../registry.ts";
 
 export interface GameRules {
@@ -187,12 +187,12 @@ export function makeMove(
   move?: Move,
 ): GameState {
   if (!_state) {
-    return {
+    return serialize({
       context: {},
       winner: null,
       status: 'waiting',
       players: [],
-    }
+    })
   } 
 
   const state = deserializeState(_state)
@@ -202,13 +202,13 @@ export function makeMove(
   }
 
   if (move === undefined) {
-    return state;
+    return serialize(state);
   } else if (move?.type === 'join') {
     handlePlayerJoin(state, rules, move)
-    return makeSerializable(state)
+    return serialize(state)
   } else if (move.type === 'start') {
     handleStartGame(state, rules)
-    return makeSerializable(state)
+    return serialize(state)
   }
 
 
@@ -252,7 +252,7 @@ export function makeMove(
     state.winner = winner
   }
 
-  return makeSerializable(state)
+  return serialize(state)
 }
 
 function doInitialPlacement(
@@ -354,13 +354,9 @@ export function addPathToRules (rules): void {
   }
 }
 
-function makeSerializable (state) {
-  return JSON.parse(serialize(state))
-}
-
 function deserializeState (state) {
   return deserialize(
-    JSON.stringify(state),
+    state,
     registry
   )
 }
