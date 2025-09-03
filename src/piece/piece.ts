@@ -1,17 +1,16 @@
 import type { PieceRule, PieceRuleMatcher } from "../../types";
 import type Player from "../player/player";
-import Serializable from "../serializable.js";
 
 interface Options {
   player?: Player;
 }
 
-export default class Piece extends Serializable {
+export default class Piece {
   rule: PieceRule;
   player: Player;
   constructor(pieceRule: PieceRule, options: Options) {
-    super(pieceRule, options);
     this.rule = pieceRule;
+    this.id = `${Math.random()}`
     if (options.player !== undefined) {
       ({ player: this.player } = options);
     }

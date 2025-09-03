@@ -21,7 +21,6 @@ import Cls19 from "./piece/pile.js";
 import Cls20 from "./player/player.ts";
 import Cls21 from "./round/round.js";
 import Cls22 from "./round/sequential-player-turn.js";
-import Cls23 from "./serializable.js";
 import Cls24 from "./space/space.ts";
 
 export const registry = {
@@ -48,6 +47,5 @@ export const registry = {
   "Player": Cls20,
   "Round": Cls21,
   "SequentialPlayerTurn": Cls22,
-  "Serializable": Cls23,
   "Space": Cls24
 };

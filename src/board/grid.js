@@ -2,9 +2,6 @@ import get from "lodash/get.js";
 import Board from "./board.js";
 import Space from "../space/space.ts";
 
-const INITIAL_ROTATION = 0;
-const FLIPPED_ROTATION = 180;
-
 export default class Grid extends Board {
   constructor(boardRule, options) {
     super(boardRule, options);

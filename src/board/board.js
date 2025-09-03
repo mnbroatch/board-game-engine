@@ -1,13 +1,11 @@
-import Serializable from "../serializable.js";
-
-export default class Board extends Serializable {
-  constructor(boardRule, options = {}) {
-    super(boardRule, options);
-    this.rule = boardRule;
+export default class Board {
+  constructor (boardRule, options = {}) {
+    this.rule = boardRule
+    this.id = `${Math.random()}`
     if (this.player) {
-      this.player = options.player;
+      this.player = options.player
     }
   }
 
-  placePiece(target, piece) {}
+  placePiece (target, piece) {}
 }

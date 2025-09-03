@@ -9,6 +9,7 @@ import conditionFactory from "../condition/condition-factory.js";
 import actionFactory from "../action/action-factory.js";
 import Pile from "../piece/pile.js";
 import findValuePath from "../utils/find-value-path.js";
+import { serialize, deserialize } from "../wackson/wackson.js";
 import { registry } from "../registry.ts";
 
 export interface GameRules {
@@ -194,7 +195,7 @@ export function makeMove(
     }
   } 
 
-  const state = deserialize(_state)
+  const state = deserializeState(_state)
 
   if (state.status === 'done') {
     throw new Error("Game is over!");
@@ -354,33 +355,12 @@ export function addPathToRules (rules): void {
 }
 
 function makeSerializable (state) {
-  // see Serializable toJSON for stringification behavior
-  return JSON.parse(JSON.stringify(state, (key, value) => {
-    return value
-  }))
+  return JSON.parse(serialize(state))
 }
 
-function deserialize (state) {
-  const newState = {}
-  const instanceMap = new Map()
-  const deserialized = JSON.parse(JSON.stringify(state), function (key, value) {
-    if (value?.constructorName) {
-      // don't create multiple instances for objects with same ID, use canonical instance
-      const existingInstance = instanceMap.get(value.id)
-      if (existingInstance) {
-        return existingInstance
-      } else {
-        // by convention, state is last arg to classes that need it
-        // it is filtered out of serialization-safe args because it's circular
-        const obj = new registry[value.constructorName](...value.args, newState)
-        Object.assign(obj, value) // re-populate instance properties
-        instanceMap.set(obj.id, obj)
-        return obj
-      }
-    } else {
-      return value
-    }
-  })
-  // re-establish circular reference
-  return Object.assign(newState, deserialized)
+function deserializeState (state) {
+  return deserialize(
+    JSON.stringify(state),
+    registry
+  )
 }

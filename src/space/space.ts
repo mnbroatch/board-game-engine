@@ -1,16 +1,15 @@
 import type Piece from "../piece/piece";
-import Serializable from "../serializable.js";
 
 type Coordinates = [number, number];
 
-export default class Space extends Serializable {
+export default class Space {
   coordinates: Coordinates;
   pieces: Piece[];
 
   constructor(coordinates: Coordinates, startingPieces: Piece[] = []) {
-    super(coordinates, startingPieces);
     this.coordinates = coordinates;
     this.pieces = startingPieces;
+    this.id = `${Math.random()}`
   }
 
   placePiece(piece: Piece): void {
