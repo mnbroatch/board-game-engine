@@ -49,31 +49,30 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 var _conditionFactory = _interopRequireDefault(__webpack_require__(3534));
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-class Action extends _serializable.default {
+class Action {
   constructor(rules, game) {
-    super(rules, game);
     this.game = game;
     this.rules = rules;
+    this.id = `${Math.random()}`;
     const invariantConditionRules = [{
-      type: "actionTypeMatches",
+      type: 'actionTypeMatches',
       actionRule: this.rules
     }, {
-      type: "pieceMatches",
+      type: 'pieceMatches',
       actionRule: this.rules
     }, {
-      type: "isValidPlayer"
+      type: 'isValidPlayer'
     }];
     this.conditions = [...invariantConditionRules, ...(this.rules.conditions || [])].map(conditionRule => (0, _conditionFactory.default)(conditionRule, game));
   }
   assertIsValid(actionPayload) {
     const unmetConditions = this.conditions.filter(condition => !condition.isMet(actionPayload));
     if (unmetConditions.length) {
-      console.log("==================");
-      console.log("unmetConditions", unmetConditions);
-      console.log("actionPayload", actionPayload);
-      throw new Error("conditions not met ^");
+      console.log('==================');
+      console.log('unmetConditions', unmetConditions);
+      console.log('actionPayload', actionPayload);
+      throw new Error('conditions not met ^');
     }
   }
   do() {}
@@ -219,7 +218,7 @@ module.exports = exports.default;
 /***/ }),
 
 /***/ 9578:
-/***/ ((module, exports, __webpack_require__) => {
+/***/ ((module, exports) => {
 
 "use strict";
 
@@ -228,13 +227,11 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-class Board extends _serializable.default {
+class Board {
   constructor(boardRule) {
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    super(boardRule, options);
     this.rule = boardRule;
+    this.id = `${Math.random()}`;
     if (this.player) {
       this.player = options.player;
     }
@@ -260,8 +257,6 @@ var _get = _interopRequireDefault(__webpack_require__(8156));
 var _board = _interopRequireDefault(__webpack_require__(9578));
 var _space = _interopRequireDefault(__webpack_require__(7971));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const INITIAL_ROTATION = 0;
-const FLIPPED_ROTATION = 180;
 class Grid extends _board.default {
   constructor(boardRule, options) {
     super(boardRule, options);
@@ -492,7 +487,7 @@ module.exports = exports.default;
 /***/ }),
 
 /***/ 7213:
-/***/ ((module, exports, __webpack_require__) => {
+/***/ ((module, exports) => {
 
 "use strict";
 
@@ -501,11 +496,9 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-class Condition extends _serializable.default {
+class Condition {
   constructor(rules, game) {
-    super(rules, game);
+    this.id = `${Math.random()}`;
     this.rules = rules;
     this.game = game;
   }
@@ -701,6 +694,7 @@ var _conditionFactory = _interopRequireDefault(__webpack_require__(3534));
 var _actionFactory = _interopRequireDefault(__webpack_require__(9448));
 var _pile = _interopRequireDefault(__webpack_require__(1595));
 var _findValuePath = _interopRequireDefault(__webpack_require__(4229));
+var _wackson = __webpack_require__(7627);
 var _registry = __webpack_require__(8353);
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function initializeState(state, rules) {
@@ -815,25 +809,25 @@ function handleStartGame(state, rules) {
 }
 function makeMove(rules, _state, move) {
   if (!_state) {
-    return {
+    return (0, _wackson.serialize)({
       context: {},
       winner: null,
       status: 'waiting',
       players: []
-    };
+    });
   }
-  const state = deserialize(_state);
+  const state = deserializeState(_state);
   if (state.status === 'done') {
     throw new Error("Game is over!");
   }
   if (move === undefined) {
-    return state;
+    return (0, _wackson.serialize)(state);
   } else if (move?.type === 'join') {
     handlePlayerJoin(state, rules, move);
-    return makeSerializable(state);
+    return (0, _wackson.serialize)(state);
   } else if (move.type === 'start') {
     handleStartGame(state, rules);
-    return makeSerializable(state);
+    return (0, _wackson.serialize)(state);
   }
 
   // Expand the move payload with defaults and normalizations
@@ -872,7 +866,7 @@ function makeMove(rules, _state, move) {
     state.status = 'done';
     state.winner = winner;
   }
-  return makeSerializable(state);
+  return (0, _wackson.serialize)(state);
 }
 function doInitialPlacement(placement, player, state) {
   const actionRule = placement.action;
@@ -940,35 +934,8 @@ function addPathToRules(rules) {
     rules.rounds.forEach((r, i) => annotate(r, ['rounds', i]));
   }
 }
-function makeSerializable(state) {
-  // see Serializable toJSON for stringification behavior
-  return JSON.parse(JSON.stringify(state, (key, value) => {
-    return value;
-  }));
-}
-function deserialize(state) {
-  const newState = {};
-  const instanceMap = new Map();
-  const deserialized = JSON.parse(JSON.stringify(state), function (key, value) {
-    if (value?.constructorName) {
-      // don't create multiple instances for objects with same ID, use canonical instance
-      const existingInstance = instanceMap.get(value.id);
-      if (existingInstance) {
-        return existingInstance;
-      } else {
-        // by convention, state is last arg to classes that need it
-        // it is filtered out of serialization-safe args because it's circular
-        const obj = new _registry.registry[value.constructorName](...value.args, newState);
-        Object.assign(obj, value); // re-populate instance properties
-        instanceMap.set(obj.id, obj);
-        return obj;
-      }
-    } else {
-      return value;
-    }
-  });
-  // re-establish circular reference
-  return Object.assign(newState, deserialized);
+function deserializeState(state) {
+  return (0, _wackson.deserialize)(state, _registry.registry);
 }
 
 /***/ }),
@@ -993,7 +960,7 @@ module.exports = exports.default;
 /***/ }),
 
 /***/ 5923:
-/***/ ((module, exports, __webpack_require__) => {
+/***/ ((module, exports) => {
 
 "use strict";
 
@@ -1002,12 +969,10 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-class Piece extends _serializable.default {
+class Piece {
   constructor(pieceRule, options) {
-    super(pieceRule, options);
     this.rule = pieceRule;
+    this.id = `${Math.random()}`;
     if (options.player !== undefined) {
       ({
         player: this.player
@@ -1037,15 +1002,14 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 var _pieceFactory = _interopRequireDefault(__webpack_require__(4570));
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 // all this extra complication is to support arbitrary (infinite) piles of pieces
-class Pile extends _serializable.default {
+class Pile {
   constructor(pieceRule) {
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    super(pieceRule, options);
     this.pieceRule = pieceRule;
     this.name = pieceRule.name;
+    this.id = `${Math.random()}`;
     if (options.player) {
       this.player = options.player;
     }
@@ -1104,7 +1068,7 @@ module.exports = exports.default;
 /***/ }),
 
 /***/ 6835:
-/***/ ((module, exports, __webpack_require__) => {
+/***/ ((module, exports) => {
 
 "use strict";
 
@@ -1113,16 +1077,11 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-class Player extends _serializable.default {
+class Player {
   constructor(rule, index, id) {
-    super(rule, index, id);
     this.rule = rule;
     this.index = index;
-    if (id) {
-      this.id = id;
-    }
+    this.id = id || `${Math.random()}`;
   }
 }
 var _default = exports["default"] = Player;
@@ -1163,7 +1122,6 @@ var _pile = _interopRequireDefault(__webpack_require__(1595));
 var _player = _interopRequireDefault(__webpack_require__(6835));
 var _round = _interopRequireDefault(__webpack_require__(4221));
 var _sequentialPlayerTurn = _interopRequireDefault(__webpack_require__(7820));
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
 var _space = _interopRequireDefault(__webpack_require__(7971));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const registry = exports.registry = {
@@ -1190,7 +1148,6 @@ const registry = exports.registry = {
   "Player": _player.default,
   "Round": _round.default,
   "SequentialPlayerTurn": _sequentialPlayerTurn.default,
-  "Serializable": _serializable.default,
   "Space": _space.default
 };
 
@@ -1228,15 +1185,14 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 var _actionFactory = _interopRequireDefault(__webpack_require__(9448));
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const DEBUG = true;
-class Round extends _serializable.default {
+class Round {
   constructor(rules, game) {
-    super(rules, game);
     this.rules = rules;
     this.game = game;
     this.history = [];
+    this.id = `${Math.random()}`;
     this.actions = rules.actions?.map(actionRule => (0, _actionFactory.default)(actionRule, this.game));
   }
   getCorrectAction(actionPayload) {
@@ -1296,7 +1252,7 @@ module.exports = exports.default;
 
 /***/ }),
 
-/***/ 6863:
+/***/ 7971:
 /***/ ((module, exports) => {
 
 "use strict";
@@ -1306,44 +1262,12 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-class Serializable {
-  constructor() {
-    // arguments must be simple objects, duck type gamestate object out
-    this.args = [...arguments].filter(arg => !arg || arg.status === undefined);
-    this.id = `${Math.random()}`;
-  }
-  toJSON() {
-    const obj = {
-      ...this,
-      constructorName: this.constructor.name
-    };
-    delete obj.game;
-    return obj;
-  }
-}
-exports["default"] = Serializable;
-module.exports = exports.default;
-
-/***/ }),
-
-/***/ 7971:
-/***/ ((module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _serializable = _interopRequireDefault(__webpack_require__(6863));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-class Space extends _serializable.default {
+class Space {
   constructor(coordinates) {
     let startingPieces = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-    super(coordinates, startingPieces);
     this.coordinates = coordinates;
     this.pieces = startingPieces;
+    this.id = `${Math.random()}`;
   }
   placePiece(piece) {
     this.pieces.push(piece);
@@ -6958,6 +6882,109 @@ function toString(value) {
 module.exports = toString;
 
 
+/***/ }),
+
+/***/ 7627:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   deserialize: () => (/* binding */ deserialize),
+/* harmony export */   serialize: () => (/* binding */ serialize)
+/* harmony export */ });
+function serialize (state, options) {
+  // preliminary scan allows us to tag only duplicate instances
+  const duplicatesMap = new Map([...walkCyclical(state).duplicates].map(d => [d, null]))
+
+  // Second pass: replace repeated instances with placeholders, add _constructorName
+  return JSON.stringify(state, (_, value) => {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const duplicateId = duplicatesMap.get(value)
+      if (typeof duplicateId === 'number') {
+        return { _instanceReference: duplicateId }
+      }
+
+      const copy = Array.isArray(value) ? [...value] : { ...value }
+
+      if (duplicateId === null) {
+        const id = Math.random()
+        duplicatesMap.set(value, id)
+        copy._instanceReferenceId = id
+      }
+
+      if (value.constructor !== Object && value.constructor !== Array) {
+        copy._constructorName = value.constructor.name
+      }
+
+      return copy
+    }
+
+    return value
+  }, options?.space)
+}
+
+function deserialize (serialized, registry) {
+  const parsed = JSON.parse(serialized)
+  const idMap = new Map()
+
+  // restore prototype, gather repeated instance placeholder meta
+  walkCyclical(parsed, (node) => {
+    if (node._instanceReferenceId != null) {
+      const id = node._instanceReferenceId
+      delete node._instanceReferenceId
+      idMap.set(id, node)
+    }
+
+    if (registry && node._constructorName) {
+      const constructor = registry[node._constructorName]
+      if (!constructor) {
+        throw new Error(`Constructor ${node._constructorName} is not in registry`)
+      }
+      Object.setPrototypeOf(node, constructor.prototype)
+      delete node._constructorName
+    }
+  })
+
+  // restore repeated instance references
+  walkCyclical(parsed, (node, parent, key) => {
+    if (node?._instanceReference != null) {
+      const ref = idMap.get(node._instanceReference)
+      if (!ref) {
+        throw new Error(`Unknown _instanceReference: ${node._instanceReference}`)
+      }
+      parent[key] = ref
+    }
+  })
+
+  return parsed
+}
+
+function walkCyclical (value, visitor, seen = new WeakSet(), parent = null, key = null, duplicates = new Set()) {
+  if (typeof value !== 'object' || value === null) return duplicates
+
+  if (seen.has(value)) {
+    duplicates.add(value)
+    return
+  }
+
+  seen.add(value)
+  visitor?.(value, parent, key)
+
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      walkCyclical(value[i], visitor, seen, value, i, duplicates)
+    }
+  } else {
+    for (const k of Object.keys(value)) {
+      walkCyclical(value[k], visitor, seen, value, k, duplicates)
+    }
+  }
+
+  return { duplicates }
+}
+
+
 /***/ })
 
 /******/ 	});
@@ -6990,6 +7017,18 @@ module.exports = toString;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -7000,6 +7039,22 @@ module.exports = toString;
 /******/ 				if (typeof window === 'object') return window;
 /******/ 			}
 /******/ 		})();
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
