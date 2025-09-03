@@ -1,9 +1,21 @@
 module.exports = {
+  testEnvironment: 'node',
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest'
+    '^.+\\.(js|ts)$': ['babel-jest', {
+      presets: [
+        '@babel/preset-typescript',
+        ['@babel/preset-env', {
+          modules: 'cjs',
+          targets: { node: 'current' }
+        }]
+      ],
+      plugins: ['add-module-exports']
+    }]
   },
   clearMocks: true,
-  transformIgnorePatterns: [
-    '/node_modules/(?!@mnbroatch).+\\.js$'
+  moduleFileExtensions: ['js', 'ts', 'json'],
+  testMatch: [
+    '**/__tests__/**/*.(js|ts)',
+    '**/*.(test|spec).(js|ts)'
   ]
 }
