@@ -1,22 +1,49 @@
-import HtmlWebPackPlugin from "html-webpack-plugin";
-import PrebuildRegistryPlugin from "./webpack-prebuild-registry.js";
-
-export default {
-  entry: "./index.js",
-  output: { filename: "board-game-engine.js" },
-  plugins: [
-    new HtmlWebPackPlugin({ template: "./index.html" }),
-    new PrebuildRegistryPlugin(),
-  ],
+const common = {
+  mode: 'production',
+  entry: './src/index.ts',
+  output: {
+    filename: 'yarn-bound.min.js',
+    library: {
+      name: 'YarnBound',
+      type: 'umd'
+    },
+    globalObject: 'this'
+  },
   module: {
-    rules: [
-      {
-        test: /\.(js|ts)x?$/,
-        exclude: /node_modules/,
-        use: { loader: "babel-loader", options: { presets: ["@babel/preset-env","@babel/preset-react"] } },
-      },
-      { test: /\.s?[ac]ss$/i, use: ["style-loader","css-loader","sass-loader"] },
-    ],
+    rules: [{
+      test: /\.(js|ts)$/,
+      exclude: /node_modules\/(?!@mnbroatch).+/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            '@babel/preset-typescript',
+            ['@babel/preset-env',
+              {
+                modules: 'cjs',
+                targets: 'last 4 years'
+              }
+            ],
+          ],
+          plugins: ['add-module-exports']
+        }
+      }
+    }]
   },
   resolve: { extensions: [".js",".ts",".tsx",".jsx",".json"] },
-};
+}
+
+module.exports = [
+  common,
+  {
+    ...common,
+    output: {
+      ...common.output,
+      filename: 'yarn-bound.js'
+    },
+    optimization: {
+      ...common.optimization,
+      minimize: false
+    }
+  },
+]

@@ -8,8 +8,8 @@ import roundFactory from "../round/round-factory.js";
 import conditionFactory from "../condition/condition-factory.js";
 import actionFactory from "../action/action-factory.js";
 import Pile from "../piece/pile.js";
-import findValuePath from "../../util/find-value-path.js";
-import { registry } from "../../registry.ts";
+import findValuePath from "../utils/find-value-path.js";
+import { registry } from "../registry.ts";
 
 export interface GameRules {
   round: any;

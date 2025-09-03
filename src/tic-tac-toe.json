@@ -1,9 +1,0 @@
-{
-  "sharedBoard": {
-    "type": "grid",
-    "width": 3,
-    "height": 3
-  },
-  "winCondition": "bingo",
-  "drawCondition": "blackout"
-}
