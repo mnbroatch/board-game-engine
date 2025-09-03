@@ -5,12 +5,18 @@ export default function resolveBoard(board, gameState) {
   if (Array.isArray(board)) {
     return get(gameState, board);
   }
-
+  
+  const visited = new WeakSet();
+  
   function search(node) {
     if (!node || typeof node !== "object") return null;
-
+    
+    // Prevent infinite loops by tracking visited objects
+    if (visited.has(node)) return null;
+    visited.add(node);
+    
     if (node.id === board.id) return node;
-
+    
     if (node.grid && Array.isArray(node.grid)) {
       for (const row of node.grid) {
         for (const cell of row) {
@@ -19,14 +25,14 @@ export default function resolveBoard(board, gameState) {
         }
       }
     }
-
+    
     for (const value of Object.values(node)) {
       const found = search(value);
       if (found) return found;
     }
-
+    
     return null;
   }
-
+  
   return search(gameState);
 }

@@ -2,9 +2,9 @@ const common = {
   mode: 'production',
   entry: './src/index.ts',
   output: {
-    filename: 'yarn-bound.min.js',
+    filename: 'board-game-engine.min.js',
     library: {
-      name: 'YarnBound',
+      name: 'BoardGameEngine',
       type: 'umd'
     },
     globalObject: 'this'
@@ -39,7 +39,7 @@ module.exports = [
     ...common,
     output: {
       ...common.output,
-      filename: 'yarn-bound.js'
+      filename: 'board-game-engine.js'
     },
     optimization: {
       ...common.optimization,

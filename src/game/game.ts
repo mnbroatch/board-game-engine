@@ -368,7 +368,6 @@ function deserialize (state) {
       // don't create multiple instances for objects with same ID, use canonical instance
       const existingInstance = instanceMap.get(value.id)
       if (existingInstance) {
-        console.log('existingInstance', existingInstance)
         return existingInstance
       } else {
         // by convention, state is last arg to classes that need it
