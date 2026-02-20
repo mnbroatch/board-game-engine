@@ -1,4 +1,4 @@
-import { INVALID_MOVE } from 'boardgame.io/dist/cjs/core.js';
+import { INVALID_MOVE } from '@mnbroatch/boardgame.io/dist/cjs/core.js';
 import checkConditions from "../../utils/check-conditions.js";
 import resolveProperties from "../../utils/resolve-properties.js";
 

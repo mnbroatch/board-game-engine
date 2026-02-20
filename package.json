@@ -1,12 +1,11 @@
 {
   "name": "board-game-engine",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "wip board game engine",
   "main": "dist/board-game-engine.js",
   "scripts": {
     "test": "jest --coverage --verbose false",
     "lint": "eslint .",
-    "postinstall": "node ./patch-bgio.cjs",
     "build": "webpack",
     "prepublish": "npm run build"
   },
@@ -28,7 +27,7 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "boardgame.io": "^0.50.2",
+    "@mnbroatch/boardgame.io": "0.0.1",
     "expr-eval": "^2.0.2",
     "wackson": "^1.1.0"
   },

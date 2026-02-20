@@ -1,6 +1,6 @@
-import { Client as BoardgameIOClient } from 'boardgame.io/client'
-import { Debug } from 'boardgame.io/debug';
-import { SocketIO } from 'boardgame.io/multiplayer'
+import { Client as BoardgameIOClient } from '@mnbroatch/boardgame.io/client'
+import { Debug } from '@mnbroatch/boardgame.io/debug';
+import { SocketIO } from '@mnbroatch/boardgame.io/multiplayer'
 import { serialize, deserialize } from 'wackson';
 
 import gameFactory from '../game-factory/game-factory.js'
