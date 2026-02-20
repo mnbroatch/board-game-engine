@@ -16335,7 +16335,7 @@ exports.c = createMatch;
 /***/ },
 
 /***/ 4245
-(module, exports, __webpack_require__) {
+(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 
@@ -16343,7 +16343,7 @@ exports.c = createMatch;
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports["default"] = void 0;
+exports.Client = void 0;
 var _client = __webpack_require__(4688);
 var _debug = __webpack_require__(504);
 var _multiplayer = __webpack_require__(9843);
@@ -16513,7 +16513,7 @@ class Client {
     this.options.onClientUpdate?.();
   }
 }
-exports["default"] = Client;
+exports.Client = Client;
 function getPossibleMoves(bgioState, moves, moveBuilder, isSpectator) {
   if (isSpectator) {
     return {
@@ -16597,7 +16597,6 @@ function getWinnerAfterMove(state, game, moveInstance, movePayload) {
     G: JSON.parse((0, _wackson.serialize)(simulatedG))
   });
 }
-module.exports = exports.default;
 
 /***/ },
 

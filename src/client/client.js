@@ -14,8 +14,7 @@ import preparePayload from '../utils/prepare-payload.js';
 import getSteps from '../utils/get-steps.js';
 import createPayload from '../utils/create-payload.js';
 
-
-export default class Client {
+export class Client {
   constructor (options) {
     this.options = options
     this.moveBuilder = {
