@@ -2,12 +2,12 @@ import { serialize } from "wackson";
 import moveFactory from "./move/move-factory.js";
 import Bank from "./bank/bank.js";
 import expandGameRules from "./expand-game-rules.js";
-import getScenarioResults from './utils/get-scenario-results.js'
-import doMoves from './utils/do-moves.js'
-import deserializeBgioArguments from './utils/deserialize-bgio-arguments.js'
+import getScenarioResults from '../utils/get-scenario-results.js'
+import doMoves from '../utils/do-moves.js'
+import deserializeBgioArguments from '../utils/deserialize-bgio-arguments.js'
 
-export default function gameFactory (gameRules, rulesHash) {
-  const game = { name: rulesHash }
+export default function gameFactory (gameRules, gameName) {
+  const game = { name: gameName }
   const rules = expandGameRules(gameRules)
 
   game.setup = (bgioArguments) => {

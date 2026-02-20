@@ -1,4 +1,4 @@
-import resolveProperties from "../utils/resolve-properties.js";
+import resolveProperties from "../../utils/resolve-properties.js";
 
 export default class Condition {
   constructor (rule) {

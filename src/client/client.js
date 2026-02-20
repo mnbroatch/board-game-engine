@@ -1,17 +1,19 @@
 import { Client as BoardgameIOClient } from 'boardgame.io/client'
 import { Debug } from 'boardgame.io/debug';
 import { SocketIO } from 'boardgame.io/multiplayer'
+import { serialize, deserialize } from 'wackson';
 
-import { serialize, deserialize } from "wackson";
-import { registry } from "../../server/game-factory/registry.js";
-import simulateMove from "../../server/game-factory/utils/simulate-move.js";
-import preparePayload from "../utils/prepare-payload.js";
-import getCurrentMoves from "../../server/game-factory/utils/get-current-moves.js";
+import gameFactory from '../game-factory/game-factory.js'
+import { registry } from '../registry.js';
+
+import simulateMove from '../utils/simulate-move.js';
+import getCurrentMoves from '../utils/get-current-moves.js';
+import resolveProperties from '../utils/resolve-properties.js';
+import checkConditions from '../utils/check-conditions.js';
+import preparePayload from '../utils/prepare-payload.js';
 import getSteps from '../utils/get-steps.js';
 import createPayload from '../utils/create-payload.js';
-import resolveProperties from "../../server/game-factory/utils/resolve-properties.js";
-import checkConditions from '../../server/game-factory/utils/check-conditions.js';
-import gameFactory from '../../server/game-factory/game-factory.js'
+
 
 export default class Client {
   constructor (options) {
@@ -23,7 +25,7 @@ export default class Client {
     }
     this.optimisticWinner = null
     this.allClickable = new Set()
-    this.game = gameFactory(JSON.parse(gameRules), rulesHash)
+    this.game = gameFactory(JSON.parse(options.gameRules), options.gameName)
   }
 
   connect () {

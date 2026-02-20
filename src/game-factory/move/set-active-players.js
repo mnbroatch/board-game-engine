@@ -1,5 +1,5 @@
 import Move from "./move.js";
-import doMoves from '../utils/do-moves.js'
+import doMoves from '../../utils/do-moves.js'
 
 export default class SetActivePlayers extends Move {
   do(bgioArguments, rule, _, context) {

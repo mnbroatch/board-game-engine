@@ -1,6 +1,6 @@
 import { INVALID_MOVE } from 'boardgame.io/dist/cjs/core.js';
-import checkConditions from "../utils/check-conditions.js";
-import resolveProperties from "../utils/resolve-properties.js";
+import checkConditions from "../../utils/check-conditions.js";
+import resolveProperties from "../../utils/resolve-properties.js";
 
 export default class Move {
   constructor (rule) {

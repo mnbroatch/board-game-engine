@@ -1,5 +1,5 @@
 import Condition from "./condition.js";
-import entityMatches from '../utils/entity-matches.js'
+import entityMatches from '../../utils/entity-matches.js'
 
 export default class Is extends Condition {
   checkCondition(bgioArguments, rule, { target }, context) {

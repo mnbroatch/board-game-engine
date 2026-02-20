@@ -1,4 +1,4 @@
-import moveFactory from "../move/move-factory.js";
+import moveFactory from "../game-factory/move/move-factory.js";
 
 export default function doMoves (bgioArguments, moves = [], context) {
   if (!moves?.length) {

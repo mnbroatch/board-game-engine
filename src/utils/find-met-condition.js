@@ -1,4 +1,4 @@
-import conditionFactory from '../condition/condition-factory.js';
+import conditionFactory from '../game-factory/condition/condition-factory.js';
 
 export default function findMetCondition (
   bgioArguments,

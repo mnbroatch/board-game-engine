@@ -1,6 +1,6 @@
 import cloneDeep from "lodash/cloneDeep.js";
 import find from "lodash/find.js";
-import transformJSON from "./utils/json-transformer.js";
+import transformJSON from "../utils/json-transformer.js";
 
 // for later when we implement deep replacement
 // { type: 'IsEmpty' } = { type: 'not', conditions: [{ type: 'Contains' }], 

@@ -1,5 +1,5 @@
 import Condition from "./condition.js";
-import gridContainsSequence from "../utils/grid-contains-sequence.js";
+import gridContainsSequence from "../../utils/grid-contains-sequence.js";
 
 
 export default class InLineCondition extends Condition {

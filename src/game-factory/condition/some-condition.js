@@ -1,5 +1,5 @@
 import Condition from "./condition.js";
-import checkConditions from "../utils/check-conditions.js";
+import checkConditions from "../../utils/check-conditions.js";
 
 export default class SomeCondition extends Condition {
   checkCondition(bgioArguments, rule, { target: targets }, context) {

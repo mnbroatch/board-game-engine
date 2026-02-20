@@ -1,6 +1,9 @@
 const common = {
   mode: 'production',
-  entry: './src/index.ts',
+  entry: './src/index.js',
+  optimization: {
+    concatenateModules: false,
+  },
   output: {
     filename: 'board-game-engine.min.js',
     library: {

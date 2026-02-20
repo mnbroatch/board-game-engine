@@ -1,7 +1,7 @@
 import { serialize, deserialize } from 'wackson'
 import { INVALID_MOVE } from 'boardgame.io/dist/cjs/core.js';
-import { registry } from '../registry.js'
-import deserializeBgioArguments from '../utils/deserialize-bgio-arguments.js'
+import { registry } from '../../registry.js'
+import deserializeBgioArguments from '../../utils/deserialize-bgio-arguments.js'
 import MoveEntity from "./move-entity.js";
 import RemoveEntity from "./remove-entity.js";
 import PlaceNew from "./place-new.js";

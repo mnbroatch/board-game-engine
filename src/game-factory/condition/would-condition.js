@@ -1,6 +1,6 @@
 import Condition from "./condition.js";
-import checkConditions from "../utils/check-conditions.js";
-import simulateMove from "../utils/simulate-move.js";
+import checkConditions from "../../utils/check-conditions.js";
+import simulateMove from "../../utils/simulate-move.js";
 
 // relying on target order is not perfect;
 // I think we'll want to switch to named arguments

@@ -1,4 +1,4 @@
-import resolveProperties from '../utils/resolve-properties.js'
+import resolveProperties from '../../utils/resolve-properties.js'
 
 // lazily create entities as needed, and also function as an index of entities created
 class BankSlot {
