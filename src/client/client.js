@@ -2,10 +2,8 @@ import { Client as BoardgameIOClient } from '@mnbroatch/boardgame.io/client'
 import { Debug } from '@mnbroatch/boardgame.io/debug';
 import { SocketIO } from '@mnbroatch/boardgame.io/multiplayer'
 import { serialize, deserialize } from 'wackson';
-
 import gameFactory from '../game-factory/game-factory.js'
 import { registry } from '../registry.js';
-
 import simulateMove from '../utils/simulate-move.js';
 import getCurrentMoves from '../utils/get-current-moves.js';
 import resolveProperties from '../utils/resolve-properties.js';
@@ -23,7 +21,6 @@ export class Client {
       eliminatedMoves: []
     }
     this.optimisticWinner = null
-    this.allClickable = new Set()
     this.game = gameFactory(JSON.parse(options.gameRules), options.gameName)
   }
 
@@ -31,13 +28,11 @@ export class Client {
     const {
       server,
       numPlayers,
-      onClientUpdate,
       debug = {
         collapseOnLoad: true,
         impl: Debug,
       },
       gameId,
-      gameRules,
       boardgamePlayerID,
       clientToken,
       singlePlayer = !clientToken,
@@ -48,12 +43,7 @@ export class Client {
         ? { game: this.game, numPlayers, debug }
         : {
             game: this.game,
-            multiplayer: singlePlayer ? undefined : SocketIO({
-              server,
-              socketOpts: {
-                transports: ['websocket', 'polling']
-              }
-            }),
+            multiplayer: SocketIO({ server, socketOpts: { transports: ['websocket', 'polling'] } }),
             matchID: gameId,
             playerID: boardgamePlayerID,
             credentials: clientToken,
@@ -61,24 +51,25 @@ export class Client {
           }
 
       this.client = BoardgameIOClient(clientOptions)
-
-      if (onClientUpdate) {
-        this.client.subscribe(onClientUpdate)
-      }
-
+      this.client.subscribe(() => this.update())
       this.client.start()
-
       return this
     } catch (error) {
       console.error('Failed to join game:', error)
     }
   }
 
+  update () {
+    this.options.onClientUpdate?.()
+  }
+
   getState () {
     let state
     let moves
     let gameover
+
     const clientState = this.client?.getState()
+
     if (clientState) {
       state = {
         ...clientState,
@@ -88,41 +79,31 @@ export class Client {
 
       gameover = state?.ctx?.gameover
 
-      // Fix: use arrow function so `this` refers to the Client instance
       moves = !gameover
         ? Object.entries(getCurrentMoves(state, this.client)).reduce((acc, [moveName, rawMove]) => {
             const move = (payload) => {
               this.client.moves[moveName](preparePayload(payload))
             }
             move.moveInstance = rawMove.moveInstance
-            return {
-              ...acc,
-              [moveName]: move
-            }
+            return { ...acc, [moveName]: move }
           }, {})
         : []
     }
 
-    return {
-      state,
-      gameover,
-      moves
-    }
+    const { allClickable, possibleMoveMeta } = getPossibleMoves(state, moves, this.moveBuilder)
+
+    return { state, gameover, moves, allClickable, possibleMoveMeta }
   }
 
-  doStep (target, isSpectator) {
-    const { state, moves } = this.getState()
-    const { possibleMoveMeta, allClickable } = getPossibleMoves(
-      state,
-      moves,
-      this.moveBuilder,
-      isSpectator
-    )
-    this.allClickable = allClickable
+  doStep (_target) {
+    const { state, moves, possibleMoveMeta } = this.getState()
 
-    // Filter out moves that don't accept this target
+    const target = _target.abstract
+      ? _target
+      : state.G.bank.locate(_target.entityId)
+
     const newEliminated = Object.entries(possibleMoveMeta)
-      .filter(([_, meta]) => !meta.finishedOnLastStep && !meta.clickableForMove.has(target))
+      .filter(([_, meta]) => !hasTarget(meta.clickableForMove, target))
       .map(([name]) => name)
       .concat(this.moveBuilder.eliminatedMoves);
 
@@ -131,41 +112,37 @@ export class Client {
       return;
     }
 
-    this.moveBuilder = {
-      eliminatedMoves: newEliminated,
-      stepIndex: this.moveBuilder.stepIndex + 1,
-      targets: [...this.moveBuilder.targets, target]
-    }
+    const remainingMoveEntries = Object.entries(possibleMoveMeta)
+      .filter(([name]) => !newEliminated.includes(name))
 
-    // Fix: filter possibleMoveMeta to only include moves not in newEliminated,
-    // so findCompletedMove sees the post-elimination state rather than the stale pre-elimination state
-    const filteredMoveMeta = Object.fromEntries(
-      Object.entries(possibleMoveMeta).filter(([name]) => !newEliminated.includes(name))
-    );
-
-    const completed = findCompletedMove(state, filteredMoveMeta, this.moveBuilder, moves);
-    
-    if (completed) {
-      // without this, an extra post-game turn would flash
-      this.optimisticWinner = getWinnerAfterMove(
+    if (isMoveCompleted(state, moves, remainingMoveEntries, this.moveBuilder.stepIndex)) {
+      const [moveName] = remainingMoveEntries[0]
+      const move = moves[moveName]
+      const payload = createPayload(
         state,
-        this.game,
-        completed.move.moveInstance,
-        completed.payload
+        move.moveInstance.rule,
+        [...this.moveBuilder.targets, target],
+        { moveInstance: move.moveInstance }
       );
-      
-      completed.move(completed.payload);
-      
-      this.moveBuilder = ({ targets: [], stepIndex: 0, eliminatedMoves: [] });
+
+      this.optimisticWinner = getWinnerAfterMove(state, this.game, move.moveInstance, payload);
+      move(payload);
+      this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
+    } else {
+      this.moveBuilder = {
+        eliminatedMoves: newEliminated,
+        stepIndex: this.moveBuilder.stepIndex + 1,
+        targets: [...this.moveBuilder.targets, target]
+      }
     }
 
-    this.options.onClientUpdate?.()
+    this.update()
   }
 
   reset () {
-    this.moveBuilder = ({ targets: [], stepIndex: 0, eliminatedMoves: [] });
+    this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
     this.optimisticWinner = null
-    this.options.onClientUpdate?.()
+    this.update()
   }
 
   undoStep () {
@@ -176,111 +153,58 @@ export class Client {
         eliminatedMoves: []
       }
     }
-    this.options.onClientUpdate?.()
+    this.update()
   }
 }
 
-function getPossibleMoves(bgioState, moves, moveBuilder, isSpectator) {
-  if (isSpectator) {
-    return { possibleMoveMeta: {}, allClickable: new Set() };
-  }
+function hasTarget(clickableSet, target) {
+  if (!target.abstract) return clickableSet.has(target);
+  return [...clickableSet].some(item => item.abstract && item.value === target.value);
+}
 
+function getPossibleMoves(bgioState, moves, moveBuilder) {
   const { eliminatedMoves, stepIndex } = moveBuilder;
-  
   const possibleMoveMeta = {};
   const allClickable = new Set();
 
-  const availableMoves = Object.entries(moves)
-    .filter(([moveName]) => !eliminatedMoves.includes(moveName));
+  Object.entries(moves)
+    .filter(([moveName]) => !eliminatedMoves.includes(moveName))
+    .forEach(([moveName, move]) => {
+      const moveRule = resolveProperties(bgioState, { ...move.moveInstance.rule, moveName })
 
-  availableMoves.forEach(([moveName, move]) => {
-    const moveRule = resolveProperties(
-      bgioState,
-      { ...move.moveInstance.rule, moveName }
-    )
+      const context = {
+        moveInstance: move.moveInstance,
+        moveArguments: moveRule.arguments
+      }
 
-    const context = {
-      moveInstance: move.moveInstance,
-      moveArguments: moveRule.arguments
-    }
-    
-    const payload = createPayload(
-      bgioState,
-      moveRule,
-      moveBuilder.targets,
-      context
-    );
-    
-    context.moveArguments = {
-      ...context.moveArguments,
-      ...payload.arguments,
-    }
+      const targets = moveBuilder.targets.map(t =>
+        t.abstract ? t : bgioState.G.bank.locate(t.entityId)
+      )
 
-    const moveIsAllowed = checkConditions(
-      bgioState,
-      moveRule,
-      {},
-      context
-    ).conditionsAreMet;
+      const payload = createPayload(bgioState, moveRule, targets, context);
 
-    const moveSteps = getSteps(
-      bgioState,
-      moveRule
-    );
+      context.moveArguments = { ...context.moveArguments, ...payload.arguments }
 
-    const lastStep = moveSteps?.[stepIndex - 1];
-    const currentStep = moveSteps?.[stepIndex];
-    const finishedOnLastStep = moveSteps && !!lastStep && !currentStep;
-    
-    const clickableForMove = new Set(
-      (moveIsAllowed && currentStep?.getClickable(context)) || []
-    );
+      const moveIsAllowed = checkConditions(bgioState, moveRule, {}, context).conditionsAreMet;
+      const moveSteps = getSteps(bgioState, moveRule);
 
-    possibleMoveMeta[moveName] = { finishedOnLastStep, clickableForMove };
-    
-    clickableForMove.forEach((entity) => {
-      allClickable.add(entity);
+      const clickableForMove = new Set(
+        (moveIsAllowed && moveSteps?.[stepIndex]?.getClickable(context)) || []
+      );
+
+      possibleMoveMeta[moveName] = { clickableForMove };
+      clickableForMove.forEach(entity => allClickable.add(entity));
     });
-  });
 
   return { possibleMoveMeta, allClickable };
 }
 
-// Fix: renamed first parameter from `bgioArguments` to `bgioState` to match its actual usage
-function findCompletedMove(bgioState, possibleMoveMeta, moveBuilder, moves) {
-  const possibleMoveNames = Object.keys(possibleMoveMeta);
-  
-  // Only one possible move left
-  if (possibleMoveNames.length !== 1) return null;
-  
-  const moveName = possibleMoveNames[0];
-  const meta = possibleMoveMeta[moveName];
-  
-  // And it's finished
-  if (!meta.finishedOnLastStep) return null;
-  
-  const move = moves[moveName];
-  const moveRule = move.moveInstance.rule;
-  
-  const payload = createPayload(
-    bgioState,
-    moveRule,
-    moveBuilder.targets,
-    { moveInstance: move.moveInstance }
-  );
-
-  return { moveName, move, payload };
+function isMoveCompleted(state, moves, remainingMoveEntries, stepIndex) {
+  return remainingMoveEntries.length === 1 &&
+    getSteps(state, moves[remainingMoveEntries[0][0]].moveInstance.rule).length === stepIndex + 1;
 }
 
 function getWinnerAfterMove (state, game, moveInstance, movePayload) {
-  const simulatedG = simulateMove(
-    state,
-    preparePayload(movePayload),
-    { moveInstance }
-  )
-
-  return game.endIf?.({
-    ...state,
-    G: JSON.parse(serialize(simulatedG))
-  })
+  const simulatedG = simulateMove(state, preparePayload(movePayload), { moveInstance })
+  return game.endIf?.({ ...state, G: JSON.parse(serialize(simulatedG)) })
 }

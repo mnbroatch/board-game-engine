@@ -102,23 +102,15 @@ function resolveProperty (bgioArguments, value, context) {
     return maxTargets
   } else if (value?.type === 'Pick') {
     const target = resolveProperties(bgioArguments, value.target, context, 'target')
-    if (target !== undefined) {
-      console.log('target', target)
-      console.log('target.attributes', target.attributes)
-      const x = pick(
-        resolveProperties(
-          bgioArguments,
-          target.attributes,
-          context,
-          'attributes'
-        ),
-        value.properties
-      )
-      console.log('x', x)
-      return x
-    } else {
-      console.log('8888target', target)
-    }
+    return pick(
+      resolveProperties(
+        bgioArguments,
+        target.attributes,
+        context,
+        'attributes'
+      ),
+      value.properties
+    )
   } else if (value?.type === 'Coordinates') {
     const originalTarget = value.target
       ? resolveProperties(bgioArguments, value.target, context, 'target')

@@ -24,5 +24,6 @@ export default function getSteps (bgioState, moveRule) {
             moveRule.arguments[argName],
             context
           )
+
     }))
 }

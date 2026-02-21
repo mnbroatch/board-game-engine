@@ -16367,20 +16367,17 @@ class Client {
       eliminatedMoves: []
     };
     this.optimisticWinner = null;
-    this.allClickable = new Set();
     this.game = (0, _gameFactory.default)(JSON.parse(options.gameRules), options.gameName);
   }
   connect() {
     const {
       server,
       numPlayers,
-      onClientUpdate,
       debug = {
         collapseOnLoad: true,
         impl: _debug.Debug
       },
       gameId,
-      gameRules,
       boardgamePlayerID,
       clientToken,
       singlePlayer = !clientToken
@@ -16392,7 +16389,7 @@ class Client {
         debug
       } : {
         game: this.game,
-        multiplayer: singlePlayer ? undefined : (0, _multiplayer.SocketIO)({
+        multiplayer: (0, _multiplayer.SocketIO)({
           server,
           socketOpts: {
             transports: ['websocket', 'polling']
@@ -16404,14 +16401,15 @@ class Client {
         debug
       };
       this.client = (0, _client.Client)(clientOptions);
-      if (onClientUpdate) {
-        this.client.subscribe(onClientUpdate);
-      }
+      this.client.subscribe(() => this.update());
       this.client.start();
       return this;
     } catch (error) {
       console.error('Failed to join game:', error);
     }
+  }
+  update() {
+    this.options.onClientUpdate?.();
   }
   getState() {
     let state;
@@ -16425,8 +16423,6 @@ class Client {
         originalG: clientState.G
       };
       gameover = state?.ctx?.gameover;
-
-      // Fix: use arrow function so `this` refers to the Client instance
       moves = !gameover ? Object.entries((0, _getCurrentMoves.default)(state, this.client)).reduce((acc, _ref) => {
         let [moveName, rawMove] = _ref;
         const move = payload => {
@@ -16439,27 +16435,28 @@ class Client {
         };
       }, {}) : [];
     }
+    const {
+      allClickable,
+      possibleMoveMeta
+    } = getPossibleMoves(state, moves, this.moveBuilder);
     return {
       state,
       gameover,
-      moves
+      moves,
+      allClickable,
+      possibleMoveMeta
     };
   }
-  doStep(target, isSpectator) {
+  doStep(_target) {
     const {
       state,
-      moves
+      moves,
+      possibleMoveMeta
     } = this.getState();
-    const {
-      possibleMoveMeta,
-      allClickable
-    } = getPossibleMoves(state, moves, this.moveBuilder, isSpectator);
-    this.allClickable = allClickable;
-
-    // Filter out moves that don't accept this target
+    const target = _target.abstract ? _target : state.G.bank.locate(_target.entityId);
     const newEliminated = Object.entries(possibleMoveMeta).filter(_ref2 => {
       let [_, meta] = _ref2;
-      return !meta.finishedOnLastStep && !meta.clickableForMove.has(target);
+      return !hasTarget(meta.clickableForMove, target);
     }).map(_ref3 => {
       let [name] = _ref3;
       return name;
@@ -16468,30 +16465,31 @@ class Client {
       console.error('invalid move with target:', target?.rule);
       return;
     }
-    this.moveBuilder = {
-      eliminatedMoves: newEliminated,
-      stepIndex: this.moveBuilder.stepIndex + 1,
-      targets: [...this.moveBuilder.targets, target]
-    };
-
-    // Fix: filter possibleMoveMeta to only include moves not in newEliminated,
-    // so findCompletedMove sees the post-elimination state rather than the stale pre-elimination state
-    const filteredMoveMeta = Object.fromEntries(Object.entries(possibleMoveMeta).filter(_ref4 => {
+    const remainingMoveEntries = Object.entries(possibleMoveMeta).filter(_ref4 => {
       let [name] = _ref4;
       return !newEliminated.includes(name);
-    }));
-    const completed = findCompletedMove(state, filteredMoveMeta, this.moveBuilder, moves);
-    if (completed) {
-      // without this, an extra post-game turn would flash
-      this.optimisticWinner = getWinnerAfterMove(state, this.game, completed.move.moveInstance, completed.payload);
-      completed.move(completed.payload);
+    });
+    if (isMoveCompleted(state, moves, remainingMoveEntries, this.moveBuilder.stepIndex)) {
+      const [moveName] = remainingMoveEntries[0];
+      const move = moves[moveName];
+      const payload = (0, _createPayload.default)(state, move.moveInstance.rule, [...this.moveBuilder.targets, target], {
+        moveInstance: move.moveInstance
+      });
+      this.optimisticWinner = getWinnerAfterMove(state, this.game, move.moveInstance, payload);
+      move(payload);
       this.moveBuilder = {
         targets: [],
         stepIndex: 0,
         eliminatedMoves: []
       };
+    } else {
+      this.moveBuilder = {
+        eliminatedMoves: newEliminated,
+        stepIndex: this.moveBuilder.stepIndex + 1,
+        targets: [...this.moveBuilder.targets, target]
+      };
     }
-    this.options.onClientUpdate?.();
+    this.update();
   }
   reset() {
     this.moveBuilder = {
@@ -16500,7 +16498,7 @@ class Client {
       eliminatedMoves: []
     };
     this.optimisticWinner = null;
-    this.options.onClientUpdate?.();
+    this.update();
   }
   undoStep() {
     if (this.moveBuilder.targets.length) {
@@ -16510,28 +16508,25 @@ class Client {
         eliminatedMoves: []
       };
     }
-    this.options.onClientUpdate?.();
+    this.update();
   }
 }
 exports.Client = Client;
-function getPossibleMoves(bgioState, moves, moveBuilder, isSpectator) {
-  if (isSpectator) {
-    return {
-      possibleMoveMeta: {},
-      allClickable: new Set()
-    };
-  }
+function hasTarget(clickableSet, target) {
+  if (!target.abstract) return clickableSet.has(target);
+  return [...clickableSet].some(item => item.abstract && item.value === target.value);
+}
+function getPossibleMoves(bgioState, moves, moveBuilder) {
   const {
     eliminatedMoves,
     stepIndex
   } = moveBuilder;
   const possibleMoveMeta = {};
   const allClickable = new Set();
-  const availableMoves = Object.entries(moves).filter(_ref5 => {
+  Object.entries(moves).filter(_ref5 => {
     let [moveName] = _ref5;
     return !eliminatedMoves.includes(moveName);
-  });
-  availableMoves.forEach(_ref6 => {
+  }).forEach(_ref6 => {
     let [moveName, move] = _ref6;
     const moveRule = (0, _resolveProperties.default)(bgioState, {
       ...move.moveInstance.rule,
@@ -16541,52 +16536,27 @@ function getPossibleMoves(bgioState, moves, moveBuilder, isSpectator) {
       moveInstance: move.moveInstance,
       moveArguments: moveRule.arguments
     };
-    const payload = (0, _createPayload.default)(bgioState, moveRule, moveBuilder.targets, context);
+    const targets = moveBuilder.targets.map(t => t.abstract ? t : bgioState.G.bank.locate(t.entityId));
+    const payload = (0, _createPayload.default)(bgioState, moveRule, targets, context);
     context.moveArguments = {
       ...context.moveArguments,
       ...payload.arguments
     };
     const moveIsAllowed = (0, _checkConditions.default)(bgioState, moveRule, {}, context).conditionsAreMet;
     const moveSteps = (0, _getSteps.default)(bgioState, moveRule);
-    const lastStep = moveSteps?.[stepIndex - 1];
-    const currentStep = moveSteps?.[stepIndex];
-    const finishedOnLastStep = moveSteps && !!lastStep && !currentStep;
-    const clickableForMove = new Set(moveIsAllowed && currentStep?.getClickable(context) || []);
+    const clickableForMove = new Set(moveIsAllowed && moveSteps?.[stepIndex]?.getClickable(context) || []);
     possibleMoveMeta[moveName] = {
-      finishedOnLastStep,
       clickableForMove
     };
-    clickableForMove.forEach(entity => {
-      allClickable.add(entity);
-    });
+    clickableForMove.forEach(entity => allClickable.add(entity));
   });
   return {
     possibleMoveMeta,
     allClickable
   };
 }
-
-// Fix: renamed first parameter from `bgioArguments` to `bgioState` to match its actual usage
-function findCompletedMove(bgioState, possibleMoveMeta, moveBuilder, moves) {
-  const possibleMoveNames = Object.keys(possibleMoveMeta);
-
-  // Only one possible move left
-  if (possibleMoveNames.length !== 1) return null;
-  const moveName = possibleMoveNames[0];
-  const meta = possibleMoveMeta[moveName];
-
-  // And it's finished
-  if (!meta.finishedOnLastStep) return null;
-  const move = moves[moveName];
-  const moveRule = move.moveInstance.rule;
-  const payload = (0, _createPayload.default)(bgioState, moveRule, moveBuilder.targets, {
-    moveInstance: move.moveInstance
-  });
-  return {
-    moveName,
-    move,
-    payload
-  };
+function isMoveCompleted(state, moves, remainingMoveEntries, stepIndex) {
+  return remainingMoveEntries.length === 1 && (0, _getSteps.default)(state, moves[remainingMoveEntries[0][0]].moveInstance.rule).length === stepIndex + 1;
 }
 function getWinnerAfterMove(state, game, moveInstance, movePayload) {
   const simulatedG = (0, _simulateMove.default)(state, (0, _preparePayload.default)(movePayload), {
@@ -17258,7 +17228,6 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
 class Or extends _condition.default {
   checkCondition(bgioArguments, rule, payload, context) {
     const result = (0, _findMetCondition.default)(bgioArguments, rule, payload, context);
-    console.log('result', result);
     return {
       conditionIsMet: !!result
     };
@@ -18447,8 +18416,6 @@ class SetState extends _move.default {
         state
       }
     } = _ref;
-    console.log('entity', entity);
-    console.log('state', state);
     entity.state = {
       ...entity.state,
       [state.property]: state.value
@@ -19540,15 +19507,7 @@ function resolveProperty(bgioArguments, value, context) {
     return maxTargets;
   } else if (value?.type === 'Pick') {
     const target = resolveProperties(bgioArguments, value.target, context, 'target');
-    if (target !== undefined) {
-      console.log('target', target);
-      console.log('target.attributes', target.attributes);
-      const x = (0, _pick.default)(resolveProperties(bgioArguments, target.attributes, context, 'attributes'), value.properties);
-      console.log('x', x);
-      return x;
-    } else {
-      console.log('8888target', target);
-    }
+    return (0, _pick.default)(resolveProperties(bgioArguments, target.attributes, context, 'attributes'), value.properties);
   } else if (value?.type === 'Coordinates') {
     const originalTarget = value.target ? resolveProperties(bgioArguments, value.target, context, 'target') : context.originalTarget;
     const parent = bgioArguments.G.bank.findParent(originalTarget);
