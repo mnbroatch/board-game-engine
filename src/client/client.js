@@ -21,7 +21,8 @@ export class Client {
       eliminatedMoves: []
     }
     this.optimisticWinner = null
-    this.game = gameFactory(JSON.parse(options.gameRules), options.gameName)
+    this.game = options.game
+      || gameFactory(JSON.parse(options.gameRules), options.gameName)
   }
 
   connect () {

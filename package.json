@@ -1,6 +1,6 @@
 {
   "name": "board-game-engine",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "wip board game engine",
   "main": "dist/board-game-engine.js",
   "scripts": {

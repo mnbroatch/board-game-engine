@@ -16367,7 +16367,7 @@ class Client {
       eliminatedMoves: []
     };
     this.optimisticWinner = null;
-    this.game = (0, _gameFactory.default)(JSON.parse(options.gameRules), options.gameName);
+    this.game = options.game || (0, _gameFactory.default)(JSON.parse(options.gameRules), options.gameName);
   }
   connect() {
     const {
