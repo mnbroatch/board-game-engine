@@ -16361,13 +16361,15 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
 class Client {
   constructor(options) {
     this.options = options;
-    this.moveBuilder = {
-      targets: [],
-      stepIndex: 0,
-      eliminatedMoves: []
-    };
-    this.optimisticWinner = null;
-    this.game = options.game || (0, _gameFactory.default)(JSON.parse(options.gameRules), options.gameName);
+    this.game = options.boardgameIOGame || (0, _gameFactory.default)(JSON.parse(options.gameRules), options.gameName);
+    if (!options.boardgameIOGame) {
+      this.moveBuilder = {
+        targets: [],
+        stepIndex: 0,
+        eliminatedMoves: []
+      };
+      this.optimisticWinner = null;
+    }
   }
   connect() {
     const {
@@ -16412,33 +16414,35 @@ class Client {
     this.options.onClientUpdate?.();
   }
   getState() {
-    let state;
-    let moves;
-    let gameover;
     const clientState = this.client?.getState();
-    if (clientState) {
-      state = {
-        ...clientState,
-        G: (0, _wackson.deserialize)(JSON.stringify(clientState.G), _registry.registry),
-        originalG: clientState.G
+    if (!clientState) return {};
+    if (this.options.boardgameIOGame) {
+      return {
+        state: clientState,
+        gameover: clientState?.ctx?.gameover,
+        moves: this.client.moves
       };
-      gameover = state?.ctx?.gameover;
-      moves = !gameover ? Object.entries((0, _getCurrentMoves.default)(state, this.client)).reduce((acc, _ref) => {
-        let [moveName, rawMove] = _ref;
-        const move = payload => {
-          this.client.moves[moveName]((0, _preparePayload.default)(payload));
-        };
-        move.moveInstance = rawMove.moveInstance;
-        return {
-          ...acc,
-          [moveName]: move
-        };
-      }, {}) : [];
     }
-    const {
-      allClickable,
-      possibleMoveMeta
-    } = getPossibleMoves(state, moves, this.moveBuilder);
+    const state = {
+      ...clientState,
+      G: (0, _wackson.deserialize)(JSON.stringify(clientState.G), _registry.registry),
+      originalG: clientState.G
+    };
+    const gameover = state?.ctx?.gameover;
+    const moves = !gameover ? Object.entries((0, _getCurrentMoves.default)(state, this.client)).reduce((acc, _ref) => {
+      let [moveName, rawMove] = _ref;
+      const move = payload => {
+        this.client.moves[moveName]((0, _preparePayload.default)(payload));
+      };
+      move.moveInstance = rawMove.moveInstance;
+      return {
+        ...acc,
+        [moveName]: move
+      };
+    }, {}) : [];
+    const possibleMoves = getPossibleMoves(state, moves, this.moveBuilder);
+    const allClickable = possibleMoves.allClickable;
+    const possibleMoveMeta = possibleMoves.possibleMoveMeta;
     return {
       state,
       gameover,
@@ -16448,6 +16452,7 @@ class Client {
     };
   }
   doStep(_target) {
+    if (this.options.boardgameIOGame) return;
     const {
       state,
       moves,
@@ -16492,6 +16497,7 @@ class Client {
     this.update();
   }
   reset() {
+    if (this.options.boardgameIOGame) return;
     this.moveBuilder = {
       targets: [],
       stepIndex: 0,
@@ -16501,6 +16507,7 @@ class Client {
     this.update();
   }
   undoStep() {
+    if (this.options.boardgameIOGame) return;
     if (this.moveBuilder.targets.length) {
       this.moveBuilder = {
         targets: this.moveBuilder.targets.slice(0, -1),
