@@ -20418,7 +20418,7 @@ module.exports = ListCache;
 
 /***/ },
 
-/***/ 604
+/***/ 8223
 (module, __unused_webpack_exports, __webpack_require__) {
 
 var getNative = __webpack_require__(6110),
@@ -23468,7 +23468,7 @@ module.exports = getSymbolsIn;
 (module, __unused_webpack_exports, __webpack_require__) {
 
 var DataView = __webpack_require__(5580),
-    Map = __webpack_require__(604),
+    Map = __webpack_require__(8223),
     Promise = __webpack_require__(2804),
     Set = __webpack_require__(6545),
     WeakMap = __webpack_require__(8303),
@@ -24257,7 +24257,7 @@ module.exports = listCacheSet;
 
 var Hash = __webpack_require__(1549),
     ListCache = __webpack_require__(79),
-    Map = __webpack_require__(604);
+    Map = __webpack_require__(8223);
 
 /**
  * Removes all key-value entries from the map.
@@ -24896,7 +24896,7 @@ module.exports = stackHas;
 (module, __unused_webpack_exports, __webpack_require__) {
 
 var ListCache = __webpack_require__(79),
-    Map = __webpack_require__(604),
+    Map = __webpack_require__(8223),
     MapCache = __webpack_require__(3661);
 
 /** Used as the size to enable large array optimizations. */
@@ -28818,9 +28818,9 @@ function createCookieJar() { }
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WebTransport = exports.WebSocket = exports.NodeWebSocket = exports.XHR = exports.NodeXHR = exports.Fetch = exports.nextTick = exports.parse = exports.installTimerFunctions = exports.transports = exports.TransportError = exports.Transport = exports.protocol = exports.SocketWithUpgrade = exports.SocketWithoutUpgrade = exports.Socket = void 0;
-const socket_js_1 = __webpack_require__(8223);
+const socket_js_1 = __webpack_require__(604);
 Object.defineProperty(exports, "Socket", ({ enumerable: true, get: function () { return socket_js_1.Socket; } }));
-var socket_js_2 = __webpack_require__(8223);
+var socket_js_2 = __webpack_require__(604);
 Object.defineProperty(exports, "SocketWithoutUpgrade", ({ enumerable: true, get: function () { return socket_js_2.SocketWithoutUpgrade; } }));
 Object.defineProperty(exports, "SocketWithUpgrade", ({ enumerable: true, get: function () { return socket_js_2.SocketWithUpgrade; } }));
 exports.protocol = socket_js_1.Socket.protocol;
@@ -28851,7 +28851,7 @@ Object.defineProperty(exports, "WebTransport", ({ enumerable: true, get: functio
 
 /***/ },
 
-/***/ 8223
+/***/ 604
 (__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -35613,8 +35613,8 @@ Object.defineProperty(exports, "gameFactory", ({
     return _gameFactory.default;
   }
 }));
-var _client = __webpack_require__(4245);
 var _gameFactory = _interopRequireDefault(__webpack_require__(4913));
+var _client = __webpack_require__(4245);
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 })();
 
