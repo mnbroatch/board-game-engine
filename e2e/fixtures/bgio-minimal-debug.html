@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>boardgame.io minimal with Debug</title>
+</head>
+<body>
+  <h1>boardgame.io client only (debug on)</h1>
+  <pre id="out">(waiting…)</pre>
+  <div id="debug-root"></div>
+  <script src="/node_modules/@mnbroatch/boardgame.io/dist/boardgameio.min.js"></script>
+  <script>
+    (function () {
+      const out = document.getElementById('out');
+      if (!window.BoardgameIO || !window.BoardgameIO.Client) {
+        out.textContent = 'BoardgameIO.Client not found';
+        return;
+      }
+      const Client = window.BoardgameIO.Client;
+      const game = {
+        name: 'minimal',
+        setup: () => ({ count: 0 }),
+        moves: {
+          inc: (G) => ({ ...G, count: G.count + 1 }),
+        },
+      };
+      const debugRoot = document.getElementById('debug-root');
+      const client = Client({
+        game,
+        numPlayers: 2,
+        debug: window.BoardgameIO.Debug ? { impl: window.BoardgameIO.Debug, collapseOnLoad: true } : true,
+        root: debugRoot,
+      });
+      client.subscribe(() => {
+        const state = client.getState();
+        if (state && state.G !== undefined) {
+          window.__bgioMinimalState = state;
+          out.textContent = 'State: ' + JSON.stringify({ G: state.G, ctx: state.ctx });
+        }
+      });
+      client.start();
+      window.__bgioMinimalClient = client;
+      out.textContent = 'Client started (debug on).';
+    })();
+  </script>
+</body>
+</html>

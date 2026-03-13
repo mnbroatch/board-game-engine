@@ -9,7 +9,7 @@ const argNamesMap = {
 
 // this might not be where special handling for setstate wants to live
 export default function getSteps (bgioState, moveRule) {
-  return argNamesMap[moveRule.type]
+  return argNamesMap[moveRule.moveType]
     .filter(argName => moveRule.arguments[argName].playerChoice)
     .map(argName => ({
       argName,

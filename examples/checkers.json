@@ -1,0 +1,793 @@
+{
+  "entities": [
+    {
+      "name": "mainGrid",
+      "entityType": "Grid",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "name": "checker",
+      "perPlayer": true,
+      "state": { 
+        "isKing": false
+      },
+      "displayProperties": ["isKing"],
+      "count": 12
+    }
+  ],
+  "sharedBoard": [{ "name": "mainGrid" }],
+  "initialPlacements": [
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 1}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 3}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 5}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 7}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 8}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 10}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 12}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 14}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 17}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 19}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 21}},
+    {"entity": {"name": "checker", "player": "1"}, "destination": {"index": 23}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 40}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 42}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 44}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 46}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 49}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 51}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 53}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 55}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 56}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 58}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 60}},
+    {"entity": {"name": "checker", "player": "0"}, "destination": {"index": 62}}
+  ],
+  "minPlayers": 2,
+  "maxPlayers": 2,
+  "turn": {
+    "activePlayers": { "currentPlayer": "jumpIfPossible" },
+    "stages": {
+      "jumpIfPossible": {
+        "initialMoves": [{
+          "moveType": "SetActivePlayers",
+          "options": {
+            "currentPlayer": { "stage": "moveIfNoJump" }
+          },
+          "conditions": [{ "conditionType": "NoPossibleMoves" }]
+        }],
+        "moves": {
+          "jumpChecker": {
+            "moveType": "MoveEntity",
+            "arguments": {
+              "entity": {
+                "playerChoice": true,
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "matcher": {
+                      "name": "checker",
+                      "player": {
+                        "type": "ctxPath",
+                        "path": ["currentPlayer"]
+                      }
+                    }
+                  }
+                ]
+              },
+              "destination": {
+                "playerChoice": true,
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "matcher": { "entityType": "Space" }
+                  },
+                  {
+                    "conditionType": "Not",
+                    "conditions": [{ "conditionType": "Contains" }]
+                  },
+                  {
+                    "conditionType": "Or",
+                    "conditions": [
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [-2, 2],
+                              "player1RelativeCoordinates": [-2, -2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["moveArguments", "entity"]
+                          }
+                        }]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [2, 2],
+                              "player1RelativeCoordinates": [2, -2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["moveArguments", "entity"]
+                          }
+                        }]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [-2, -2],
+                              "player1RelativeCoordinates": [-2, 2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": { "isKing": true }
+                          }
+                        ]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [2, -2],
+                              "player1RelativeCoordinates": [2, 2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": { "isKing": true }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "conditionType": "InLine",
+                    "sequence": [
+                      {
+                        "conditions": [{
+                          "conditionType": "Contains",
+                          "conditions": [{
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          }]
+                        }]
+                      },
+                      {
+                        "conditions": [{
+                          "conditionType": "Contains",
+                          "conditions": [{
+                            "conditionType": "Not",
+                            "conditions": [{
+                              "conditionType": "Is",
+                              "matcher": {
+                                "player": {
+                                  "type": "ctxPath",
+                                  "path": ["currentPlayer"]
+                                }
+                              }
+                            }]
+                          }]
+                        }]
+                      },
+                      {
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["originalTarget"]
+                          }
+                        }]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "then": [
+              {
+                "moveType": "ForEach",
+                "arguments": {
+                  "targets": {
+                    "type": "contextPath",
+                    "path": [
+                      "moveConditionResults",
+                      0,
+                      "conditionResults",
+                      "argumentResults",
+                      "destination",
+                      "results",
+                      0,
+                      "results",
+                      3,
+                      "matches",
+                      0,
+                      1,
+                      "entities"
+                    ]
+                  }
+                },
+                "move": {
+                  "moveType": "RemoveEntity",
+                  "arguments": {
+                    "entity": {
+                      "type": "contextPath",
+                      "path": [ "loopTarget" ]
+                    }
+                  }
+                }
+              },
+              {
+                "moveType": "SetActivePlayers",
+                "options": {
+                  "currentPlayer": { "stage": "keepJumping" }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "keepJumping": {
+        "initialMoves": [{
+          "moveType": "SetActivePlayers",
+          "options": {
+            "currentPlayer": { "stage": "kingPieces" }
+          },
+          "conditions": [{ "conditionType": "NoPossibleMoves" }]
+        }],
+        "moves": {
+          "jumpChecker": {
+            "moveType": "MoveEntity",
+            "arguments": {
+              "entity": {
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "entity": {
+                      "type": "gamePath",
+                      "path": ["_meta", "previousPayloads", "jumpChecker", "arguments", "entity"]
+                    }
+                  }
+                ]
+              },
+              "destination": {
+                "playerChoice": true,
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "matcher": { "entityType": "Space" }
+                  },
+                  {
+                    "conditionType": "Not",
+                    "conditions": [{ "conditionType": "Contains" }]
+                  },
+                  {
+                    "conditionType": "Or",
+                    "conditions": [
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [-2, 2],
+                              "player1RelativeCoordinates": [-2, -2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["moveArguments", "entity"]
+                          }
+                        }]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [2, 2],
+                              "player1RelativeCoordinates": [2, -2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["moveArguments", "entity"]
+                          }
+                        }]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [-2, -2],
+                              "player1RelativeCoordinates": [-2, 2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": { "isKing": true }
+                          }
+                        ]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [2, -2],
+                              "player1RelativeCoordinates": [2, 2],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": { "isKing": true }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "conditionType": "InLine",
+                    "sequence": [
+                      {
+                        "conditions": [{
+                          "conditionType": "Contains",
+                          "conditions": [{
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          }]
+                        }]
+                      },
+                      {
+                        "conditions": [{
+                          "conditionType": "Contains",
+                          "conditions": [{
+                            "conditionType": "Not",
+                            "conditions": [{
+                              "conditionType": "Is",
+                              "matcher": {
+                                "player": {
+                                  "type": "ctxPath",
+                                  "path": ["currentPlayer"]
+                                }
+                              }
+                            }]
+                          }]
+                        }]
+                      },
+                      {
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["originalTarget"]
+                          }
+                        }]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "then": [
+              {
+                "moveType": "ForEach",
+                "arguments": {
+                  "targets": {
+                    "type": "contextPath",
+                    "path": [
+                      "moveConditionResults",
+                      0,
+                      "conditionResults",
+                      "argumentResults",
+                      "destination",
+                      "results",
+                      0,
+                      "results",
+                      3,
+                      "matches",
+                      0,
+                      1,
+                      "entities"
+                    ]
+                  }
+                },
+                "move": {
+                  "moveType": "RemoveEntity",
+                  "arguments": {
+                    "entity": {
+                      "type": "contextPath",
+                      "path": [ "loopTarget" ]
+                    }
+                  }
+                }
+              },
+              {
+                "moveType": "SetActivePlayers",
+                "options": {
+                  "currentPlayer": { "stage": "kingPieces" }
+                },
+                "conditions": [{ "conditionType": "NoPossibleMoves" }]
+              }
+            ]
+          }
+        }
+      },
+      "moveIfNoJump": {
+        "initialMoves": [{
+          "moveType": "PassTurn",
+          "conditions": [{ "conditionType": "NoPossibleMoves" }]
+        }],
+        "moves": {
+          "moveChecker": {
+            "moveType": "MoveEntity",
+            "arguments": {
+              "entity": {
+                "playerChoice": true,
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "matcher": {
+                      "name": "checker",
+                      "player": {
+                        "type": "ctxPath",
+                        "path": ["currentPlayer"]
+                      }
+                    }
+                  }
+                ]
+              },
+              "destination": {
+                "playerChoice": true,
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "matcher": { "entityType": "Space" }
+                  },
+                  {
+                    "conditionType": "Not",
+                    "conditions": [{ "conditionType": "Contains" }]
+                  },
+                  {
+                    "conditionType": "Or",
+                    "conditions": [
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [-1, 1],
+                              "player1RelativeCoordinates": [-1, -1],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["moveArguments", "entity"]
+                          }
+                        }]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [1, 1],
+                              "player1RelativeCoordinates": [1, -1],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "entity": {
+                            "type": "contextPath",
+                            "path": ["moveArguments", "entity"]
+                          }
+                        }]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [-1, -1],
+                              "player1RelativeCoordinates": [-1, 1],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": { "isKing": true }
+                          }
+                        ]
+                      },
+                      {
+                        "conditionType": "Contains",
+                        "target": {
+                          "type": "relativeCoordinates",
+                          "location": {
+                            "type": "expression",
+                            "expression": "player == '0' ? player0RelativeCoordinates : player1RelativeCoordinates",
+                            "arguments": {
+                              "player0RelativeCoordinates": [1, -1],
+                              "player1RelativeCoordinates": [1, 1],
+                              "player": {
+                                "type": "ctxPath",
+                                "path": ["currentPlayer"]
+                              }
+                            }
+                          }
+                        },
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "entity": {
+                              "type": "contextPath",
+                              "path": ["moveArguments", "entity"]
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": { "isKing": true }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "then": [
+              {
+                "moveType": "SetActivePlayers",
+                "options": {
+                  "currentPlayer": { "stage": "kingPieces" }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "kingPieces": {
+        "initialMoves": [
+          {
+            "moveType": "ForEach",
+            "arguments": {
+              "targets": {
+                "type": "map",
+                "targets": {
+                  "matchMultiple": true,
+                  "conditions": [
+                    {
+                      "conditionType": "Is",
+                          "matcher": { "entityType": "Space" }
+                    },
+                    { "conditionType": "Contains" },
+                    {
+                      "conditionType": "Evaluate",
+                      "expression": "(player == '0' and destinationCoordinates[1] == 0) or (player == '1' and destinationCoordinates[1] == 7)",
+                      "arguments": {
+                        "player": {
+                          "type": "RelativePath",
+                          "target": {
+                            "type": "contextPath",
+                            "path": ["originalTarget"]
+                          },
+                          "path": ["entities", 0, "rule", "player"]
+                        },
+                        "destinationCoordinates": {
+                          "type": "Coordinates",
+                          "target": {
+                            "type": "contextPath",
+                            "path": ["target"]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mapping": {
+                  "type": "contextPath",
+                  "path": [
+                    "loopTarget",
+                    "entities",
+                    0
+                  ]
+                }
+              }
+            },
+            "move": {
+              "moveType": "SetState",
+              "arguments": {
+                "entity": {
+                  "type": "contextPath",
+                  "path": ["loopTarget"]
+                },
+                "state": {
+                  "property": "isKing",
+                  "value": true
+                }
+              }
+            }
+          },
+          { "moveType": "EndTurn" }
+        ]
+      }
+    }
+  },
+  "endIf": [{
+    "conditions": [{
+      "conditionType": "Evaluate",
+      "expression": "passCount > 0",
+      "arguments": {
+        "passCount": {
+          "type": "gamePath",
+          "path": ["_meta", "passedPlayers", "length"]
+        }
+      }
+    }],
+    "result": {
+      "winner": {
+        "type": "expression",
+        "expression": "(currentPlayer + 1) % 2",
+        "arguments": {
+          "currentPlayer": {
+            "type": "ctxPath",
+            "path": ["currentPlayer"]
+          }
+        }
+      }
+    }
+  }]
+}

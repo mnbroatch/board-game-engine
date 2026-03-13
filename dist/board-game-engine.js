@@ -16407,7 +16407,8 @@ class Client {
       this.client.start();
       return this;
     } catch (error) {
-      console.error('Failed to join game:', error);
+      console.error('Failed to join game:', error?.message ?? error);
+      if (error?.stack) console.error(error.stack);
     }
   }
   update() {
@@ -16676,7 +16677,7 @@ class Bank {
   createEntity() {
     let definition = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     let options = arguments.length > 1 ? arguments[1] : undefined;
-    const entity = new _registry.registry[definition.type || 'Entity']({
+    const entity = new _registry.registry[definition.entityType || 'Entity']({
       bank: this,
       fromBank: true,
       ...options
@@ -17158,7 +17159,7 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
 class IsFull extends _condition.default {
   checkCondition(bgioArguments, rule, payload, context) {
     return {
-      conditionIsMet: payload.target.spaces.every(space => space.entities.length)
+      conditionIsMet: payload.target.spaces.every(space => space?.entities.length)
     };
   }
 }
@@ -17345,7 +17346,7 @@ class WouldCondition extends _condition.default {
     const payload = {
       arguments: targets.reduce((acc, target, i) => ({
         ...acc,
-        [argNameMap[context.moveInstance.rule.type][i]]: target
+        [argNameMap[context.moveInstance.rule.moveType][i]]: target
       }), {})
     };
     const simulatedG = (0, _simulateMove.default)(bgioArguments, payload, context);
@@ -17477,10 +17478,10 @@ function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e
 // Things we always want, don't need to configure, and
 // want to treat as first-class citizens
 const invariantEntities = [{
-  type: "Space",
+  entityType: "Space",
   count: "Infinity"
 }, {
-  type: "Board",
+  entityType: "Board",
   name: 'sharedBoard'
 }, {
   name: "playerMarker",
@@ -17503,7 +17504,7 @@ function expandInitialPlacements(rules, entities) {
   }
   if (rules.personalBoard) {
     entities.push({
-      type: "Board",
+      entityType: "Board",
       name: 'personalBoard',
       perPlayer: true
     });
@@ -17527,7 +17528,7 @@ function expandInitialPlacements(rules, entities) {
       const entityDefinition = (0, _find.default)(entities, matcher);
       if (placement.destination.name === 'personalBoard') {
         return {
-          type: 'ForEach',
+          moveType: 'ForEach',
           arguments: {
             targets: {
               type: 'ctxPath',
@@ -17535,7 +17536,7 @@ function expandInitialPlacements(rules, entities) {
             }
           },
           move: {
-            type: 'PlaceNew',
+            moveType: 'PlaceNew',
             entity: {
               state,
               conditions: [{
@@ -17569,7 +17570,7 @@ function expandInitialPlacements(rules, entities) {
         };
       } else {
         return {
-          type: 'PlaceNew',
+          moveType: 'PlaceNew',
           entity: {
             state,
             conditions: [{
@@ -17593,7 +17594,7 @@ function expandInitialPlacements(rules, entities) {
     delete rules.initialPlacements;
   }
 }
-const keyMappings = [['thatMatches', 'conditions'], ['entityType', 'type'], ['moveType', 'type'], ['endConditions', 'endIf']];
+const keyMappings = [];
 const simpleReplacements = [['isCurrentPlayer', {
   conditionType: 'Is',
   matcher: {
@@ -18105,7 +18106,7 @@ function revivePayload(serializablePayload, G) {
   }
 }
 function getMoveInstance(moveRule) {
-  switch (moveRule.type) {
+  switch (moveRule.moveType) {
     case 'MoveEntity':
       return new _moveEntity.default(moveRule);
     case 'PlaceNew':
@@ -18563,7 +18564,7 @@ class SpaceGroup extends _entity.default {
   }
   makeSpaces(bank) {
     return Array(this.getSpacesCount()).fill().map((_, i) => bank.createEntity({
-      type: 'Space',
+      entityType: 'Space',
       index: i
     }));
   }
@@ -19071,7 +19072,7 @@ const argNamesMap = {
 
 // this might not be where special handling for setstate wants to live
 function getSteps(bgioState, moveRule) {
-  return argNamesMap[moveRule.type].filter(argName => moveRule.arguments[argName].playerChoice).map(argName => ({
+  return argNamesMap[moveRule.moveType].filter(argName => moveRule.arguments[argName].playerChoice).map(argName => ({
     argName,
     getClickable: argName === 'state' ? () => moveRule.arguments[argName].possibleValues.map(value => ({
       abstract: true,

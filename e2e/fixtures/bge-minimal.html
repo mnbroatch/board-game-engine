@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoardGameEngine client minimal (trivial game)</title>
+</head>
+<body>
+  <h1>BoardGameEngine client – minimal game</h1>
+  <pre id="out">(waiting…)</pre>
+  <script src="/dist/board-game-engine.js"></script>
+  <script>
+    (async function () {
+      const out = document.getElementById('out');
+      if (!window.BoardGameEngine || !window.BoardGameEngine.Client) {
+        out.textContent = 'BoardGameEngine.Client not found';
+        return;
+      }
+      let gameRules;
+      try {
+        const res = await fetch('/e2e/fixtures/minimal-game.json');
+        const rules = await res.json();
+        gameRules = JSON.stringify(rules);
+      } catch (e) {
+        out.textContent = 'Fetch failed: ' + (e && e.message);
+        return;
+      }
+      const client = new window.BoardGameEngine.Client({
+        gameRules,
+        gameName: 'minimal',
+        numPlayers: 2,
+        debug: false,
+        onClientUpdate: () => {
+          const s = client.getState();
+          if (s && s.state) window.__bgeMinimalState = s;
+        },
+      });
+      const connected = client.connect();
+      window.__bgeMinimalClient = connected || client;
+      out.textContent = connected ? 'Client connected.' : 'Connect returned falsy.';
+    })();
+  </script>
+</body>
+</html>

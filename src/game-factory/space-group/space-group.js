@@ -8,7 +8,7 @@ export default class SpaceGroup extends Entity {
 
   makeSpaces (bank) {
     return Array(this.getSpacesCount()).fill()
-      .map((_, i) => bank.createEntity({ type: 'Space', index: i }))
+      .map((_, i) => bank.createEntity({ entityType: 'Space', index: i }))
   }
 
   getEmptySpaces() {

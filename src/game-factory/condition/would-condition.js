@@ -17,7 +17,7 @@ export default class WouldCondition extends Condition {
     const payload = {
       arguments: targets.reduce((acc, target, i) => ({
         ...acc,
-        [argNameMap[context.moveInstance.rule.type][i]]: target
+        [argNameMap[context.moveInstance.rule.moveType][i]]: target
       }), {})
     }
 

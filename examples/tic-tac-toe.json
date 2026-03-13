@@ -1,0 +1,53 @@
+{
+  "entities": [
+    {
+      "name": "mainGrid",
+      "entityType": "Grid",
+      "width": 3,
+      "height": 3
+    }
+  ],
+  "numPlayers": 2,
+  "moves": {
+    "placePlayerMarker": {
+      "moveType": "PlaceNew",
+      "entity": {
+        "conditions": "isCurrentPlayer"
+      },
+      "arguments": {
+        "destination": {
+          "conditions": [
+            { "entityType": "Space" },
+            "isEmpty"
+          ],
+          "playerChoice": true
+        }
+      }
+    }
+  },
+  "endIf": [
+    {
+      "conditions": [{
+        "conditionType": "HasLine",
+        "target": "mainGrid",
+        "sequence": [
+          {
+            "minCount": 3,
+            "conditions": [{
+              "conditionType": "ContainsSame",
+              "properties": ["player"]
+            }]
+          }
+        ]
+      }],
+      "result": { "winner": "ownerOfFirstResultEntity" }
+    },
+    {
+      "conditions": [{
+        "conditionType": "IsFull",
+        "target": "mainGrid"
+      }],
+      "result": { "draw": true }
+    }
+  ]
+}

@@ -21,11 +21,11 @@ import transformJSON from "../utils/json-transformer.js";
 // want to treat as first-class citizens
 const invariantEntities = [
   {
-    type: "Space",
+    entityType: "Space",
     count: "Infinity",
   },
   {
-    type: "Board",
+    entityType: "Board",
     name: 'sharedBoard'
   },
   {
@@ -51,7 +51,7 @@ function expandInitialPlacements (rules, entities) {
 
   if (rules.personalBoard) {
     entities.push({
-      type: "Board",
+      entityType: "Board",
       name: 'personalBoard',
       perPlayer: true
     })
@@ -75,7 +75,7 @@ function expandInitialPlacements (rules, entities) {
       
       if (placement.destination.name === 'personalBoard') {
         return {
-          type: 'ForEach',
+          moveType: 'ForEach',
           arguments: {
             targets: {
               type: 'ctxPath',
@@ -83,7 +83,7 @@ function expandInitialPlacements (rules, entities) {
             }
           },
           move: {
-            type: 'PlaceNew',
+            moveType: 'PlaceNew',
             entity: {
               state,
               conditions: [{
@@ -120,7 +120,7 @@ function expandInitialPlacements (rules, entities) {
         }
       } else {
         return {
-          type: 'PlaceNew',
+          moveType: 'PlaceNew',
           entity: {
             state,
             conditions: [{
@@ -145,12 +145,7 @@ function expandInitialPlacements (rules, entities) {
   }
 }
 
-const keyMappings = [
-  ['thatMatches', 'conditions'],
-  ['entityType', 'type'],
-  ['moveType', 'type'],
-  ['endConditions', 'endIf'],
-]
+const keyMappings = []
 
 const simpleReplacements = [
   [

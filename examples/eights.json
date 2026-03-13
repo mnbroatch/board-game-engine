@@ -1,0 +1,653 @@
+{
+  "entities": [
+    {
+      "name": "score",
+      "perPlayer": true,
+      "displayProperties": ["value"],
+      "state": { "value": 0 }
+    },
+    {
+      "entityType": "Space",
+      "name": "hand",
+      "perPlayer": true,
+      "contentsHiddenFrom": "Others"
+    },
+    {
+      "entityType": "Space",
+      "name": "discard"
+    },
+    {
+      "entityType": "Space",
+      "name": "stock",
+      "contentsHiddenFrom": "All"
+    },
+    {"value": 1, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 2, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 3, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 4, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 5, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 6, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 7, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 8, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 9, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 10, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 11, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 12, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "clubs", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 1, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 2, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 3, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 4, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 5, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 6, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 7, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 8, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 9, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 10, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 11, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 12, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "hearts", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 1, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 2, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 3, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 4, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 5, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 6, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 7, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 8, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 9, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 10, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 11, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 12, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "spades", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 1, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 2, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 3, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 4, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 5, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 6, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 7, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 8, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 9, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 10, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 11, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 12, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"},
+    {"value": 13, "suit": "diamonds", "displayProperties": ["value", "suit"], "name": "card"}
+  ],
+  "sharedBoard": [
+    { "name": "stock" },
+    { "name": "discard" }
+  ],
+  "personalBoard": [
+    { "name": "hand" },
+    { "name": "score" }
+  ],
+  "initialMoves": [
+    {
+      "moveType": "PlaceNew",
+      "matchMultiple": true,
+      "entity": {
+        "conditions": [{
+          "conditionType": "Is",
+          "matcher": { "name": "card" }
+        }]
+      },
+      "arguments": {
+        "destination": {
+          "conditions": [{
+            "conditionType": "Is",
+            "matcher": { "name": "stock" }
+          }]
+        }
+      }
+    }
+  ],
+  "minPlayers": 2,
+  "maxPlayers": 5,
+  "phases": {
+    "play": {
+      "start": true,
+      "next": "score",
+      "initialMoves": [
+        {
+          "moveType": "MoveEntity",
+          "arguments": {
+            "entity": {
+              "matchMultiple": true,
+              "conditions": [{
+                "conditionType": "Is",
+                "matcher": { "name": "card" }
+              }]
+            },
+            "destination": {
+              "conditions": [{
+                "conditionType": "Is",
+                "matcher": { "name": "stock" }
+              }]
+            }
+          }
+        },
+        {
+          "moveType": "Shuffle",
+          "arguments": {
+            "target": {
+              "conditions": [{
+                "conditionType": "Is",
+                "matcher": { "name": "stock" }
+              }]
+            }
+          }
+        },
+        {
+          "moveType": "ForEach",
+          "arguments": {
+            "targets": [0,1,2,3,4]
+          },
+          "move": {
+            "moveType": "ForEach",
+            "arguments": {
+              "targets": {
+                "type": "ctxPath",
+                "path": ["playOrder"]
+              }
+            },
+            "move": {
+              "moveType": "MoveEntity",
+              "arguments": {
+                "entity": {
+                  "conditions": [
+                    {
+                      "conditionType": "Is",
+                      "target": { "type": "Parent" },
+                      "matcher": { "name": "stock" }
+                    },
+                    {
+                      "conditionType": "Position",
+                      "position": "First"
+                    }
+                  ]
+                },
+                "destination": {
+                  "conditions": [
+                    {
+                      "conditionType": "Is",
+                      "matcher": {
+                        "name": "hand",
+                        "player": {
+                          "type": "contextPath",
+                          "path": ["loopTarget"]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "moveType": "MoveEntity",
+          "arguments": {
+            "entity": {
+              "conditions": [
+                {
+                  "conditionType": "Is",
+                  "target": { "type": "Parent" },
+                  "matcher": { "name": "stock" }
+                },
+                {
+                  "conditionType": "Position",
+                  "position": "First"
+                }
+              ]
+            },
+            "destination": {
+              "conditions": [
+                {
+                  "conditionType": "Is",
+                  "matcher": {
+                    "name": "discard"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "turn": {
+        "order": {
+          "playOrder": "RotateFirst"
+        },
+        "activePlayers": { "currentPlayer": "normalPlay" },
+        "initialMoves": [
+          {
+            "moveType": "ForEach",
+            "arguments": {
+              "targets": {
+                "matchMultiple": true,
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "target": { "type": "Parent" },
+                    "matcher": { "name": "discard" }
+                  },
+                  {
+                    "conditionType": "Not",
+                    "conditions": [{
+                      "conditionType": "Position",
+                      "position": "First"
+                    }]
+                  }
+                ]
+              }
+            },
+            "conditions": [{
+              "conditionType": "Not",
+              "target": {
+                "conditions": [{
+                  "conditionType": "Is",
+                  "matcher": { "name": "stock" }
+                }]
+              },
+              "conditions": [{ "conditionType": "Contains" }]
+            }],
+            "move": {
+              "moveType": "MoveEntity",
+              "arguments": {
+                "entity": {
+                  "type": "contextPath",
+                  "path": ["loopTarget"]
+                },
+                "destination": {
+                  "conditions": [
+                    {
+                      "conditionType": "Is",
+                      "matcher": {
+                        "name": "stock"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "moveType": "Shuffle",
+            "arguments": {
+              "target": {
+                "conditions": [{
+                  "conditionType": "Is",
+                  "matcher": { "name": "stock" }
+                }]
+              }
+            }
+          }
+        ],
+        "stages": {
+          "normalPlay": {
+            "moves": {
+              "playCard": {
+                "moveType": "MoveEntity",
+                "position": "First",
+                "arguments": {
+                  "entity": {
+                    "playerChoice": true,
+                    "conditions": [
+                      {
+                        "conditionType": "Is",
+                        "target": { "type": "Parent" },
+                        "matcher": {
+                          "name": "hand",
+                          "player": {
+                            "type": "ctxPath",
+                            "path": ["currentPlayer"]
+                          }
+                        }
+                      },
+                      {
+                        "conditionType": "Or",
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "matcher": {
+                              "value": 8
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": {
+                              "type": "Pick",
+                              "properties": ["suit"],
+                              "target": {
+                                "conditions": [
+                                  {
+                                    "conditionType": "Is",
+                                    "target": { "type": "Parent" },
+                                    "matcher": { "name": "discard" }
+                                  },
+                                  {
+                                    "conditionType": "Position",
+                                    "position": "First"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "conditionType": "Is",
+                            "matcher": {
+                              "type": "Pick",
+                              "properties": ["value"],
+                              "target": {
+                                "conditions": [
+                                  {
+                                    "conditionType": "Is",
+                                    "target": { "type": "Parent" },
+                                    "matcher": { "name": "discard" }
+                                  },
+                                  {
+                                    "conditionType": "Position",
+                                    "position": "First"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "destination": {
+                    "position": "First",
+                    "conditions": [
+                      {
+                        "conditionType": "Is",
+                        "matcher": { "name": "discard" }
+                      }
+                    ]
+                  }
+                },
+                "then": [
+                  {
+                    "moveType": "SetActivePlayers",
+                    "options": {
+                      "currentPlayer": {
+                        "stage": "nameSuit"
+                      }
+                    },
+                    "conditions": [{
+                      "conditionType": "Is",
+                      "target": {
+                        "type": "contextPath",
+                        "path": ["previousArguments", "entity"]
+                      },
+                      "matcher": { "value": 8 }
+                    }]
+                  },
+                  {
+                    "moveType": "EndTurn",
+                    "conditions": [{
+                      "conditionType": "Not",
+                      "target": {
+                        "type": "contextPath",
+                        "path": ["previousArguments", "entity"]
+                      },
+                      "conditions": [{
+                        "conditionType": "Is",
+                        "matcher": { "value": 8 }
+                      }]
+                    }]
+                  }
+                ]
+              },
+              "takeCard": {
+                "moveType": "TakeFrom",
+                "conditions": [{
+                  "conditionType": "Contains",
+                  "target": {
+                    "conditions": [{
+                      "conditionType": "Is",
+                      "matcher": { "name": "stock" }
+                    }]
+                  }
+                }],
+                "arguments": {
+                  "source": {
+                    "playerChoice": true,
+                    "conditions": [
+                      {
+                        "conditionType": "Is",
+                        "matcher": { "name": "stock" }
+                      }
+                    ]
+                  },
+                  "destination": {
+                    "conditions": [
+                      {
+                        "conditionType": "Is",
+                        "matcher": {
+                          "name": "hand",
+                          "player": {
+                            "type": "ctxPath",
+                            "path": ["currentPlayer"]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "then": [{ "moveType": "EndTurn" }]
+              }
+            }
+          },
+          "nameSuit": {
+            "moves": {
+              "nameSuit": {
+              "moveType": "SetState",
+                "arguments": {
+                  "entity": {
+                    "conditions": [
+                      {
+                        "conditionType": "Is",
+                        "target": { "type": "Parent" },
+                        "matcher": { "name": "discard" }
+                      },
+                      {
+                        "conditionType": "Position",
+                        "position": "First"
+                      }
+                    ]
+                  },
+                  "state": {
+                    "playerChoice": true,
+                    "property": "suit",
+                    "possibleValues": [ "clubs", "hearts", "spades", "diamonds" ]
+                  }
+              },
+              "then": [{ "moveType": "EndTurn" }]
+              }
+            }
+          }
+        }
+      },
+      "endIf": [{
+        "conditions": [{
+          "conditionType": "Is",
+          "target": {
+            "conditions": [
+              {
+                "conditionType": "Is",
+                "matcher": { "name": "hand" }
+              },
+              {
+                "conditionType": "Not",
+                "conditions": [{ "conditionType": "Contains" }]
+              }
+            ]
+          }
+        }]
+      }]
+    },
+    "score": {
+      "next": "play",
+      "initialMoves": [
+        {
+          "moveType": "ForEach",
+          "arguments": {
+            "targets": {
+              "type": "ctxPath",
+              "path": ["playOrder"]
+            }
+          },
+          "move": {
+            "moveType": "SetState",
+            "arguments": {
+              "entity": {
+                "conditions": [
+                  {
+                    "conditionType": "Is",
+                    "matcher": {
+                      "name": "score",
+                      "player": {
+                        "type": "RelativePath",
+                        "target": {
+                          "conditions": [
+                            {
+                              "conditionType": "Is",
+                              "matcher": { "name": "hand" }
+                            },
+                            {
+                              "conditionType": "Not",
+                              "conditions": [{ "conditionType": "Contains" }]
+                            }
+                          ]
+                        },
+                        "path": ["player"]
+                      }
+                    }
+                  }
+                ]
+              },
+              "state": {
+                "property": "value",
+                "value": {
+                  "type": "expression",
+                  "expression": "existingScore + sum(faceValues)",
+                  "arguments": {
+                    "existingScore": {
+                      "type": "RelativePath",
+                      "target": {
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "matcher": {
+                              "name": "score",
+                              "player": {
+                                "type": "RelativePath",
+                                "target": {
+                                  "conditions": [
+                                    {
+                                      "conditionType": "Is",
+                                      "matcher": { "name": "hand" }
+                                    },
+                                    {
+                                      "conditionType": "Not",
+                                      "conditions": [{ "conditionType": "Contains" }]
+                                    }
+                                  ]
+                                },
+                                "path": ["player"]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "path": ["value"]
+                    },
+                    "faceValues": {
+                      "type": "map",
+                      "targets": {
+                        "matchMultiple": true,
+                        "conditions": [
+                          {
+                            "conditionType": "Is",
+                            "target": { "type": "Parent" },
+                            "matcher": {
+                              "name": "hand",
+                              "player": {
+                                "type": "contextPath",
+                                "path": [ "loopTarget" ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "mapping": {
+                        "type": "expression",
+                        "expression": "cardValue == 8 ? 50 : (cardValue >= 10 and cardValue <= 13) ? 10 : cardValue",
+                        "arguments": {
+                          "cardValue": {
+                            "conditionType": "RelativePath",
+                            "target": {
+
+                              "type": "contextPath",
+                              "path": ["loopTarget"]
+                            },
+                            "path": ["value"]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        { "moveType": "EndTurn" }
+      ]
+    }
+  },
+  "endIf": [{
+    "conditions": [{
+      "conditionType": "Some",
+      "target": {
+        "matchMultiple": true,
+        "conditions": [{
+          "conditionType": "Is",
+          "matcher": { "name": "score" }
+        }
+      ]},
+      "conditions": [
+        {
+          "conditionType": "Evaluate",
+          "expression": "score >= numPlayers * 50",
+          "arguments": {
+            "score": {
+              "type": "RelativePath",
+              "target": {
+                "type": "contextPath",
+                "path": ["loopTarget"]
+              },
+              "path": ["value"]
+            },
+            "numPlayers": {
+             
+              "type": "ctxPath",
+              "path": ["playOrder", "length"]
+            }
+          }
+        }
+      ]
+    }],
+    "result": {
+      "winner": {
+        "type": "contextPath",
+        "path": ["results",0,"result","rule","player"]
+      }
+    }
+  }]
+}

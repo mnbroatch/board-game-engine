@@ -62,7 +62,7 @@ function revivePayload (serializablePayload, G) {
 }
 
 export function getMoveInstance (moveRule) {
-  switch (moveRule.type) {
+  switch (moveRule.moveType) {
     case 'MoveEntity':
       return new MoveEntity(moveRule);
     case 'PlaceNew':

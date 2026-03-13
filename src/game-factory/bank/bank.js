@@ -12,7 +12,7 @@ class Bank {
   }
 
   createEntity (definition = {}, options) {
-    const entity = new (registry[definition.type || 'Entity'])(
+    const entity = new (registry[definition.entityType || 'Entity'])(
       {
         bank: this,
         fromBank: true,

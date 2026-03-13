@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Board Game Engine Examples</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 1rem 1.5rem 2rem;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    select, input, button {
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    select:focus, input:focus, button:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px #38bdf8;
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+      color: #022c22;
+      font-weight: 600;
+    }
+    button:hover {
+      filter: brightness(1.08);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    label {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    #debug {
+      background: #020617;
+      border-radius: 0.85rem;
+      border: 1px solid #1f2937;
+      min-height: 320px;
+      padding: 0.5rem;
+      overflow: auto;
+    }
+    .panel {
+      background: #020617;
+      border-radius: 0.85rem;
+      border: 1px solid #1f2937;
+      padding: 0.75rem 0.9rem;
+      min-height: 160px;
+    }
+    .panel h2 {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    pre {
+      margin: 0;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Board Game Engine – Examples</h1>
+  <div class="controls">
+    <label>
+      Game&nbsp;
+      <select id="game-select">
+        <option value="tic-tac-toe">Tic Tac Toe</option>
+        <option value="connect-four">Connect Four</option>
+        <option value="reversi">Reversi</option>
+        <option value="eights">Crazy Eights</option>
+        <option value="checkers">Checkers</option>
+      </select>
+    </label>
+    <label>
+      Players&nbsp;
+      <input id="players-input" type="number" min="1" max="6" value="2" />
+    </label>
+    <button id="start-btn">Start / Reset Game</button>
+    <span class="badge">Debug UI attaches below</span>
+  </div>
+
+  <div class="layout">
+    <div id="debug"></div>
+    <div class="panel">
+      <h2>Client snapshot</h2>
+      <pre id="state-view">(no game started)</pre>
+    </div>
+  </div>
+
+  <script src="../dist/board-game-engine.js"></script>
+  <script>
+    (function () {
+      const gameFiles = {
+        'tic-tac-toe': './tic-tac-toe.json',
+        'connect-four': './connect-four.json',
+        'reversi': './reversi.json',
+        'eights': './eights.json',
+        'checkers': './checkers.json',
+      };
+
+      const selectEl = document.getElementById('game-select');
+      const playersEl = document.getElementById('players-input');
+      const startBtn = document.getElementById('start-btn');
+      const stateView = document.getElementById('state-view');
+
+      let currentClient = null;
+
+      function toSerializableSnapshot(snapshot) {
+        // Avoid circular structures by swapping in originalG (plain JSON)
+        if (!snapshot || !snapshot.state) return snapshot;
+        const { state, ...rest } = snapshot;
+        const { originalG, G, ...stateRest } = state;
+        return {
+          ...rest,
+          state: {
+            ...stateRest,
+            // originalG is what came from boardgame.io before our deserialization step
+            G: originalG ?? G,
+          },
+        };
+      }
+
+      async function startGame() {
+        const key = selectEl.value;
+        const file = gameFiles[key];
+        if (!file || !window.BoardGameEngine || !window.BoardGameEngine.Client) {
+          stateView.textContent = 'Engine bundle or game config not available.';
+          return;
+        }
+
+        startBtn.disabled = true;
+        stateView.textContent = 'Loading ' + key + '…';
+
+        try {
+          const res = await fetch(file);
+          const rules = await res.json();
+
+          const numPlayers =
+            Number(playersEl.value) ||
+            rules.numPlayers ||
+            rules.maxPlayers ||
+            2;
+
+          const client = new window.BoardGameEngine.Client({
+            gameRules: JSON.stringify(rules),
+            gameName: key,
+            numPlayers,
+            onClientUpdate: () => {
+              const snapshot = client.getState();
+              const safe = toSerializableSnapshot(snapshot);
+              stateView.textContent = JSON.stringify(safe, null, 2);
+            },
+          });
+
+          currentClient = client.connect();
+          if (currentClient && typeof currentClient.getState === 'function') {
+            // Force initial snapshot after connect
+            const snapshot = currentClient.getState();
+            const safe = toSerializableSnapshot(snapshot);
+            stateView.textContent = JSON.stringify(safe, null, 2);
+          }
+        } catch (err) {
+          console.error(err);
+          stateView.textContent = 'Error loading game: ' + (err && err.message ? err.message : String(err));
+        } finally {
+          startBtn.disabled = false;
+        }
+      }
+
+      startBtn.addEventListener('click', startGame);
+    })();
+  </script>
+</body>
+</html>
+

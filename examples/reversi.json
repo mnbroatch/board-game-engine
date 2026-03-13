@@ -1,0 +1,215 @@
+{
+  "entities": [
+    {
+      "name": "mainGrid",
+      "entityType": "Grid",
+      "width": 8,
+      "height": 8
+    },
+    {
+      "name": "disc",
+      "state": { "player": "0" },
+      "count": "Infinity"
+    }
+  ],
+  "sharedBoard": [{ "name": "mainGrid" }],
+  "initialPlacements": [
+    {
+      "entity": {
+        "name": "disc",
+        "state": { "player": "0" }
+      },
+      "destination": { "index": 27 }
+    },
+    {
+      "entity": {
+        "name": "disc",
+        "state": { "player": "1" }
+      },
+      "destination": { "index": 28 }
+    },
+    {
+      "entity": {
+        "name": "disc",
+        "state": { "player": "1" }
+      },
+      "destination": { "index": 35 }
+    },
+    {
+      "entity": {
+        "name": "disc",
+        "state": { "player": "0" }
+      },
+      "destination": { "index": 36 }
+    }
+  ],
+  "minPlayers": 2,
+  "maxPlayers": 2,
+  "turn": {
+    "minMoves": 1,
+    "maxMoves": 1,
+    "initialMoves": [{
+      "moveType": "PassTurn",
+      "conditions": [{ "conditionType": "NoPossibleMoves" }]
+    }]
+  },
+  "moves": {
+    "placeDisc": {
+      "moveType": "PlaceNew",
+      "entity": {
+        "state": {
+          "player": {
+            "type": "ctxPath",
+            "path": ["currentPlayer"]
+          }
+        },
+        "conditions": [{
+          "conditionType": "Is",
+          "matcher": { "name": "disc" }
+        }]
+      },
+      "arguments": {
+        "destination": {
+          "playerChoice": true,
+          "conditions": [
+            {
+              "conditionType": "Is",
+              "matcher": { "entityType": "Space" }
+            },
+            {
+              "conditionType": "Not",
+              "conditions": [{ "conditionType": "Contains" }]
+            },
+            {
+              "conditionType": "InLine",
+              "sequence": [
+                {
+                  "conditions": [{
+                    "conditionType": "Is",
+                    "entity": {
+                      "type": "contextPath",
+                      "path": ["originalTarget"]
+                    }
+                  }]
+                },
+                {
+                  "minCount": 1,
+                  "conditions": [
+                    {
+                      "conditionType": "Not",
+                      "conditions": [{
+                        "conditionType": "Contains",
+                        "conditions": [{
+                          "conditionType": "Is",
+                          "matcher": {
+                            "player": {
+                              "type": "ctxPath",
+                              "path": ["currentPlayer"]
+                            }
+                          }
+                        }]
+                      }]
+                    },
+                    {
+                      "conditionType": "ContainsSame",
+                      "properties": ["player"]
+                    }
+                  ]
+                },
+                {
+                  "conditions": [{
+                    "conditionType": "Contains",
+                    "conditions": [{
+                      "conditionType": "Is",
+                      "matcher": {
+                        "player": {
+                          "type": "ctxPath",
+                          "path": ["currentPlayer"]
+                        }
+                      }
+                    }]
+                  }]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "then": [{
+        "moveType": "ForEach",
+        "arguments": {
+          "targets": {
+            "type": "contextPath",
+            "path": [
+              "moveConditionResults",
+              0,
+              "conditionResults",
+              "argumentResults",
+              "destination",
+              "results",
+              0,
+              "results",
+              2,
+              "matches",
+              { "flatten": true, "map": ["entities"] },
+              { "flatten": true }
+            ]
+          }
+        },
+        "move": {
+          "moveType": "SetState",
+          "arguments": {
+            "entity": {
+              "type": "contextPath",
+              "path": [ "loopTarget" ]
+            },
+            "state": {
+              "property": "player",
+              "value": {
+                "type": "ctxPath",
+                "path": ["currentPlayer"]
+              }
+            }
+          }
+        }
+      }]
+    }
+  },
+  "endIf": [{
+    "conditions": [{
+      "conditionType": "Evaluate",
+      "expression": "passCount == numPlayers",
+      "arguments": {
+        "passCount": {
+          "type": "gamePath",
+          "path": ["_meta", "passedPlayers", "length"]
+        },
+        "numPlayers": {
+          "type": "ctxPath",
+          "path": ["playOrder", "length"]
+        }
+      }
+    }],
+    "result": {
+      "winners": {
+        "type": "mapMax",
+        "targets": {
+          "type": "ctxPath",
+          "path": ["playOrder"]
+        },
+        "mapping": {
+          "type": "count",
+          "conditions": [{
+            "conditionType": "Is",
+            "matcher": {
+              "player": {
+                "type": "contextPath",
+                "path": [ "loopTarget" ]
+              }
+            }
+          }]
+        }
+      }
+    }
+  }]
+}

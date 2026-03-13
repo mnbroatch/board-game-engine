@@ -1,0 +1,126 @@
+{
+  "entities": [
+    {
+      "name": "mainGrid",
+      "entityType": "Grid",
+      "width": 7,
+      "height": 6
+    },
+    {
+      "name": "playerMarker",
+      "perPlayer": true,
+      "count": "Infinity"
+    }
+  ],
+  "sharedBoard": [{"name": "mainGrid"}],
+  "minPlayers": 2,
+  "maxPlayers": 2,
+  "turn": {
+    "minMoves": 1,
+    "maxMoves": 1
+  },
+  "moves": {
+    "placePlayerMarker": {
+      "moveType": "PlaceNew",
+      "entity": {
+        "conditions": [{
+          "conditionType": "Is",
+          "matcher": {
+            "name": "playerMarker",
+            "player": {
+              "type": "ctxPath",
+              "path": ["currentPlayer"]
+            }
+          }
+        }]
+      },
+      "arguments": {
+        "destination": {
+          "playerChoice": true,
+          "conditions": [
+            {
+              "conditionType": "Is",
+              "matcher": { "entityType": "Space" }
+            },
+            {
+              "conditionType": "Not",
+              "conditions": [{"conditionType": "Contains"}]
+            },
+            {
+              "conditionType": "Not",
+              "conditions": [
+                {
+                  "target": {
+                    "type": "relativeCoordinates",
+                    "location": [0, 1]
+                  },
+                  "conditionType": "Not",
+                  "conditions": [{"conditionType": "Contains"}]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "endIf": [
+    {
+      "conditions": [{
+      "conditionType": "Some",
+      "target": {
+        "matchMultiple": true,
+        "conditions": [{
+          "conditionType": "Is",
+          "matcher": { "entityType": "Space" }
+        }
+      ]},
+        "conditions": [{
+          "conditionType": "InLine",
+          "target": {
+            "type": "contextPath",
+            "path": ["loopTarget"]
+          },
+          "sequence": [
+            {
+              "minCount": 4,
+              "conditions": [{
+                "conditionType": "ContainsSame",
+                "properties": ["player"]
+              }]
+            }
+          ]
+        }]
+      }],
+      "result": {
+        "winner": {
+          "type": "contextPath",
+          "path": ["results", 0, "result", "entities", 0, "attributes", "player"]
+        }
+      }
+    },
+    {
+      "conditions": [{
+        "conditionType": "Every",
+        "target": {
+          "matchMultiple": true,
+          "conditions": [
+            {
+              "conditionType": "Is",
+              "target": { "type": "Parent" },
+              "matcher": { "name": "mainGrid" }
+            }
+          ]
+        },
+        "conditions": [{
+          "target": {
+            "type": "contextPath",
+            "path": ["loopTarget"]
+          },
+          "conditionType": "Contains"
+        }]
+      }],
+      "result": { "draw": true }
+    }
+  ]
+}

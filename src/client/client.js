@@ -55,7 +55,8 @@ export class Client {
       this.client.start()
       return this
     } catch (error) {
-      console.error('Failed to join game:', error)
+      console.error('Failed to join game:', error?.message ?? error)
+      if (error?.stack) console.error(error.stack)
     }
   }
 
