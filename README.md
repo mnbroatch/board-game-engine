@@ -63,11 +63,28 @@ A client that runs a B.A.G.E.L.-defined game
 **Methods**
 
 - **`connect()`** — Connects to the game (local or server), starts the client, subscribes to updates. Returns `this`.
-- **`getState()`** — Returns current state. With a B.A.G.E.L. game this includes `state`, `gameover`, `moves`, `allClickable`, `possibleMoveMeta`; with `boardgameIOGame` it returns `{ state, gameover, moves }`.
-- **`doStep(target)`** — Applies one step of a multi-step move (e.g. “from” then “to”). For B.A.G.E.L. games only; no-op when using `boardgameIOGame`.
+- **`getState()`** — Returns current state. See [getState() return value](#getstate-return-value) below.
+- **`update()`** — Triggers `onClientUpdate` if set.
+- **`doStep(target)`** — Applies one step of a multi-step move (e.g. “from” then “to”). For B.A.G.E.L. games only.
 - **`undoStep()`** — Undoes the last step of the current move. B.A.G.E.L. games only.
 - **`reset()`** — Clears the current move builder (targets/steps). B.A.G.E.L. games only.
-- **`update()`** — Triggers `onClientUpdate` if set.
+
+**Properties**
+
+- **`client`** — boardgame.io client instance
+- **`moveBuilder`** — Mostly for internal use with multi-step moves but could inform UI
+
+#### getState() return value
+
+`Client` can run normal boardgame.io games, with limited features compared to B.A.G.E.L. games.
+
+In non-B.A.G.E.L. games, `doStep(target)` is not used. instead, the boardgame.io client's moves object is returned from getState().
+
+- `state` — current game state
+- `gameover` — game-over result when the game has ended
+- `allClickable` — B.A.G.E.L. games only. Clickable targets for the current step of the current move
+- `moves` — non-B.A.G.E.L. games only. From boardgame.io client
+- `currentMoves` — non-B.A.G.E.L. games only. `moves` object filtered to only contain current phase / stage moves. May break for complex turns.
 
 **Example**
 

@@ -27071,7 +27071,7 @@ ${message}`);
   var Client2 = class {
     constructor(options) {
       this.options = options;
-      this.game = options.boardgameIOGame || gameFactory(JSON.parse(options.gameRules), options.gameName);
+      this.game = options.boardgameIOGame || gameFactory(JSON.parse(options.gameRules));
       if (!options.boardgameIOGame) {
         this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
         this.optimisticWinner = null;
@@ -27085,18 +27085,18 @@ ${message}`);
           collapseOnLoad: true,
           impl: Debug
         },
-        gameId,
-        boardgamePlayerID,
-        clientToken,
-        singlePlayer = !clientToken
+        matchID,
+        playerID,
+        credentials,
+        multiplayer = SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } })
       } = this.options;
       try {
-        const clientOptions = singlePlayer ? { game: this.game, numPlayers, debug } : {
+        const clientOptions = !credentials ? { game: this.game, numPlayers, debug } : {
           game: this.game,
-          multiplayer: SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
-          matchID: gameId,
-          playerID: boardgamePlayerID,
-          credentials: clientToken,
+          multiplayer,
+          matchID,
+          playerID,
+          credentials,
           debug
         };
         this.client = Client(clientOptions);
@@ -27112,46 +27112,45 @@ ${message}`);
       this.options.onClientUpdate?.();
     }
     getState() {
-      const clientState = this.client?.getState();
-      if (!clientState) return {};
+      const bgioState = this.client?.getState();
+      if (!bgioState) return {};
+      const state = this.options.boardgameIOGame ? bgioState : {
+        ...bgioState,
+        G: deserialize(JSON.stringify(bgioState.G), registry)
+      };
+      const gameover = this.optimisticWinner ?? state?.ctx?.gameover;
+      const currentMoves = gameover ? [] : Object.entries(getCurrentMoves(state, this.client));
       if (this.options.boardgameIOGame) {
         return {
-          state: clientState,
-          gameover: clientState?.ctx?.gameover,
-          moves: this.client.moves
+          state,
+          gameover,
+          moves: this.client.moves,
+          currentMoves
         };
       }
-      const state = {
-        ...clientState,
-        G: deserialize(JSON.stringify(clientState.G), registry),
-        originalG: clientState.G
-      };
-      const gameover = state?.ctx?.gameover;
-      const moves = !gameover ? Object.entries(getCurrentMoves(state, this.client)).reduce((acc, [moveName, rawMove]) => {
+      const _wrappedMoves = Object.entries(currentMoves).reduce((acc, [moveName, rawMove]) => {
         const move = (payload) => {
           this.client.moves[moveName](preparePayload(payload));
         };
         move.moveInstance = rawMove.moveInstance;
         return { ...acc, [moveName]: move };
-      }, {}) : [];
-      const possibleMoves = getPossibleMoves(state, moves, this.moveBuilder);
-      const allClickable = possibleMoves.allClickable;
-      const possibleMoveMeta = possibleMoves.possibleMoveMeta;
-      return { state, gameover, moves, allClickable, possibleMoveMeta };
+      }, {});
+      const { allClickable, _possibleMoveMeta } = getPossibleMoves(state, _wrappedMoves, this.moveBuilder);
+      return { state, gameover, allClickable, _wrappedMoves, _possibleMoveMeta };
     }
     doStep(_target) {
       if (this.options.boardgameIOGame) return;
-      const { state, moves, possibleMoveMeta } = this.getState();
+      const { state, _wrappedMoves, _possibleMoveMeta } = this.getState();
       const target = _target.abstract ? _target : state.G.bank.locate(_target.entityId);
-      const newEliminated = Object.entries(possibleMoveMeta).filter(([_2, meta]) => !hasTarget(meta.clickableForMove, target)).map(([name]) => name).concat(this.moveBuilder.eliminatedMoves);
-      if (newEliminated.length === Object.keys(moves).length) {
+      const newEliminated = Object.entries(_possibleMoveMeta).filter(([_2, meta]) => !hasTarget(meta.clickableForMove, target)).map(([name]) => name).concat(this.moveBuilder.eliminatedMoves);
+      if (newEliminated.length === Object.keys(_wrappedMoves).length) {
         console.error("invalid move with target:", target?.rule);
         return;
       }
-      const remainingMoveEntries = Object.entries(possibleMoveMeta).filter(([name]) => !newEliminated.includes(name));
-      if (isMoveCompleted(state, moves, remainingMoveEntries, this.moveBuilder.stepIndex)) {
+      const remainingMoveEntries = Object.entries(_possibleMoveMeta).filter(([name]) => !newEliminated.includes(name));
+      if (isMoveCompleted(state, _wrappedMoves, remainingMoveEntries, this.moveBuilder.stepIndex)) {
         const [moveName] = remainingMoveEntries[0];
-        const move = moves[moveName];
+        const move = _wrappedMoves[moveName];
         const payload = createPayload(
           state,
           move.moveInstance.rule,
@@ -27194,7 +27193,7 @@ ${message}`);
   }
   function getPossibleMoves(bgioState, moves, moveBuilder) {
     const { eliminatedMoves, stepIndex } = moveBuilder;
-    const possibleMoveMeta = {};
+    const _possibleMoveMeta = {};
     const allClickable = /* @__PURE__ */ new Set();
     Object.entries(moves).filter(([moveName]) => !eliminatedMoves.includes(moveName)).forEach(([moveName, move]) => {
       const moveRule = resolveProperties(bgioState, { ...move.moveInstance.rule, moveName });
@@ -27212,10 +27211,10 @@ ${message}`);
       const clickableForMove = new Set(
         moveIsAllowed && moveSteps?.[stepIndex]?.getClickable(context) || []
       );
-      possibleMoveMeta[moveName] = { clickableForMove };
+      _possibleMoveMeta[moveName] = { clickableForMove };
       clickableForMove.forEach((entity) => allClickable.add(entity));
     });
-    return { possibleMoveMeta, allClickable };
+    return { _possibleMoveMeta, allClickable };
   }
   function isMoveCompleted(state, moves, remainingMoveEntries, stepIndex) {
     return remainingMoveEntries.length === 1 && getSteps(state, moves[remainingMoveEntries[0][0]].moveInstance.rule).length === stepIndex + 1;

@@ -65,67 +65,70 @@ export class Client {
   }
 
   getState () {
-    const clientState = this.client?.getState()
-    if (!clientState) return {}
+    const bgioState = this.client?.getState()
+    if (!bgioState) return {}
+
+    const state = this.options.boardgameIOGame
+      ? bgioState
+      : {
+        ...bgioState,
+        G: deserialize(JSON.stringify(bgioState.G), registry),
+      }
+
+    const gameover = this.optimisticWinner ?? state?.ctx?.gameover
+
+    const currentMoves = gameover
+      ? []
+      : Object.entries(getCurrentMoves(state, this.client))
 
     if (this.options.boardgameIOGame) {
       return {
-        state: clientState,
-        gameover: clientState?.ctx?.gameover,
+        state,
+        gameover,
         moves: this.client.moves,
+        currentMoves
       }
     }
 
-    const state = {
-      ...clientState,
-      G: deserialize(JSON.stringify(clientState.G), registry),
-      originalG: clientState.G,
-    }
-
-    const gameover = state?.ctx?.gameover
-
-    const moves = !gameover
-      ? Object.entries(getCurrentMoves(state, this.client)).reduce((acc, [moveName, rawMove]) => {
+    const _wrappedMoves = Object.entries(currentMoves)
+      .reduce((acc, [moveName, rawMove]) => {
           const move = (payload) => {
             this.client.moves[moveName](preparePayload(payload))
           }
           move.moveInstance = rawMove.moveInstance
           return { ...acc, [moveName]: move }
         }, {})
-      : []
 
-    const possibleMoves = getPossibleMoves(state, moves, this.moveBuilder)
-    const allClickable = possibleMoves.allClickable
-    const possibleMoveMeta = possibleMoves.possibleMoveMeta
+    const { allClickable, _possibleMoveMeta } = getPossibleMoves(state, _wrappedMoves, this.moveBuilder)
 
-    return { state, gameover, moves, allClickable, possibleMoveMeta }
+    return { state, gameover, allClickable, _wrappedMoves, _possibleMoveMeta }
   }
 
   doStep (_target) {
     if (this.options.boardgameIOGame) return
 
-    const { state, moves, possibleMoveMeta } = this.getState()
+    const { state, _wrappedMoves, _possibleMoveMeta } = this.getState()
 
     const target = _target.abstract
       ? _target
       : state.G.bank.locate(_target.entityId)
 
-    const newEliminated = Object.entries(possibleMoveMeta)
+    const newEliminated = Object.entries(_possibleMoveMeta)
       .filter(([_, meta]) => !hasTarget(meta.clickableForMove, target))
       .map(([name]) => name)
       .concat(this.moveBuilder.eliminatedMoves);
 
-    if (newEliminated.length === Object.keys(moves).length) {
+    if (newEliminated.length === Object.keys(_wrappedMoves).length) {
       console.error('invalid move with target:', target?.rule);
       return;
     }
 
-    const remainingMoveEntries = Object.entries(possibleMoveMeta)
+    const remainingMoveEntries = Object.entries(_possibleMoveMeta)
       .filter(([name]) => !newEliminated.includes(name))
 
-    if (isMoveCompleted(state, moves, remainingMoveEntries, this.moveBuilder.stepIndex)) {
+    if (isMoveCompleted(state, _wrappedMoves, remainingMoveEntries, this.moveBuilder.stepIndex)) {
       const [moveName] = remainingMoveEntries[0]
-      const move = moves[moveName]
+      const move = _wrappedMoves[moveName]
       const payload = createPayload(
         state,
         move.moveInstance.rule,
@@ -174,7 +177,7 @@ function hasTarget(clickableSet, target) {
 
 function getPossibleMoves(bgioState, moves, moveBuilder) {
   const { eliminatedMoves, stepIndex } = moveBuilder;
-  const possibleMoveMeta = {};
+  const _possibleMoveMeta = {};
   const allClickable = new Set();
 
   Object.entries(moves)
@@ -202,11 +205,11 @@ function getPossibleMoves(bgioState, moves, moveBuilder) {
         (moveIsAllowed && moveSteps?.[stepIndex]?.getClickable(context)) || []
       );
 
-      possibleMoveMeta[moveName] = { clickableForMove };
+      _possibleMoveMeta[moveName] = { clickableForMove };
       clickableForMove.forEach(entity => allClickable.add(entity));
     });
 
-  return { possibleMoveMeta, allClickable };
+  return { _possibleMoveMeta, allClickable };
 }
 
 function isMoveCompleted(state, moves, remainingMoveEntries, stepIndex) {
