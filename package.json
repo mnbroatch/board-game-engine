@@ -1,13 +1,13 @@
 {
   "name": "board-game-engine",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "wip board game engine",
   "main": "dist/board-game-engine.cjs",
   "module": "dist/board-game-engine.mjs",
   "exports": {
     ".": {
-      "import": "dist/board-game-engine.mjs",
-      "require": "dist/board-game-engine.cjs"
+      "import": "./dist/board-game-engine.mjs",
+      "require": "./dist/board-game-engine.cjs"
     }
   },
   "scripts": {
