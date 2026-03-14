@@ -3,7 +3,7 @@
  * Loads a trivial game via boardgame.io only to narrow down why the client
  * doesn't hydrate in headless Firefox.
  */
-import { test, expect } from '@playwright/test'
+import { test, expect } from './coverage.js'
 
 const BGIO_MINIMAL_URL = '/e2e/fixtures/bgio-minimal.html'
 const BGIO_MINIMAL_DEBUG_URL = '/e2e/fixtures/bgio-minimal-debug.html'

@@ -1,5 +1,5 @@
 /** E2E tests for examples/index.html (Board Game Engine). */
-import { test, expect } from '@playwright/test'
+import { test, expect } from './coverage.js'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 

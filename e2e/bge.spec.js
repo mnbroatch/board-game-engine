@@ -1,7 +1,7 @@
 /**
  * BoardGameEngine Client e2e tests.
  */
-import { test, expect } from '@playwright/test'
+import { test, expect } from './coverage.js'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
@@ -98,6 +98,62 @@ test.describe('BoardGameEngine', () => {
     expect(result.error).toBeUndefined()
     expect(result.isSet).toBe(true)
     expect(result.size).toBeGreaterThan(0)
+  })
+
+  test('tic-tac-toe: entity in allClickable is same reference as entity in getState().state.G', async ({ page }) => {
+    test.setTimeout(20000)
+    const tttJson = readFileSync(TTT_JSON_PATH, 'utf8')
+    await page.route(/tic-tac-toe\.json$/, (route) =>
+      route.fulfill({ contentType: 'application/json', body: tttJson })
+    )
+    await page.goto(FIXTURES.ttt, { waitUntil: 'load' })
+    await expect(page.getByRole('heading', { name: /BoardGameEngine – tic-tac-toe/i })).toBeVisible()
+
+    const result = await page.evaluate(async () => {
+      const client = window.__bgeTttClient
+      if (!client?.getState) return { error: 'no client' }
+      let state = client.getState()
+      for (let i = 0; i < 60; i++) {
+        if (state?.state?.G) break
+        await new Promise((r) => setTimeout(r, 100))
+        state = client.getState()
+      }
+      if (!state?.state?.G) return { error: 'no state' }
+      const allClickable = state.allClickable
+      if (!allClickable?.size) return { error: 'allClickable empty' }
+      const entityFromAllClickable = allClickable.values().next().value
+      const G = state.state.G
+      const sharedBoard = G?.sharedBoard
+      if (!sharedBoard) return { error: 'no sharedBoard' }
+
+      // Find the same entity by walking sharedBoard -> entities -> ... (grid.spaces, space.entities, etc.)
+      function findEntityInTree (node, target) {
+        if (node === target) return node
+        if (!node || typeof node !== 'object') return null
+        const entities = node.entities ?? node.spaces
+        if (Array.isArray(entities)) {
+          for (let i = 0; i < entities.length; i++) {
+            const found = findEntityInTree(entities[i], target)
+            if (found) return found
+          }
+        }
+        return null
+      }
+      const entityInSharedBoard = findEntityInTree(sharedBoard, entityFromAllClickable)
+      const sameRefAsSharedBoard = entityInSharedBoard === entityFromAllClickable
+      const entityFromBank = G?.bank?.locate?.(entityFromAllClickable?.entityId)
+      const sameRefAsBank = entityFromAllClickable === entityFromBank
+
+      return {
+        sameRefAsSharedBoard,
+        sameRefAsBank,
+        entityId: entityFromAllClickable?.entityId,
+        foundInSharedBoard: entityInSharedBoard != null,
+      }
+    })
+
+    expect(result.error).toBeUndefined()
+    expect(result.sameRefAsSharedBoard, 'entity in allClickable should be the same reference as the entity in state.G.sharedBoard (entities/spaces tree), not just bank.locate()').toBe(true)
   })
 
   test('tic-tac-toe: make a move and assert state changed', async ({ page }) => {
