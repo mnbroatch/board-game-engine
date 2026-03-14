@@ -16,7 +16,7 @@ export class Client {
   constructor (options) {
     this.options = options
     this.game = options.boardgameIOGame
-      || gameFactory(JSON.parse(options.gameRules), options.gameName)
+      || gameFactory(JSON.parse(options.gameRules))
 
     if (!options.boardgameIOGame) {
       this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] }
@@ -32,21 +32,21 @@ export class Client {
         collapseOnLoad: true,
         impl: Debug,
       },
-      gameId,
-      boardgamePlayerID,
-      clientToken,
-      singlePlayer = !clientToken,
+      matchID,
+      playerID,
+      credentials,
+      multiplayer = SocketIO({ server, socketOpts: { transports: ['websocket', 'polling'] } }),
     } = this.options
 
     try {
-      const clientOptions = singlePlayer
+      const clientOptions = !credentials
         ? { game: this.game, numPlayers, debug }
         : {
             game: this.game,
-            multiplayer: SocketIO({ server, socketOpts: { transports: ['websocket', 'polling'] } }),
-            matchID: gameId,
-            playerID: boardgamePlayerID,
-            credentials: clientToken,
+            multiplayer,
+            matchID,
+            playerID,
+            credentials,
             debug,
           }
 

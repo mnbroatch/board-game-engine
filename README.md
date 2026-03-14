@@ -52,17 +52,12 @@ A client that runs a B.A.G.E.L.-defined game
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `gameRules` | string | JSON string of the B.A.G.E.L. game definition. Ignored if `boardgameIOGame` is set. |
-| `gameName` | string | Game name when using `gameRules`. |
-| `server` | string | Server URL for multiplayer. |
-| `numPlayers` | number | Number of players. |
-| `gameId` | string | Match ID for multiplayer. |
-| `boardgamePlayerID` | string | Player ID (e.g. `'0'`, `'1'`). |
-| `clientToken` | string | Credentials for multiplayer. |
-| `singlePlayer` | boolean | If `true` (default when no `clientToken`), run in single-player mode. |
-| `debug` | object | boardgame.io debug panel config; e.g. `{ collapseOnLoad: true, impl: Debug }`. |
+| `gameRules` | string | JSON string of the B.A.G.E.L. game definition |
+| `numPlayers` | number | Number of players in client-side game. |
 | `onClientUpdate` | function | Callback after state updates (e.g. to re-render UI). |
-| `boardgameIOGame` | object | Pre-built boardgame.io game object. If set, `gameRules` / `gameName` are not used. |
+| `debug` | object | boardgame.io debug panel config; e.g. `false`. |
+
+**Multiplayer** — For connecting to a remote game, see [Multiplayer](#multiplayer) below. Options such as `server` and `matchId` are passed through to the boardgame.io client; see the [boardgame.io Client API](https://boardgame.io/documentation/#/api/Client) for details.
 
 
 **Methods**
@@ -81,7 +76,6 @@ import { Client } from 'board-game-engine'
 
 const client = new Client({
   gameRules: JSON.stringify(myGameRules),
-  gameName: 'MyGame',
   numPlayers: 2,
   onClientUpdate: () => render(client.getState())
 })
@@ -91,39 +85,37 @@ client.connect()
 client.doStep(target)
 ```
 
+#### Multiplayer
+
+To connect to a remote match instead of running client-only, pass `server`, `matchId`, `playerID`, and `credentials`. When `credentials` is absent, the client runs in client-only mode.
+
+Note: boardgame.io does not allow adding games to the server instance after it is instantiated. boardgameengine.com hacks around that, but your server will need to have access to any games you intend to play when you boot it up.
+
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `server` | string | URL of gameserver running boardgame.io server instance |
+| `matchId` | string | Match ID. |
+| `gameName` | string | Game name |
+| `playerID` | string | Player ID (first player is `'0'`, next is `'1'`, etc.) |
+| `credentials` | string | Credentials for your server to interpret |
+| `multiplayer` | object | boardgame.io multiplayer transport. Defaults to `SocketIO({ server, socketOpts: { transports: ['websocket', 'polling'] } })`, (SocketIO is exported from `boardgame.io/multiplayer` |
+
+All options are required, (only one of `server` or `multiplayer`). For full details on the client options and multiplayer setup, see the [boardgame.io Client API](https://boardgame.io/documentation/#/api/Client).
+
 ---
 
-### `gameFactory(gameRules, gameName?)`
+### `gameFactory(gameRules, gameName)`
 
-Builds a boardgame.io-compatible game from a B.A.G.E.L. game definition.
-
-- **`gameRules`** (object) — Your B.A.G.E.L. game definition (entities, boards, moves, turn, phases, endIf).
-- **`gameName`** (string, optional) — Name of the game (used by boardgame.io).
-
-**Returns:** A game object with `setup`, `moves`, `turn`, `phases`, and `endIf` as needed — the same shape boardgame.io expects for its `game` option.
-
-**Example**
-
-```js
-import { gameFactory } from 'board-game-engine'
-
-const gameRules = {
-  entities: [/* ... */],
-  moves: [/* ... */],
-  turn: { /* ... */ },
-  endIf: [/* ... */]
-}
-
-const game = gameFactory(gameRules, 'MyGame')
-// Use with boardgame.io server or client
-```
+Builds a boardgame.io-compatible game from a B.A.G.E.L. game definition. Useful for preloading games in server code (server games must be preloaded in boardgame.io)
 
 ---
 
 ## How it fits
 
 1. You write a B.A.G.E.L. game definition (JSON).
-2. **board-game-engine** turns it into a boardgame.io game via `gameFactory`, or you run it in the browser with `Client`.
+2. **board-game-engine** turns it into a boardgame.io game
 3. The game runs with boardgame.io (local or server).
+4. `Client` wrapper adds client-side functionality like valid move highlighting
 
 For the full language reference, examples, and getting started, see **[https://boardgameengine.com/docs/index.html](https://boardgameengine.com/docs/index.html)**.
