@@ -27071,7 +27071,7 @@ ${message}`);
   var Client2 = class {
     constructor(options) {
       this.options = options;
-      this.game = options.boardgameIOGame || gameFactory(JSON.parse(options.gameRules));
+      this.game = options.boardgameIOGame || gameFactory(JSON.parse(options.gameRules), options.gameName);
       if (!options.boardgameIOGame) {
         this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
         this.optimisticWinner = null;
@@ -27097,6 +27097,7 @@ ${message}`);
           matchID,
           playerID,
           credentials,
+          numPlayers,
           debug
         };
         this.client = Client(clientOptions);

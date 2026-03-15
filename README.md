@@ -57,7 +57,7 @@ A client that runs a B.A.G.E.L.-defined game
 | `onClientUpdate` | function | Callback after state updates (e.g. to re-render UI). |
 | `debug` | object | boardgame.io debug panel config; e.g. `false`. |
 
-**Multiplayer** — For connecting to a remote game, see [Multiplayer](#multiplayer) below. Options such as `server` and `matchId` are passed through to the boardgame.io client; see the [boardgame.io Client API](https://boardgame.io/documentation/#/api/Client) for details.
+**Multiplayer** — For connecting to a remote game, see [Multiplayer](#multiplayer) below. Options such as `server` and `matchID` are passed through to the boardgame.io client; see the [boardgame.io Client API](https://boardgame.io/documentation/#/api/Client) for details.
 
 
 **Methods**
@@ -104,7 +104,7 @@ client.doStep(target)
 
 #### Multiplayer
 
-To connect to a remote match instead of running client-only, pass `server`, `matchId`, `playerID`, and `credentials`. When `credentials` is absent, the client runs in client-only mode.
+To connect to a remote match instead of running client-only, pass `server`, `matchID`, `playerID`, and `credentials`. When `credentials` is absent, the client runs in client-only mode.
 
 Note: boardgame.io does not allow adding games to the server instance after it is instantiated. boardgameengine.com hacks around that, but your server will need to have access to any games you intend to play when you boot it up.
 
@@ -112,7 +112,7 @@ Note: boardgame.io does not allow adding games to the server instance after it i
 | Option | Type | Description |
 |--------|------|-------------|
 | `server` | string | URL of gameserver running boardgame.io server instance |
-| `matchId` | string | Match ID. |
+| `matchID` | string | Match ID. |
 | `gameName` | string | Game name |
 | `playerID` | string | Player ID (first player is `'0'`, next is `'1'`, etc.) |
 | `credentials` | string | Credentials for your server to interpret |

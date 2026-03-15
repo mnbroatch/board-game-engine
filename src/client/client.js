@@ -16,7 +16,7 @@ export class Client {
   constructor (options) {
     this.options = options
     this.game = options.boardgameIOGame
-      || gameFactory(JSON.parse(options.gameRules))
+      || gameFactory(JSON.parse(options.gameRules), options.gameName)
 
     if (!options.boardgameIOGame) {
       this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] }
@@ -47,6 +47,7 @@ export class Client {
             matchID,
             playerID,
             credentials,
+            numPlayers,
             debug,
           }
 
