@@ -27110,7 +27110,7 @@ var Client2 = class {
       G: deserialize(JSON.stringify(bgioState.G), registry)
     };
     const gameover = this.optimisticWinner ?? state?.ctx?.gameover;
-    const currentMoves = gameover ? [] : Object.entries(getCurrentMoves(state, this.client));
+    const currentMoves = gameover ? [] : getCurrentMoves(state, this.client);
     if (this.options.boardgameIOGame) {
       return {
         state,

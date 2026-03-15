@@ -79,7 +79,7 @@ export class Client {
 
     const currentMoves = gameover
       ? []
-      : Object.entries(getCurrentMoves(state, this.client))
+      : getCurrentMoves(state, this.client)
 
     if (this.options.boardgameIOGame) {
       return {

@@ -15,6 +15,7 @@
     "test:coverage": "npm run build:coverage && cross-env COVERAGE=1 playwright test && nyc merge .nyc_output/run .nyc_output/out.json && nyc report --reporter=html --reporter=text",
     "build:coverage": "cross-env COVERAGE=1 node scripts/build.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:debug": "cross-env DEBUG_CONSOLE=1 playwright test",
     "test:e2e:install": "playwright install firefox",
     "serve": "http-server . -p 5174 -c-1",
     "lint": "eslint .",
