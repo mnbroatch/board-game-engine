@@ -19,7 +19,7 @@ export default class Condition {
       newContext
     )
 
-    // We don't simply defer to payload target because of Parent and RelativePath
+    // We don't simply defer to payload target because of parent and relativePath
     // target types, for instance, which retarget to another entity
     if (rule.target !== undefined) {
       conditionPayload.target = rule.target

@@ -107,7 +107,7 @@
           "conditions": [
             {
               "conditionType": "Is",
-              "target": { "type": "Parent" },
+              "target": { "type": "parent" },
               "matcher": { "name": "mainGrid" }
             }
           ]

@@ -8425,10 +8425,10 @@ ${message}`);
       return get(bgioArguments.ctx, value2.path);
     } else if (value2?.type === "gamePath") {
       return get(bgioArguments.G, value2.path);
-    } else if (value2?.type === "RelativePath") {
+    } else if (value2?.type === "relativePath" || value2?.type === "RelativePath") {
       const target = resolveProperties(bgioArguments, value2.target, context, "target");
       return get(target.attributes, value2.path) ?? null;
-    } else if (value2?.type === "Parent") {
+    } else if (value2?.type === "parent" || value2?.type === "Parent") {
       const originalTarget = value2.target ? resolveProperties(bgioArguments, value2.target, context, "target") : context.originalTarget;
       return bgioArguments.G.bank.findParent(originalTarget) ?? null;
     } else if (value2?.type === "map") {
@@ -8458,7 +8458,7 @@ ${message}`);
         }
       }
       return maxTargets;
-    } else if (value2?.type === "Pick") {
+    } else if (value2?.type === "pick" || value2?.type === "Pick") {
       const target = resolveProperties(bgioArguments, value2.target, context, "target");
       return (0, import_pick.default)(
         resolveProperties(
@@ -8469,7 +8469,7 @@ ${message}`);
         ),
         value2.properties
       );
-    } else if (value2?.type === "Coordinates") {
+    } else if (value2?.type === "coordinates" || value2?.type === "Coordinates") {
       const originalTarget = value2.target ? resolveProperties(bgioArguments, value2.target, context, "target") : context.originalTarget;
       const parent = bgioArguments.G.bank.findParent(originalTarget);
       return parent.getCoordinates(originalTarget.rule.index);

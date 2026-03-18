@@ -65,10 +65,10 @@ function resolveProperty (bgioArguments, value, context) {
     return get(bgioArguments.ctx, value.path)
   } else if (value?.type === 'gamePath') {
     return get(bgioArguments.G, value.path)
-  } else if (value?.type === 'RelativePath') {
+  } else if (value?.type === 'relativePath' || value?.type === 'RelativePath') {
     const target = resolveProperties(bgioArguments, value.target, context, 'target')
     return get(target.attributes, value.path) ?? null
-  } else if (value?.type === 'Parent') {
+  } else if (value?.type === 'parent' || value?.type === 'Parent') {
     const originalTarget = value.target
       ? resolveProperties(bgioArguments, value.target, context, 'target')
       : context.originalTarget
@@ -100,7 +100,7 @@ function resolveProperty (bgioArguments, value, context) {
       }
     }
     return maxTargets
-  } else if (value?.type === 'Pick') {
+  } else if (value?.type === 'pick' || value?.type === 'Pick') {
     const target = resolveProperties(bgioArguments, value.target, context, 'target')
     return pick(
       resolveProperties(
@@ -111,12 +111,12 @@ function resolveProperty (bgioArguments, value, context) {
       ),
       value.properties
     )
-  } else if (value?.type === 'Coordinates') {
+  } else if (value?.type === 'coordinates' || value?.type === 'Coordinates') {
     const originalTarget = value.target
       ? resolveProperties(bgioArguments, value.target, context, 'target')
       : context.originalTarget
-      const parent = bgioArguments.G.bank.findParent(originalTarget)
-      return parent.getCoordinates(originalTarget.rule.index)
+    const parent = bgioArguments.G.bank.findParent(originalTarget)
+    return parent.getCoordinates(originalTarget.rule.index)
   } else if (value?.type === 'relativeCoordinates') {
     const originalTarget = value.target
       ? resolveProperties(bgioArguments, value.target, context, 'target')
@@ -126,9 +126,9 @@ function resolveProperty (bgioArguments, value, context) {
       parent.getCoordinates(originalTarget.rule.index)
     const newCoordinates =
       parent.getRelativeCoordinates(
-      oldCoordinates,
-      resolveProperties(bgioArguments, value.location, context, 'location')
-    )
+        oldCoordinates,
+        resolveProperties(bgioArguments, value.location, context, 'location')
+      )
     return (newCoordinates && parent.spaces[parent.getIndex(newCoordinates)]) ?? null
   } else {
     return value

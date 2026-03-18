@@ -719,7 +719,7 @@
                       "expression": "(player == '0' and destinationCoordinates[1] == 0) or (player == '1' and destinationCoordinates[1] == 7)",
                       "arguments": {
                         "player": {
-                          "type": "RelativePath",
+                          "type": "relativePath",
                           "target": {
                             "type": "contextPath",
                             "path": ["originalTarget"]
@@ -727,7 +727,7 @@
                           "path": ["entities", 0, "rule", "player"]
                         },
                         "destinationCoordinates": {
-                          "type": "Coordinates",
+                          "type": "coordinates",
                           "target": {
                             "type": "contextPath",
                             "path": ["target"]

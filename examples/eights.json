@@ -161,7 +161,7 @@
                   "conditions": [
                     {
                       "conditionType": "Is",
-                      "target": { "type": "Parent" },
+                      "target": { "type": "parent" },
                       "matcher": { "name": "stock" }
                     },
                     {
@@ -195,7 +195,7 @@
               "conditions": [
                 {
                   "conditionType": "Is",
-                  "target": { "type": "Parent" },
+                  "target": { "type": "parent" },
                   "matcher": { "name": "stock" }
                 },
                 {
@@ -231,7 +231,7 @@
                 "conditions": [
                   {
                     "conditionType": "Is",
-                    "target": { "type": "Parent" },
+                    "target": { "type": "parent" },
                     "matcher": { "name": "discard" }
                   },
                   {
@@ -298,7 +298,7 @@
                     "conditions": [
                       {
                         "conditionType": "Is",
-                        "target": { "type": "Parent" },
+                        "target": { "type": "parent" },
                         "matcher": {
                           "name": "hand",
                           "player": {
@@ -319,13 +319,13 @@
                           {
                             "conditionType": "Is",
                             "matcher": {
-                              "type": "Pick",
+                              "type": "pick",
                               "properties": ["suit"],
                               "target": {
                                 "conditions": [
                                   {
                                     "conditionType": "Is",
-                                    "target": { "type": "Parent" },
+                                    "target": { "type": "parent" },
                                     "matcher": { "name": "discard" }
                                   },
                                   {
@@ -339,13 +339,13 @@
                           {
                             "conditionType": "Is",
                             "matcher": {
-                              "type": "Pick",
+                              "type": "pick",
                               "properties": ["value"],
                               "target": {
                                 "conditions": [
                                   {
                                     "conditionType": "Is",
-                                    "target": { "type": "Parent" },
+                                    "target": { "type": "parent" },
                                     "matcher": { "name": "discard" }
                                   },
                                   {
@@ -452,7 +452,7 @@
                     "conditions": [
                       {
                         "conditionType": "Is",
-                        "target": { "type": "Parent" },
+                        "target": { "type": "parent" },
                         "matcher": { "name": "discard" }
                       },
                       {
@@ -512,7 +512,7 @@
                     "matcher": {
                       "name": "score",
                       "player": {
-                        "type": "RelativePath",
+                        "type": "relativePath",
                         "target": {
                           "conditions": [
                             {
@@ -538,7 +538,7 @@
                   "expression": "existingScore + sum(faceValues)",
                   "arguments": {
                     "existingScore": {
-                      "type": "RelativePath",
+                      "type": "relativePath",
                       "target": {
                         "conditions": [
                           {
@@ -546,7 +546,7 @@
                             "matcher": {
                               "name": "score",
                               "player": {
-                                "type": "RelativePath",
+                                "type": "relativePath",
                                 "target": {
                                   "conditions": [
                                     {
@@ -574,7 +574,7 @@
                         "conditions": [
                           {
                             "conditionType": "Is",
-                            "target": { "type": "Parent" },
+                            "target": { "type": "parent" },
                             "matcher": {
                               "name": "hand",
                               "player": {
@@ -590,7 +590,7 @@
                         "expression": "cardValue == 8 ? 50 : (cardValue >= 10 and cardValue <= 13) ? 10 : cardValue",
                         "arguments": {
                           "cardValue": {
-                            "conditionType": "RelativePath",
+                            "type": "relativePath",
                             "target": {
 
                               "type": "contextPath",
@@ -627,7 +627,7 @@
           "expression": "score >= numPlayers * 50",
           "arguments": {
             "score": {
-              "type": "RelativePath",
+              "type": "relativePath",
               "target": {
                 "type": "contextPath",
                 "path": ["loopTarget"]
