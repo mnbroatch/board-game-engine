@@ -1,0 +1,1 @@
+{"version":3,"file":"place-new.d.ts","sourceRoot":"","sources":["../../../src/game-factory/move/place-new.ts"],"names":[],"mappings":"AAGA,OAAO,IAAI,MAAM,WAAW,CAAC;AAI7B,MAAM,CAAC,OAAO,OAAO,QAAS,SAAQ,IAAI;IACxC,EAAE,CAAE,aAAa,EAAE,OAAO,EAAE,IAAI,EAAE,OAAO,EAAE,eAAe,EAAE,OAAO,EAAE,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;CAiCtG"}

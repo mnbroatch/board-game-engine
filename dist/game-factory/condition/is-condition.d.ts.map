@@ -1,0 +1,1 @@
+{"version":3,"file":"is-condition.d.ts","sourceRoot":"","sources":["../../../src/game-factory/condition/is-condition.ts"],"names":[],"mappings":"AAAA,OAAO,SAAS,MAAM,gBAAgB,CAAC;AAIvC,MAAM,CAAC,OAAO,OAAO,EAAG,SAAQ,SAAS;IACvC,cAAc,CAAE,aAAa,EAAE,OAAO,EAAE,IAAI,EAAE,OAAO,EAAE,EAAE,MAAM,EAAE,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;;;;CAkB7H"}

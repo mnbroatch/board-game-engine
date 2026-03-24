@@ -1,0 +1,1 @@
+{"version":3,"file":"would-condition.d.ts","sourceRoot":"","sources":["../../../src/game-factory/condition/would-condition.ts"],"names":[],"mappings":"AACA,OAAO,SAAS,MAAM,gBAAgB,CAAC;AAavC,MAAM,CAAC,OAAO,OAAO,cAAe,SAAQ,SAAS;IACnD,cAAc,CACZ,aAAa,EAAE,OAAO,EACtB,IAAI,EAAE,OAAO,EACb,gBAAgB,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EACzC,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;;;;CAqDnC"}

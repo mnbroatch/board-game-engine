@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild'
 import { esbuildPluginIstanbul } from 'esbuild-plugin-istanbul'
 
-const entry = 'src/index.js'
+const entry = 'src/index.ts'
 const outdir = 'dist'
 const globalName = 'BoardGameEngine'
 const coverage = process.env.COVERAGE === '1'
@@ -24,7 +24,7 @@ if (coverage) {
       esbuildPluginIstanbul({
         name: 'istanbul',
         filter: /\.(js|ts)$/,
-        include: ['src/**/*.js'],
+        include: ['src/**/*.{js,ts}'],
         exclude: ['**/*.spec.js', '**/node_modules/**'],
       }),
     ],

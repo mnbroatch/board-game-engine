@@ -1,0 +1,1 @@
+{"version":3,"file":"is-full-condition.d.ts","sourceRoot":"","sources":["../../../src/game-factory/condition/is-full-condition.ts"],"names":[],"mappings":"AAAA,OAAO,SAAS,MAAM,gBAAgB,CAAC;AAEvC,MAAM,CAAC,OAAO,OAAO,MAAO,SAAQ,SAAS;IAC3C,cAAc,CAAE,cAAc,EAAE,OAAO,EAAE,KAAK,EAAE,OAAO,EAAE,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,QAAQ,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;;;CAM7H"}

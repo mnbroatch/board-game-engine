@@ -1,0 +1,1 @@
+{"version":3,"file":"no-possible-moves-condition.d.ts","sourceRoot":"","sources":["../../../src/game-factory/condition/no-possible-moves-condition.ts"],"names":[],"mappings":"AAAA,OAAO,SAAS,MAAM,gBAAgB,CAAC;AAKvC,MAAM,CAAC,OAAO,OAAO,eAAgB,SAAQ,SAAS;IACpD,cAAc,CAAE,aAAa,EAAE,OAAO,EAAE,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,OAAO,EAAE,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;;;CAQ9G"}

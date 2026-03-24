@@ -1,0 +1,1 @@
+{"version":3,"file":"position-condition.d.ts","sourceRoot":"","sources":["../../../src/game-factory/condition/position-condition.ts"],"names":[],"mappings":"AAAA,OAAO,SAAS,MAAM,gBAAgB,CAAC;AAEvC,MAAM,CAAC,OAAO,OAAO,QAAS,SAAQ,SAAS;IAC7C,cAAc,CAAE,aAAa,EAAE,OAAO,EAAE,IAAI,EAAE,OAAO,EAAE,gBAAgB,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,WAAW,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;;;CASvI"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"or-condition.d.ts","sourceRoot":"","sources":["../../../src/game-factory/condition/or-condition.ts"],"names":[],"mappings":"AACA,OAAO,SAAS,MAAM,gBAAgB,CAAC;AAGvC,MAAM,CAAC,OAAO,OAAO,EAAG,SAAQ,SAAS;IACvC,cAAc,CAAE,aAAa,EAAE,OAAO,EAAE,IAAI,EAAE,OAAO,EAAE,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC;;;CAS1H"}

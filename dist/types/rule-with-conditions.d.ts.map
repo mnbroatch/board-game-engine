@@ -1,0 +1,1 @@
+{"version":3,"file":"rule-with-conditions.d.ts","sourceRoot":"","sources":["../../src/types/rule-with-conditions.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,kBAAkB,CAAC;AAElD;;;GAGG;AACH,MAAM,MAAM,kBAAkB,GAAG;IAC/B,UAAU,CAAC,EAAE,SAAS,EAAE,CAAC;CAC1B,GAAG,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,CAAC"}
