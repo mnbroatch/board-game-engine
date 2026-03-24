@@ -18,8 +18,7 @@ import createPayload from "../utils/create-payload.js";
 
 export interface ClientOptions {
   boardgameIOGame?: BoardGameEngineGame;
-  /** JSON string of a {@link GameFactoryInput} rule object */
-  gameRules?: string;
+  gameRules?: GameFactoryInput;
   gameName?: string;
   server?: string;
   numPlayers?: number;
@@ -50,7 +49,7 @@ export class Client {
   constructor (options: ClientOptions) {
     this.options = options;
     this.game = options.boardgameIOGame
-      || gameFactory(JSON.parse(options.gameRules as string) as GameFactoryInput, options.gameName ?? "");
+      || gameFactory(options.gameRules!, options.gameName ?? "");
 
     if (!options.boardgameIOGame) {
       this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };

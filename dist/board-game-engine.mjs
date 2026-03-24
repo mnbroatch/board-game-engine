@@ -27145,7 +27145,7 @@ function createPayload(bgioState, moveRule, targets, _context) {
 var Client2 = class {
   constructor(options) {
     this.options = options;
-    this.game = options.boardgameIOGame || gameFactory(JSON.parse(options.gameRules), options.gameName ?? "");
+    this.game = options.boardgameIOGame || gameFactory(options.gameRules, options.gameName ?? "");
     if (!options.boardgameIOGame) {
       this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
       this.optimisticWinner = null;

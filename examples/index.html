@@ -186,7 +186,7 @@
             2;
 
           const client = new window.BoardGameEngine.Client({
-            gameRules: JSON.stringify(rules),
+            gameRules: rules,
             gameName: key,
             numPlayers,
             onClientUpdate: () => {

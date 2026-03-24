@@ -18,8 +18,7 @@
       let gameRules;
       try {
         const res = await fetch('/e2e/fixtures/minimal-game.json');
-        const rules = await res.json();
-        gameRules = JSON.stringify(rules);
+        gameRules = await res.json();
       } catch (e) {
         out.textContent = 'Fetch failed: ' + (e && e.message);
         return;

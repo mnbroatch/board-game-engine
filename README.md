@@ -52,7 +52,7 @@ A client that runs a B.A.G.E.L.-defined game
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `gameRules` | string | JSON string of the B.A.G.E.L. game definition |
+| `gameRules` | `GameFactoryInput` | B.A.G.E.L. game definition object (same shape as for `gameFactory`) |
 | `numPlayers` | number | Number of players in client-side game. |
 | `onClientUpdate` | function | Callback after state updates (e.g. to re-render UI). |
 | `debug` | object | boardgame.io debug panel config; e.g. `false`. |
@@ -92,7 +92,7 @@ In non-B.A.G.E.L. games, `doStep(target)` is not used. instead, the boardgame.io
 import { Client } from 'board-game-engine'
 
 const client = new Client({
-  gameRules: JSON.stringify(myGameRules),
+  gameRules: myGameRules,
   numPlayers: 2,
   onClientUpdate: () => render(client.getState())
 })
