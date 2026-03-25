@@ -3,8 +3,8 @@ import { Debug } from "@mnbroatch/boardgame.io/debug";
 import { SocketIO } from "@mnbroatch/boardgame.io/multiplayer";
 import { serialize, deserialize } from "wackson";
 import gameFactory from "../game-factory/game-factory.js";
-import type { BoardGameEngineGame, BgioArguments } from "../game-factory/game-factory.js";
-import type { Condition, GameFactoryInput } from "../types/bagel-types.js";
+import type { BoardgameIoGame, BgioArguments } from "../game-factory/game-factory.js";
+import type { BagelGame, Condition } from "../types/bagel-types.js";
 import { registry } from "../registry.js";
 import simulateMove from "../utils/simulate-move.js";
 import getCurrentMoves from "../utils/get-current-moves.js";
@@ -17,8 +17,8 @@ import getSteps from "../utils/get-steps.js";
 import createPayload from "../utils/create-payload.js";
 
 export interface ClientOptions {
-  boardgameIOGame?: BoardGameEngineGame;
-  gameRules?: GameFactoryInput;
+  boardgameIOGame?: BoardgameIoGame;
+  gameRules?: BagelGame;
   gameName?: string;
   server?: string;
   numPlayers?: number;
@@ -41,7 +41,7 @@ interface MoveBuilder {
 
 export class Client {
   options: ClientOptions;
-  game: BoardGameEngineGame;
+  game: BoardgameIoGame;
   client?: ReturnType<typeof BoardgameIOClient>;
   moveBuilder?: MoveBuilder;
   optimisticWinner?: unknown | null;
@@ -84,7 +84,7 @@ export class Client {
             debug,
           };
 
-      this.client = BoardgameIOClient(clientOptions as Parameters<typeof BoardgameIOClient>[0]);
+      this.client = BoardgameIOClient(clientOptions);
       this.client.subscribe(() => this.update());
       this.client.start();
       return this;
@@ -291,7 +291,7 @@ function isMoveCompleted (
 
 function getWinnerAfterMove (
   state: unknown,
-  game: BoardGameEngineGame,
+  game: BoardgameIoGame,
   moveInstance: unknown,
   movePayload: unknown
 ) {

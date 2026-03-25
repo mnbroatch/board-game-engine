@@ -432,18 +432,15 @@ export interface BagelGame {
   initialMoves?: MoveDefinition[];
   phases?: Record<string, PhaseConfig>;
   endIf?: EndRule[];
-}
-
-/** Rule object passed to `gameFactory` (engine-specific extensions on top of BagelGame). */
-export type GameFactoryInput = BagelGame & {
+  /** Engine/debug: skip `playerView` masking of hidden information. */
   DEBUG_DISABLE_SECRET_STATE?: boolean;
-};
+}
 
 /**
  * Rules after {@link expandGameRules}: invariant entities merged, default turn/sharedBoard,
  * initial placements expanded into moves; `initialPlacements` is removed.
  */
-export type ExpandedGameRules = Omit<GameFactoryInput, "entities" | "turn" | "initialPlacements"> & {
+export type ExpandedGameRules = Omit<BagelGame, "entities" | "turn" | "initialPlacements"> & {
   entities: Entity[];
   turn: TurnConfig;
 };

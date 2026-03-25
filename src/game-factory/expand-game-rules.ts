@@ -1,5 +1,5 @@
 import find from "lodash/find.js";
-import type { Entity, EntityMatcher, EntityAttributes, GameFactoryInput, ExpandedGameRules, MoveDefinition } from "../types/bagel-types.js";
+import type { Entity, EntityMatcher, EntityAttributes, BagelGame, ExpandedGameRules, MoveDefinition } from "../types/bagel-types.js";
 import transformJSON from "../utils/json-transformer.js";
 
 type TransformRule = {
@@ -232,11 +232,11 @@ const transformationRules: TransformRule[] = [
   },
 ];
 
-export default function expandGameRules (gameRules: GameFactoryInput): ExpandedGameRules {
-  const rules = transformJSON(gameRules, transformationRules) as GameFactoryInput;
+export default function expandGameRules (gameRules: BagelGame): ExpandedGameRules {
+  const rules = transformJSON(gameRules, transformationRules) as BagelGame;
 
   if (!rules.sharedBoard) {
-    rules.sharedBoard = rules.entities as unknown as GameFactoryInput["sharedBoard"];
+    rules.sharedBoard = rules.entities as unknown as BagelGame["sharedBoard"];
   }
 
   if (!rules.turn) {

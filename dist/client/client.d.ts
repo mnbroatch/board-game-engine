@@ -1,11 +1,11 @@
 import { Client as BoardgameIOClient } from "@mnbroatch/boardgame.io/client";
 import { Debug } from "@mnbroatch/boardgame.io/debug";
 import { SocketIO } from "@mnbroatch/boardgame.io/multiplayer";
-import type { BoardGameEngineGame } from "../game-factory/game-factory.js";
-import type { GameFactoryInput } from "../types/bagel-types.js";
+import type { BoardgameIoGame } from "../game-factory/game-factory.js";
+import type { BagelGame } from "../types/bagel-types.js";
 export interface ClientOptions {
-    boardgameIOGame?: BoardGameEngineGame;
-    gameRules?: GameFactoryInput;
+    boardgameIOGame?: BoardgameIoGame;
+    gameRules?: BagelGame;
     gameName?: string;
     server?: string;
     numPlayers?: number;
@@ -26,7 +26,7 @@ interface MoveBuilder {
 }
 export declare class Client {
     options: ClientOptions;
-    game: BoardGameEngineGame;
+    game: BoardgameIoGame;
     client?: ReturnType<typeof BoardgameIOClient>;
     moveBuilder?: MoveBuilder;
     optimisticWinner?: unknown | null;

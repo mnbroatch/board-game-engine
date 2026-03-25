@@ -52,7 +52,8 @@ A client that runs a B.A.G.E.L.-defined game
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `gameRules` | `GameFactoryInput` | B.A.G.E.L. game definition object (same shape as for `gameFactory`) |
+| `gameRules` | `BagelGame` | B.A.G.E.L. game definition object (same shape as for `gameFactory`) |
+| `boardgameIOGame` | `BoardgameIoGame` | Optional pre-built boardgame.io `Game` (from `gameFactory` or hand-authored). If omitted, `gameRules` + `gameName` are used. |
 | `numPlayers` | number | Number of players in client-side game. |
 | `onClientUpdate` | function | Callback after state updates (e.g. to re-render UI). |
 | `debug` | object | boardgame.io debug panel config; e.g. `false`. |
@@ -124,7 +125,7 @@ All options are required, (only one of `server` or `multiplayer`). For full deta
 
 ### `gameFactory(gameRules, gameName)`
 
-Builds a boardgame.io-compatible game from a B.A.G.E.L. game definition. Useful for preloading games in server code (server games must be preloaded in boardgame.io)
+Builds a boardgame.io-compatible game (`BoardgameIoGame`) from a B.A.G.E.L. `BagelGame` definition. Useful for preloading games in server code (server games must be preloaded in boardgame.io)
 
 ---
 

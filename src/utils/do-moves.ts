@@ -4,7 +4,7 @@ import moveFactory from "../game-factory/move/move-factory.js";
 export default function doMoves (
   bgioArguments: { G: unknown; [k: string]: unknown },
   moves: MoveDefinition[] = [],
-  context: { game: Record<string, unknown> } & Record<string, unknown>
+  context: { game: unknown } & Record<string, unknown>
 ) {
   if (!moves?.length) {
     return bgioArguments.G;

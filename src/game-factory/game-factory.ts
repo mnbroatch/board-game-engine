@@ -1,5 +1,6 @@
+import type { Game } from "@mnbroatch/boardgame.io";
 import { serialize } from "wackson";
-import type { GameFactoryInput, MoveDefinition, TurnConfig } from "../types/bagel-types.js";
+import type { BagelGame, MoveDefinition, TurnConfig } from "../types/bagel-types.js";
 import moveFactory from "./move/move-factory.js";
 import Bank from "./bank/bank.js";
 import expandGameRules from "./expand-game-rules.js";
@@ -11,14 +12,17 @@ import type { BgioResolveState } from "../utils/bgio-resolve-types.js";
 /** boardgame.io-style arguments (minimal typing; engine passes full objects). */
 export type BgioArguments = BgioResolveState;
 
-/** Object returned from `gameFactory` (boardgame.io game definition). */
-export type BoardGameEngineGame = Record<string, unknown> & { name: string };
+/** boardgame.io `Game` definition produced by {@link gameFactory}. */
+export type BoardgameIoGame = Game;
+
+/** Internal shape while building; asserted to {@link BoardgameIoGame} at return. */
+type GameBuild = Record<string, unknown> & { name: string };
 
 export default function gameFactory (
-  gameRules: GameFactoryInput,
+  gameRules: BagelGame,
   gameName: string
-): BoardGameEngineGame {
-  const game: BoardGameEngineGame = { name: gameName };
+): BoardgameIoGame {
+  const game: GameBuild = { name: gameName };
   const rules = expandGameRules(gameRules);
 
   game.setup = (bgioArguments: BgioArguments) => {
@@ -130,7 +134,7 @@ export default function gameFactory (
     };
   }
 
-  return game;
+  return game as BoardgameIoGame;
 }
 
 function expandEntityDefinitions (entities: unknown[], ctx: { numPlayers: number }) {
@@ -171,7 +175,7 @@ function expandEntityDefinitions (entities: unknown[], ctx: { numPlayers: number
   }, []);
 }
 
-function createTurn (turnRule: TurnConfig | Record<string, unknown>, game: BoardGameEngineGame) {
+function createTurn (turnRule: TurnConfig | Record<string, unknown>, game: GameBuild) {
   const turn = { ...turnRule } as Record<string, unknown>;
 
   turn.onBegin = (bgioArguments: BgioArguments) => {
@@ -217,7 +221,7 @@ function createTurn (turnRule: TurnConfig | Record<string, unknown>, game: Board
   return turn;
 }
 
-function createPhase (phaseRule: Record<string, unknown>, game: BoardGameEngineGame) {
+function createPhase (phaseRule: Record<string, unknown>, game: GameBuild) {
   const phase = { ...phaseRule };
   if (phaseRule.turn) {
     phase.turn = createTurn(phaseRule.turn as Record<string, unknown>, game);
@@ -255,7 +259,7 @@ function createPhase (phaseRule: Record<string, unknown>, game: BoardGameEngineG
   return phase;
 }
 
-function createMoves (moves: Record<string, MoveDefinition>, game: BoardGameEngineGame) {
+function createMoves (moves: Record<string, MoveDefinition>, game: GameBuild) {
   return Object.entries(moves).reduce<Record<string, unknown>>((acc, [name, moveDefinition]) => ({
     ...acc,
     [name]: moveFactory({ ...moveDefinition, name }, game),

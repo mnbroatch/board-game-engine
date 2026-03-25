@@ -1,6 +1,5 @@
 export type {
   BagelGame,
-  GameFactoryInput,
   ExpandedGameRules,
   PathSegment,
   ValueRef,
