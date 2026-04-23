@@ -1,13 +1,16 @@
 import Entity from "../entity.js";
+import type { RuntimeEntityRule } from "../../types/runtime-entity.js";
+import type { EngineEntity, EngineSpaceMethods } from "../../types/runtime-entity.js";
 
-type BankLike = { createEntity: (def: Record<string, unknown>) => unknown };
+type BankLike = { createEntity: (def: Partial<RuntimeEntityRule>) => EngineEntity };
+type EngineSpace = EngineEntity & EngineSpaceMethods;
 
 export default class SpaceGroup extends Entity {
-  spaces: unknown[];
+  spaces: EngineSpace[];
 
   constructor (
     options: ConstructorParameters<typeof Entity>[0] & { bank: BankLike },
-    rule: Record<string, unknown>,
+    rule: RuntimeEntityRule,
     id: number
   ) {
     super(options, rule, id);
@@ -16,11 +19,11 @@ export default class SpaceGroup extends Entity {
 
   makeSpaces (bank: BankLike) {
     return Array(this.getSpacesCount()).fill(undefined)
-      .map((_, i) => bank.createEntity({ entityType: "Space", index: i }));
+      .map((_, i) => bank.createEntity({ entityType: "Space", index: i }) as EngineSpace);
   }
 
   getEmptySpaces () {
-    return (this.spaces as { isEmpty: () => boolean }[]).filter((space) => space.isEmpty());
+    return this.spaces.filter((space) => space.isEmpty());
   }
 
   getSpace (arg: number | [number, number]) {
@@ -31,11 +34,11 @@ export default class SpaceGroup extends Entity {
   }
 
   getEntities (index: number) {
-    return (this.getSpace(index) as { entities: unknown[] }).entities;
+    return this.getSpace(index).entities;
   }
 
-  placeEntity (index: number, entity: unknown) {
-    (this.getSpace(index) as { placeEntity: (e: unknown) => void }).placeEntity(entity);
+  placeEntity (index: number, entity: EngineEntity) {
+    this.getSpace(index).placeEntity(entity);
   }
 
   getSpacesCount (): number {

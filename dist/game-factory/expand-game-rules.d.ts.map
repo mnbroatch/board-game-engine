@@ -1,1 +1,1 @@
-{"version":3,"file":"expand-game-rules.d.ts","sourceRoot":"","sources":["../../src/game-factory/expand-game-rules.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAA2C,SAAS,EAAE,iBAAiB,EAAkB,MAAM,yBAAyB,CAAC;AAyOrI,MAAM,CAAC,OAAO,UAAU,eAAe,CAAE,SAAS,EAAE,SAAS,GAAG,iBAAiB,CA4BhF"}
+{"version":3,"file":"expand-game-rules.d.ts","sourceRoot":"","sources":["../../src/game-factory/expand-game-rules.ts"],"names":[],"mappings":"AAQA,OAAO,KAAK,EACV,iBAAiB,EACjB,SAAS,EAIV,MAAM,iCAAiC,CAAC;AAqQzC,MAAM,CAAC,OAAO,UAAU,eAAe,CAAE,SAAS,EAAE,iBAAiB,GAAG,SAAS,CA6ChF"}

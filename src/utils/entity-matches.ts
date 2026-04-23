@@ -1,11 +1,13 @@
 import matches from "lodash/matches.js";
 import resolveProperties from "./resolve-properties.js";
-import type { BgioResolveState } from "./bgio-resolve-types.js";
+import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
+import type { EngineEntity } from "../types/runtime-entity.js";
+import type { MoveArgumentsState, ResolutionContext } from "../types/resolution-context.js";
 
 function resolveMatcher (
-  bgioArguments: BgioResolveState,
-  matcher: Record<string, unknown>,
-  context: Record<string, unknown>
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  matcher: MoveArgumentsState,
+  context: ResolutionContext
 ) {
   const resolvedMatcher = { ...matcher };
   delete resolvedMatcher.state;
@@ -13,7 +15,7 @@ function resolveMatcher (
   return resolveProperties(bgioArguments, resolvedMatcher, context);
 }
 
-function getEntityMatcher (entity: { rule: Record<string, unknown>; state?: Record<string, unknown> }) {
+function getEntityMatcher (entity: EngineEntity) {
   return {
     ...entity.rule,
     ...entity.state,
@@ -21,10 +23,10 @@ function getEntityMatcher (entity: { rule: Record<string, unknown>; state?: Reco
 }
 
 export default function entityMatches (
-  bgioArguments: BgioResolveState,
-  matcher: Record<string, unknown>,
-  entity: { rule: Record<string, unknown>; state?: Record<string, unknown> },
-  context: Record<string, unknown>
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  matcher: MoveArgumentsState,
+  entity: EngineEntity,
+  context: ResolutionContext
 ): boolean {
   return matches(resolveMatcher(bgioArguments, matcher, context))(getEntityMatcher(entity));
 }

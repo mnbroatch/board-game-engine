@@ -1,8 +1,9 @@
 import chunk from "lodash/chunk.js";
+import type { RuntimeEntityRule } from "../../types/runtime-entity.js";
 import SpaceGroup from "./space-group.js";
 
 export default class Grid extends SpaceGroup {
-  declare rule: Record<string, unknown> & { width: number; height: number };
+  declare rule: RuntimeEntityRule & { width: number; height: number };
 
   getSpacesCount () {
     return (this.rule.width as number) * (this.rule.height as number);

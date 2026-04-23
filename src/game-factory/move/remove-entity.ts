@@ -1,11 +1,18 @@
+import type { RemoveEntityDoPayload } from "../../types/move-payload.js";
 import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ResolutionContext } from "../../types/resolution-context.js";
 import { bankOf } from "../../utils/bgio-resolve-types.js";
+import type { MoveDefinition } from "../../types/expanded-game-types.js";
 import Move from "./move.js";
 
-export default class RemoveEntity extends Move {
-  do (bgioArguments: unknown, _rule: unknown, resolvedPayload: unknown) {
-    const { entity } = (resolvedPayload as { arguments: { entity: unknown } }).arguments;
-    const bgio = bgioArguments as BgioResolveState;
-    bankOf(bgio).returnToBank(bgio, entity as { entityId: number; rule: Record<string, unknown> });
+export default class RemoveEntity extends Move<NonNullable<RemoveEntityDoPayload["arguments"]>> {
+  do (
+    bgioArguments: BgioResolveState,
+    _rule: MoveDefinition,
+    resolvedPayload: RemoveEntityDoPayload,
+    _context: ResolutionContext
+  ) {
+    const { entity } = resolvedPayload.arguments;
+    bankOf(bgioArguments).returnToBank(bgioArguments, entity);
   }
 }

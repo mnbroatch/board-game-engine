@@ -1,18 +1,12 @@
-import MoveEntity from "./move-entity.js";
-import RemoveEntity from "./remove-entity.js";
-import PlaceNew from "./place-new.js";
-import TakeFrom from "./take-from.js";
-import SetState from "./set-state.js";
-import SetActivePlayers from "./set-active-players.js";
-import EndTurn from "./end-turn.js";
-import PassTurn from "./pass-turn.js";
-import ForEach from "./for-each.js";
-import Pass from "./pass.js";
-import Shuffle from "./shuffle.js";
-import type { MoveDefinition } from "../../types/bagel-types.js";
-export default function moveFactory(moveRule: MoveDefinition, game: unknown): {
-    (bgioArguments: unknown, serializablePayload: unknown): any;
-    moveInstance: MoveEntity | RemoveEntity | PlaceNew | TakeFrom | SetState | ForEach | Pass | Shuffle | SetActivePlayers | EndTurn | PassTurn;
+import type { MoveFn } from "@mnbroatch/boardgame.io";
+import type { MoveArgumentsMap } from "../../types/move-arguments.js";
+import type { BoardgameEngineG, BoardgameIoGame } from "../game-factory.js";
+import type { MoveDefinition } from "../../types/expanded-game-types.js";
+import type Move from "./move.js";
+/** boardgame.io move function plus engine metadata for staged moves / UI. */
+export type BoardgameEngineMove = MoveFn<BoardgameEngineG> & {
+    moveInstance: Move<MoveArgumentsMap>;
 };
-export declare function getMoveInstance(moveRule: MoveDefinition): MoveEntity | RemoveEntity | PlaceNew | TakeFrom | SetState | ForEach | Pass | Shuffle | SetActivePlayers | EndTurn | PassTurn;
+export default function moveFactory(moveRule: MoveDefinition, game: BoardgameIoGame): BoardgameEngineMove;
+export declare function getMoveInstance(moveRule: MoveDefinition): Move<MoveArgumentsMap>;
 //# sourceMappingURL=move-factory.d.ts.map

@@ -1,8 +1,20 @@
-import type { Condition as ConditionRule } from "../../types/bagel-types.js";
+import type { Condition as ConditionRule } from "../../types/expanded-game-types.js";
 import Condition from "./condition.js";
 import checkConditions from "../../utils/check-conditions.js";
 import simulateMove from "../../utils/simulate-move.js";
-import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import { bankOf, type BgioReadonlyState, type BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type {
+  ConditionCheckResult,
+  ConditionContext,
+  ConditionPayload,
+} from "../../types/condition-types.js";
+import type { ResolvedConditionRule } from "../../types/resolved-condition-types.js";
+import type {
+  AbstractPickArgument,
+  PreparedMoveArgument,
+  PreparedMovePayload,
+} from "../../types/move-payload.js";
+import type { SimulatePreparedArguments } from "../../utils/simulate-move.js";
 
 const argNameMap: Record<string, string[]> = {
   PlaceNew: ["destination"],
@@ -12,44 +24,79 @@ const argNameMap: Record<string, string[]> = {
   SetState: ["entity", "state"],
 };
 
+function isEntityLike (value: unknown): value is { entityId: number } {
+  return Boolean(value && typeof value === "object" && typeof (value as { entityId?: unknown }).entityId === "number");
+}
+
+function isPreparedMoveArgument (value: unknown): value is PreparedMoveArgument {
+  return typeof value === "number"
+    || Boolean(value && typeof value === "object" && (value as AbstractPickArgument).abstract === true);
+}
+
 export default class WouldCondition extends Condition {
   checkCondition (
-    bgioArguments: unknown,
-    rule: unknown,
-    conditionPayload: Record<string, unknown>,
-    context: Record<string, unknown>
+    bgioArguments: BgioReadonlyState | BgioResolveState,
+    rule: ResolvedConditionRule,
+    conditionPayload: ConditionPayload,
+    context: ConditionContext
   ) {
     const target = conditionPayload.target;
-    const targets = (conditionPayload.targets as unknown[] | undefined) ?? [target];
+    if (!context.moveInstance) {
+      return { conditionIsMet: false };
+    }
 
-    const moveType = (context.moveInstance as { rule: { moveType: string } } | undefined)?.rule?.moveType;
+    const targets: unknown[] = conditionPayload.targets
+      ?? (Array.isArray(target) ? target : [target]);
+
+    const moveType = context.moveInstance?.rule?.moveType;
     const argNames = moveType ? argNameMap[moveType] : undefined;
-    const payload = {
-      arguments: targets.reduce<Record<string, unknown>>((acc, t, i) => {
+    const payload: PreparedMovePayload<SimulatePreparedArguments> & {
+      arguments: SimulatePreparedArguments;
+    } = {
+      arguments: targets.reduce<SimulatePreparedArguments>((acc, t, i) => {
         const key = argNames?.[i] ?? `arg${i}`;
-        return { ...acc, [key]: t };
+        if (isPreparedMoveArgument(t)) {
+          return { ...acc, [key]: t };
+        }
+        if (isEntityLike(t)) {
+          return { ...acc, [key]: t.entityId };
+        }
+        return acc;
       }, {}),
     };
 
+    if (!("events" in bgioArguments)) {
+      throw new Error("WouldCondition: requires full boardgame.io move context (DefaultPluginAPIs)");
+    }
+
     const simulatedG = simulateMove(
       bgioArguments as BgioResolveState,
-      payload as Parameters<typeof simulateMove>[1],
-      context as Parameters<typeof simulateMove>[2]
-    ) as { bank: { locate: (id: unknown) => unknown } };
+      payload,
+      { ...context, moveInstance: context.moveInstance }
+    );
 
-    let simulatedConditionsPayload: Record<string, unknown> = {};
-    if (target) {
+    let simulatedConditionsPayload: ConditionPayload = {};
+    if (Array.isArray(target)) {
       simulatedConditionsPayload = {
-        target: simulatedG.bank.locate((target as { entityId: unknown }).entityId),
+        targets: target
+          .filter(isEntityLike)
+          .map((t) => simulatedG.bank.locate(t.entityId)),
       };
+    } else if (target) {
+      if (isEntityLike(target)) {
+        simulatedConditionsPayload = {
+          target: simulatedG.bank.locate(target.entityId),
+        };
+      }
     } else if (targets) {
+      const entityTargets = targets.filter(isEntityLike);
       simulatedConditionsPayload = {
-        targets: targets.map((t) => simulatedG.bank.locate((t as { entityId: unknown }).entityId)),
+        targets: entityTargets.map((t) => simulatedG.bank.locate(t.entityId)),
       };
     }
 
     const conditionResults = checkConditions(
-      { ...(bgioArguments as BgioResolveState), G: simulatedG } as BgioResolveState,
+      { ...bgioArguments, G: simulatedG },
       (rule as { conditions?: ConditionRule[] }).conditions,
       simulatedConditionsPayload,
       context
@@ -60,13 +107,15 @@ export default class WouldCondition extends Condition {
     const results = conditionIsMet
       ? restoreReferences(
         conditionResults.results,
-        (entityId: unknown) =>
-          (bgioArguments as { G: { bank: { locate: (id: unknown) => unknown } } }).G.bank.locate(entityId)
+        (entityId: unknown) => {
+          if (typeof entityId !== "number") return entityId;
+          return bankOf(bgioArguments).locate(entityId);
+        }
       )
       : conditionResults.results;
 
     return {
-      results,
+      results: results as ConditionCheckResult["results"],
       conditionIsMet,
     };
   }
@@ -86,8 +135,8 @@ function restoreReferences (
   }
   seen.add(obj);
 
-  if ((obj as { entityId?: unknown }).entityId !== undefined) {
-    return getOriginalEntity((obj as { entityId: unknown }).entityId);
+  if (isEntityLike(obj)) {
+    return getOriginalEntity(obj.entityId);
   }
 
   if (Array.isArray(obj)) {

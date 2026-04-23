@@ -98,10 +98,10 @@ var require_immer_cjs_development = __commonJS({
     function isDraftable(value2) {
       var _value$constructor;
       if (!value2) return false;
-      return isPlainObject6(value2) || Array.isArray(value2) || !!value2[DRAFTABLE] || !!((_value$constructor = value2.constructor) === null || _value$constructor === void 0 ? void 0 : _value$constructor[DRAFTABLE]) || isMap(value2) || isSet(value2);
+      return isPlainObject10(value2) || Array.isArray(value2) || !!value2[DRAFTABLE] || !!((_value$constructor = value2.constructor) === null || _value$constructor === void 0 ? void 0 : _value$constructor[DRAFTABLE]) || isMap(value2) || isSet(value2);
     }
     var objectCtorString = /* @__PURE__ */ Object.prototype.constructor.toString();
-    function isPlainObject6(value2) {
+    function isPlainObject10(value2) {
       if (!value2 || typeof value2 !== "object") return false;
       var proto = Object.getPrototypeOf(value2);
       if (proto === null) {
@@ -1681,7 +1681,7 @@ var require_lodash = __commonJS({
     function isObjectLike(value2) {
       return !!value2 && typeof value2 == "object";
     }
-    function isPlainObject6(value2) {
+    function isPlainObject10(value2) {
       if (!isObjectLike(value2) || objectToString.call(value2) != objectTag || isHostObject(value2)) {
         return false;
       }
@@ -1692,7 +1692,7 @@ var require_lodash = __commonJS({
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
       return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
     }
-    module.exports = isPlainObject6;
+    module.exports = isPlainObject10;
   }
 });
 
@@ -1702,12 +1702,12 @@ var require_turn_order_b2ff8740 = __commonJS({
     "use strict";
     var produce = require_dist();
     var pluginRandom = require_plugin_random_7425844d();
-    var isPlainObject6 = require_lodash();
+    var isPlainObject10 = require_lodash();
     function _interopDefaultLegacy(e) {
       return e && typeof e === "object" && "default" in e ? e : { "default": e };
     }
     var produce__default = /* @__PURE__ */ _interopDefaultLegacy(produce);
-    var isPlainObject__default = /* @__PURE__ */ _interopDefaultLegacy(isPlainObject6);
+    var isPlainObject__default = /* @__PURE__ */ _interopDefaultLegacy(isPlainObject10);
     var MAKE_MOVE2 = "MAKE_MOVE";
     var GAME_EVENT2 = "GAME_EVENT";
     var REDO2 = "REDO";
@@ -4889,7 +4889,7 @@ var require_isPlainObject = __commonJS({
     var funcToString = funcProto.toString;
     var hasOwnProperty = objectProto.hasOwnProperty;
     var objectCtorString = funcToString.call(Object);
-    function isPlainObject6(value2) {
+    function isPlainObject10(value2) {
       if (!isObjectLike(value2) || baseGetTag(value2) != objectTag) {
         return false;
       }
@@ -4900,7 +4900,7 @@ var require_isPlainObject = __commonJS({
       var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
       return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
     }
-    module.exports = isPlainObject6;
+    module.exports = isPlainObject10;
   }
 });
 
@@ -5869,7 +5869,7 @@ var require_util = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.clone = exports.objectType = exports.hasOwnProperty = void 0;
     exports.hasOwnProperty = Object.prototype.hasOwnProperty;
-    function objectType(object2) {
+    function objectType2(object2) {
       if (object2 === void 0) {
         return "undefined";
       }
@@ -5881,7 +5881,7 @@ var require_util = __commonJS({
       }
       return typeof object2;
     }
-    exports.objectType = objectType;
+    exports.objectType = objectType2;
     function isNonPrimitive(value2) {
       return value2 != null && typeof value2 == "object";
     }
@@ -6717,8 +6717,36 @@ var Grid = class extends SpaceGroup {
 var import_find = __toESM(require_find());
 var import_filter = __toESM(require_filter());
 
+// src/utils/resolve-condition.ts
+var import_isPlainObject6 = __toESM(require_isPlainObject());
+
 // src/utils/resolve-properties.ts
-var import_isPlainObject2 = __toESM(require_isPlainObject());
+var import_isPlainObject5 = __toESM(require_isPlainObject());
+
+// src/utils/resolve-entity.ts
+var import_isPlainObject = __toESM(require_isPlainObject());
+
+// src/utils/bgio-resolve-types.ts
+function bankOf(bg) {
+  return bg.G.bank;
+}
+
+// src/utils/resolve-entity.ts
+var abstractTargetNames = ["state"];
+function isRuntimeSelector(val) {
+  if (!(0, import_isPlainObject.default)(val)) return false;
+  return "conditions" in val;
+}
+function resolveEntity(bgioArguments, target, context, targetName) {
+  return !abstractTargetNames.includes(targetName ?? "") && isRuntimeSelector(target) ? bankOf(bgioArguments).find(
+    bgioArguments,
+    target,
+    context
+  ) : target;
+}
+
+// src/utils/resolve-value-ref.ts
+var import_isPlainObject4 = __toESM(require_isPlainObject());
 var import_pick = __toESM(require_pick());
 
 // src/utils/get.ts
@@ -6738,6 +6766,9 @@ function get(obj, pathArray) {
       }
       current = flat;
     } else {
+      if (!current || typeof current !== "object" && typeof current !== "function") {
+        return void 0;
+      }
       current = current[step];
     }
   }
@@ -8354,22 +8385,197 @@ Parser.prototype.isOperatorEnabled = function(op) {
 var parser = new Parser();
 parser.functions.sum = (...args) => args[0].reduce((acc, val) => acc + val, 0);
 function resolveExpression2(bgioArguments, rule, context) {
-  const args = resolveProperties(bgioArguments, rule.arguments, context);
-  return parser.evaluate(rule.expression, args);
+  return parser.evaluate(rule.expression, rule.arguments ?? {});
 }
 
-// src/utils/resolve-entity.ts
-var import_isPlainObject = __toESM(require_isPlainObject());
-
-// src/utils/bgio-resolve-types.ts
-function bankOf(bg) {
-  return bg.G.bank;
+// src/types/guards/value-ref.ts
+var import_isPlainObject2 = __toESM(require_isPlainObject());
+var valueRefTypes = /* @__PURE__ */ new Set([
+  "ctxPath",
+  "contextPath",
+  "gamePath",
+  "expression",
+  "relativeCoordinates",
+  "coordinates",
+  "Coordinates",
+  "relativePath",
+  "RelativePath",
+  "parent",
+  "Parent",
+  "map",
+  "mapMax",
+  "pick",
+  "Pick",
+  "count"
+]);
+function isValueRefObject(value2) {
+  if (!(0, import_isPlainObject2.default)(value2)) return false;
+  const t2 = value2.type;
+  return typeof t2 === "string" && valueRefTypes.has(t2);
 }
 
-// src/utils/resolve-entity.ts
-var abstractTargetNames = ["state"];
-function resolveEntity(bgioArguments, target, context, targetName) {
-  return !abstractTargetNames.includes(targetName ?? "") && (0, import_isPlainObject.default)(target) ? bankOf(bgioArguments).find(bgioArguments, target, context) : target;
+// src/utils/type-asserts.ts
+var import_isPlainObject3 = __toESM(require_isPlainObject());
+function isRecord(value2) {
+  return (0, import_isPlainObject3.default)(value2);
+}
+function assertRecord(value2, message) {
+  if (!isRecord(value2)) {
+    throw new Error(message);
+  }
+}
+function assertNumber(value2, message) {
+  if (typeof value2 !== "number" || Number.isNaN(value2)) {
+    throw new Error(message);
+  }
+}
+function assertHasConditionIsMet(value2, message) {
+  if (!value2 || typeof value2 !== "object" || typeof value2.conditionIsMet !== "boolean") {
+    throw new Error(message);
+  }
+}
+
+// src/utils/resolve-value-ref.ts
+var notValueRefNode = Symbol("notValueRefNode");
+function getMappedTargets(bgioArguments, targetsRule, mapping, context, resolveProperties2) {
+  targetsRule.resolveAsEntity = true;
+  const resolved = resolveProperties2(bgioArguments, targetsRule, context);
+  if (resolved === void 0) return [];
+  if (!Array.isArray(resolved)) {
+    assertRecord(resolved, "map/mapMax targets must resolve to an array (or be omitted).");
+    throw new Error("map/mapMax targets must resolve to an array.");
+  }
+  return resolved.map((target) => ({
+    target,
+    value: resolveProperties2(
+      bgioArguments,
+      mapping,
+      { ...context, loopTarget: target }
+    )
+  }));
+}
+function resolveDiscriminatedValueRef(bgioArguments, value2, context, resolveProperties2) {
+  if (!(0, import_isPlainObject4.default)(value2)) {
+    return notValueRefNode;
+  }
+  if (!isValueRefObject(value2)) {
+    return notValueRefNode;
+  }
+  switch (value2.type) {
+    case "expression": {
+      const expr = value2;
+      const resolvedArguments = resolveProperties2(bgioArguments, expr.arguments, context, "arguments");
+      if (resolvedArguments !== void 0 && (!(0, import_isPlainObject4.default)(resolvedArguments) || Array.isArray(resolvedArguments))) {
+        throw new Error("Expression arguments must be an object or undefined.");
+      }
+      const args = resolvedArguments === void 0 ? void 0 : resolvedArguments;
+      return resolveExpression2(
+        bgioArguments,
+        {
+          ...expr,
+          arguments: args
+        },
+        context
+      );
+    }
+    case "count":
+      return bankOf(bgioArguments).findAll(
+        bgioArguments,
+        value2,
+        context
+      ).length;
+    case "contextPath":
+      return get(context, value2.path);
+    case "ctxPath":
+      return get(bgioArguments.ctx, value2.path);
+    case "gamePath":
+      return get(bgioArguments.G, value2.path);
+    case "relativePath":
+    case "RelativePath": {
+      const rp = value2;
+      const target = resolveProperties2(bgioArguments, rp.target, context, "target");
+      return get(target?.attributes, rp.path) ?? null;
+    }
+    case "parent":
+    case "Parent": {
+      const pr = value2;
+      const originalTarget = pr.target !== void 0 ? resolveProperties2(bgioArguments, pr.target, context, "target") : context.originalTarget;
+      return bankOf(bgioArguments).findParent(originalTarget) ?? null;
+    }
+    case "map": {
+      const mr = value2;
+      return getMappedTargets(
+        bgioArguments,
+        mr.targets,
+        mr.mapping,
+        context,
+        resolveProperties2
+      ).map((mappedTarget) => mappedTarget.value);
+    }
+    case "mapMax": {
+      const mm = value2;
+      const mappedTargets = getMappedTargets(
+        bgioArguments,
+        mm.targets,
+        mm.mapping,
+        context,
+        resolveProperties2
+      );
+      let maxValue;
+      const maxTargets = [];
+      for (let i2 = 0, len = mappedTargets.length; i2 < len; i2++) {
+        const { target, value: val } = mappedTargets[i2];
+        if (typeof val !== "number") {
+          throw new Error("mapMax mapping must resolve to a number.");
+        }
+        if (maxValue === void 0 || val > maxValue) {
+          maxValue = val;
+          maxTargets.length = 0;
+          maxTargets.push(target);
+        } else if (val === maxValue) {
+          maxTargets.push(target);
+        }
+      }
+      return maxTargets;
+    }
+    case "pick":
+    case "Pick": {
+      const pk = value2;
+      const target = resolveProperties2(bgioArguments, pk.target, context, "target");
+      const attrs = resolveProperties2(
+        bgioArguments,
+        target?.attributes,
+        context,
+        "attributes"
+      );
+      if (!attrs || typeof attrs !== "object" || Array.isArray(attrs)) {
+        throw new Error("pick target attributes must be an object.");
+      }
+      return (0, import_pick.default)(attrs, pk.properties);
+    }
+    case "coordinates":
+    case "Coordinates": {
+      const cr = value2;
+      const originalTarget = cr.target !== void 0 ? resolveProperties2(bgioArguments, cr.target, context, "target") : context.originalTarget;
+      const parent = bankOf(bgioArguments).findParent(originalTarget);
+      if (!parent) return null;
+      return parent.getCoordinates(originalTarget.rule.index);
+    }
+    case "relativeCoordinates": {
+      const rc = value2;
+      const originalTarget = rc.target !== void 0 ? resolveProperties2(bgioArguments, rc.target, context, "target") : context.originalTarget;
+      const parent = bankOf(bgioArguments).findParent(originalTarget);
+      if (!parent) return null;
+      const oldCoordinates = parent.getCoordinates(originalTarget.rule.index);
+      const newCoordinates = parent.getRelativeCoordinates(
+        oldCoordinates,
+        resolveProperties2(bgioArguments, rc.location, context, "location")
+      );
+      return (newCoordinates && parent.spaces[parent.getIndex(newCoordinates)]) ?? null;
+    }
+    default:
+      return notValueRefNode;
+  }
 }
 
 // src/utils/resolve-properties.ts
@@ -8380,7 +8586,7 @@ var resolutionTerminators = [
   "mapping"
 ];
 function resolveProperties(bgioArguments, obj, context = {}, key) {
-  if (!(0, import_isPlainObject2.default)(obj) && !Array.isArray(obj)) {
+  if (!(0, import_isPlainObject5.default)(obj) && !Array.isArray(obj)) {
     return obj;
   }
   let resolvedProperties = Array.isArray(obj) ? [...obj] : { ...obj };
@@ -8399,101 +8605,212 @@ function resolveProperties(bgioArguments, obj, context = {}, key) {
   ) : resolved;
 }
 function resolveProperty(bgioArguments, value2, context) {
-  const v2 = value2;
-  if (v2?.type === "expression") {
-    const expr = v2;
-    return resolveExpression2(
-      bgioArguments,
-      {
-        ...expr,
-        arguments: resolveProperties(bgioArguments, expr.arguments, context, "arguments")
-      },
-      context
-    );
-  } else if (v2?.type === "count") {
-    return bankOf(bgioArguments).findAll(
-      bgioArguments,
-      value2,
-      context
-    ).length;
-  } else if (v2?.type === "contextPath") {
-    return get(context, v2.path);
-  } else if (v2?.type === "ctxPath") {
-    return get(bgioArguments.ctx, v2.path);
-  } else if (v2?.type === "gamePath") {
-    return get(bgioArguments.G, v2.path);
-  } else if (v2?.type === "relativePath" || v2?.type === "RelativePath") {
-    const target = resolveProperties(bgioArguments, v2.target, context, "target");
-    return get(target?.attributes, v2.path) ?? null;
-  } else if (v2?.type === "parent" || v2?.type === "Parent") {
-    const originalTarget = v2.target ? resolveProperties(bgioArguments, v2.target, context, "target") : context.originalTarget;
-    return bankOf(bgioArguments).findParent(originalTarget) ?? null;
-  } else if (v2?.type === "map") {
-    return getMappedTargets(
-      bgioArguments,
-      v2.targets,
-      v2.mapping,
-      context
-    ).map((mappedTarget) => mappedTarget.value);
-  } else if (v2?.type === "mapMax") {
-    const mappedTargets = getMappedTargets(
-      bgioArguments,
-      v2.targets,
-      v2.mapping,
-      context
-    );
-    let maxValue;
-    const maxTargets = [];
-    for (let i2 = 0, len = mappedTargets.length; i2 < len; i2++) {
-      const { target, value: val } = mappedTargets[i2];
-      if (maxValue === void 0 || val > maxValue) {
-        maxValue = val;
-        maxTargets.length = 0;
-        maxTargets.push(target);
-      } else if (val === maxValue) {
-        maxTargets.push(target);
-      }
-    }
-    return maxTargets;
-  } else if (v2?.type === "pick" || v2?.type === "Pick") {
-    const target = resolveProperties(bgioArguments, v2.target, context, "target");
-    return (0, import_pick.default)(
-      resolveProperties(
-        bgioArguments,
-        target?.attributes,
-        context,
-        "attributes"
-      ),
-      v2.properties
-    );
-  } else if (v2?.type === "coordinates" || v2?.type === "Coordinates") {
-    const originalTarget = v2.target ? resolveProperties(bgioArguments, v2.target, context, "target") : context.originalTarget;
-    const parent = bankOf(bgioArguments).findParent(originalTarget);
-    return parent.getCoordinates(originalTarget.rule.index);
-  } else if (v2?.type === "relativeCoordinates") {
-    const originalTarget = v2.target ? resolveProperties(bgioArguments, v2.target, context, "target") : context.originalTarget;
-    const parent = bankOf(bgioArguments).findParent(originalTarget);
-    const oldCoordinates = parent.getCoordinates(originalTarget.rule.index);
-    const newCoordinates = parent.getRelativeCoordinates(
-      oldCoordinates,
-      resolveProperties(bgioArguments, v2.location, context, "location")
-    );
-    return (newCoordinates && parent.spaces[parent.getIndex(newCoordinates)]) ?? null;
-  } else {
-    return value2;
+  const refResult = resolveDiscriminatedValueRef(
+    bgioArguments,
+    value2,
+    context,
+    resolveProperties
+  );
+  if (refResult !== notValueRefNode) {
+    return refResult;
+  }
+  return value2;
+}
+
+// src/utils/resolve-typed-value.ts
+function expectResolvedEngineEntity(value2, message) {
+  if (!value2 || typeof value2 !== "object" || value2.entityId === void 0) {
+    throw new Error(message);
   }
 }
-function getMappedTargets(bgioArguments, targetsRule, mapping, context) {
-  targetsRule.resolveAsEntity = true;
-  const resolved = resolveProperties(bgioArguments, targetsRule, context);
-  return resolved?.map((target) => ({
-    target,
-    value: resolveProperties(
-      bgioArguments,
-      mapping,
-      { ...context, loopTarget: target }
-    )
-  })) ?? [];
+function expectResolvedEngineEntityArray(value2, message) {
+  if (!Array.isArray(value2)) {
+    throw new Error(message);
+  }
+  value2.forEach((v2) => expectResolvedEngineEntity(v2, message));
+}
+function expectResolvedEngineEntityOrArray(value2, message) {
+  if (Array.isArray(value2)) {
+    expectResolvedEngineEntityArray(value2, message);
+  } else {
+    expectResolvedEngineEntity(value2, message);
+  }
+}
+function expectResolvedGrid(value2, message) {
+  if (!(value2 instanceof Grid)) {
+    throw new Error(message);
+  }
+}
+function expectResolvedEngineEntityContainer(value2, message) {
+  if (!value2 || typeof value2 !== "object") {
+    throw new Error(message);
+  }
+  const o2 = value2;
+  const hasEntities = "entities" in o2 && Array.isArray(o2.entities);
+  const hasSpaces = "spaces" in o2 && Array.isArray(o2.spaces);
+  if (!hasEntities && !hasSpaces) {
+    throw new Error(message);
+  }
+}
+function resolveFieldAsEngineEntity(bgioArguments, node, context, message) {
+  const v2 = resolveProperties(bgioArguments, node, context, "target");
+  expectResolvedEngineEntity(v2, message);
+  return v2;
+}
+function resolveFieldAsGrid(bgioArguments, node, context, message) {
+  const v2 = resolveProperties(bgioArguments, node, context, "target");
+  expectResolvedGrid(v2, message);
+  return v2;
+}
+
+// src/utils/resolve-condition.ts
+function isRecord2(value2) {
+  return (0, import_isPlainObject6.default)(value2);
+}
+function resolveCondition(bgioArguments, rule, context, payload) {
+  if (typeof rule === "string") {
+    return rule;
+  }
+  if (rule && typeof rule === "object" && !("conditionType" in rule)) {
+    return rule;
+  }
+  switch (rule.conditionType) {
+    case "HasLine": {
+      const target = resolveProperties(bgioArguments, rule.target, context, "target");
+      expectResolvedGrid(target, "HasLine: resolved target must be a Grid");
+      payload.target = target;
+      const sequence = resolveProperties(bgioArguments, rule.sequence, context, "sequence");
+      const resolved = {
+        ...rule,
+        target,
+        // Resolve any non-condition refs inside sequence steps; leave nested `conditions` untouched.
+        sequence
+      };
+      return resolved;
+    }
+    case "IsFull": {
+      const target = resolveProperties(bgioArguments, rule.target, context, "target");
+      expectResolvedEngineEntity(target, "IsFull: resolved target must be an EngineEntity");
+      payload.target = target;
+      const resolved = {
+        ...rule,
+        target
+      };
+      return resolved;
+    }
+    case "InLine": {
+      const resolvedTarget = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
+      expectResolvedEngineEntity(resolvedTarget, "InLine: resolved target must be an EngineEntity");
+      const grid = bankOf(bgioArguments).findParent(resolvedTarget);
+      expectResolvedGrid(grid, "InLine: target must have Grid parent");
+      payload.target = resolvedTarget;
+      const sequence = resolveProperties(bgioArguments, rule.sequence, context, "sequence");
+      const resolved = {
+        ...rule,
+        target: resolvedTarget,
+        grid,
+        sequence
+      };
+      return resolved;
+    }
+    case "Is": {
+      const resolvedEntityRaw = rule.entity === void 0 ? void 0 : resolveProperties(bgioArguments, rule.entity, context, "entity");
+      let resolvedEntity;
+      if (resolvedEntityRaw !== void 0) {
+        expectResolvedEngineEntity(resolvedEntityRaw, "Is: resolved entity must be an EngineEntity");
+        resolvedEntity = resolvedEntityRaw;
+      }
+      const resolvedTargetRaw = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
+      let resolvedTargetEntity;
+      if (resolvedTargetRaw !== void 0) {
+        expectResolvedEngineEntityOrArray(resolvedTargetRaw, "Is: resolved target must be an EngineEntity (or array)");
+        resolvedTargetEntity = resolvedTargetRaw;
+        payload.target = resolvedTargetEntity;
+      }
+      const resolvedMatcherRaw = rule.matcher === void 0 ? void 0 : resolveProperties(bgioArguments, rule.matcher, context, "matcher");
+      if (resolvedMatcherRaw !== void 0 && !isRecord2(resolvedMatcherRaw)) {
+        throw new Error("Is: matcher must resolve to an object.");
+      }
+      const resolvedMatcher = resolvedMatcherRaw;
+      const resolved = {
+        conditionType: "Is",
+        ...resolvedTargetEntity === void 0 ? {} : { target: resolvedTargetEntity },
+        ...resolvedMatcher === void 0 ? {} : { matcher: resolvedMatcher },
+        ...resolvedEntity === void 0 ? {} : { entity: resolvedEntity }
+      };
+      return resolved;
+    }
+    case "Contains": {
+      const resolvedTargetRaw = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
+      let resolvedTargetEntity;
+      if (resolvedTargetRaw !== void 0) {
+        expectResolvedEngineEntityOrArray(resolvedTargetRaw, "Contains: resolved target must be an EngineEntity (or array)");
+        resolvedTargetEntity = resolvedTargetRaw;
+        payload.target = resolvedTargetEntity;
+      }
+      const resolved = {
+        conditionType: "Contains",
+        ...rule.conditions === void 0 ? {} : { conditions: rule.conditions },
+        ...resolvedTargetEntity === void 0 ? {} : { target: resolvedTargetEntity }
+      };
+      return resolved;
+    }
+    case "Not": {
+      const resolvedTargetRaw = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
+      let resolvedTargetEntity;
+      if (resolvedTargetRaw !== void 0) {
+        expectResolvedEngineEntityOrArray(resolvedTargetRaw, "Not: resolved target must be an EngineEntity (or array)");
+        resolvedTargetEntity = resolvedTargetRaw;
+        payload.target = resolvedTargetEntity;
+      }
+      const resolved = {
+        conditionType: "Not",
+        conditions: rule.conditions,
+        ...resolvedTargetEntity === void 0 ? {} : { target: resolvedTargetEntity }
+      };
+      return resolved;
+    }
+    case "Some":
+    case "Every": {
+      const resolvedTarget = resolveProperties(bgioArguments, rule.target, context, "target");
+      expectResolvedEngineEntityOrArray(resolvedTarget, `${rule.conditionType}: resolved target must be an EngineEntity (or array)`);
+      payload.target = resolvedTarget;
+      return {
+        conditionType: rule.conditionType,
+        conditions: rule.conditions
+      };
+    }
+    case "Or": {
+      return {
+        conditionType: "Or",
+        conditions: rule.conditions
+      };
+    }
+    case "Evaluate": {
+      const resolvedArguments = resolveProperties(bgioArguments, rule.arguments, context, "arguments");
+      if (resolvedArguments !== void 0 && !isRecord2(resolvedArguments)) {
+        throw new Error("Evaluate: arguments must resolve to an object.");
+      }
+      return {
+        ...rule,
+        arguments: resolvedArguments
+      };
+    }
+    default: {
+      const resolved = resolveProperties(bgioArguments, rule, context);
+      if (resolved && typeof resolved === "object" && "target" in resolved) {
+        const maybeTarget = resolved.target;
+        if (maybeTarget !== void 0) {
+          try {
+            expectResolvedEngineEntityOrArray(maybeTarget, "Resolved condition target must be EngineEntity or array");
+            payload.target = maybeTarget;
+          } catch {
+          }
+        }
+      }
+      return resolved;
+    }
+  }
 }
 
 // src/game-factory/condition/condition.ts
@@ -8507,25 +8824,11 @@ var Condition = class {
     if (conditionPayload.target) {
       newContext.originalTarget = conditionPayload.target;
     }
-    const rule = resolveProperties(
-      bgioArguments,
-      this.rule,
-      newContext
-    );
-    if (rule.target !== void 0) {
-      conditionPayload.target = rule.target;
-    }
-    if (this.rule.target !== void 0 && !conditionPayload.target) {
-      return { conditionIsMet: false };
-    }
+    const rule = resolveCondition(bgioArguments, this.rule, newContext, conditionPayload);
     return this.checkCondition(bgioArguments, rule, conditionPayload, newContext);
   }
-  isMet(...args) {
-    return this.check(
-      args[0],
-      args[1] ?? {},
-      args[2] ?? {}
-    ).conditionIsMet;
+  isMet(bgioArguments, payload = {}, context = {}) {
+    return this.check(bgioArguments, payload, context).conditionIsMet;
   }
 };
 
@@ -8550,18 +8853,21 @@ function entityMatches(bgioArguments, matcher, entity, context) {
 // src/game-factory/condition/is-condition.ts
 var Is = class extends Condition {
   checkCondition(bgioArguments, rule, { target }, context) {
-    if (this.rule.entity && target !== rule.entity) {
+    const r2 = rule;
+    const resolvedTarget = r2.target ?? target;
+    if (this.rule.entity && resolvedTarget !== r2.entity) {
       return {
-        target,
+        target: resolvedTarget,
         conditionIsMet: false
       };
     }
+    expectResolvedEngineEntity(resolvedTarget, "Is condition: target must resolve to an EngineEntity");
     return {
-      target,
+      target: resolvedTarget,
       conditionIsMet: entityMatches(
         bgioArguments,
-        rule.matcher,
-        target,
+        r2.matcher ?? {},
+        resolvedTarget,
         context
       )
     };
@@ -8586,7 +8892,9 @@ function findMetCondition(bgioArguments, conditions = [], payload, context) {
   let success;
   for (const conditionRule of conditions) {
     const result = conditionFactory(conditionRule).check(bgioArguments, payload, context);
+    assertHasConditionIsMet(result, "Condition result must include boolean conditionIsMet");
     if (result.conditionIsMet) {
+      assertRecord(result, "Condition result must be a record");
       success = {
         ...result,
         conditionRule
@@ -8613,7 +8921,11 @@ var Or = class extends Condition {
 // src/game-factory/condition/some-condition.ts
 var SomeCondition = class extends Condition {
   checkCondition(bgioArguments, rule, conditionPayload, context) {
-    const targets = conditionPayload.target;
+    const raw = conditionPayload.target;
+    if (raw === void 0) {
+      return { conditionIsMet: false, result: void 0 };
+    }
+    const targets = Array.isArray(raw) ? raw : [raw];
     const result = targets.find((target) => {
       const loopContext = {
         ...context,
@@ -8636,7 +8948,11 @@ var SomeCondition = class extends Condition {
 // src/game-factory/condition/every-condition.ts
 var EveryCondition = class extends Condition {
   checkCondition(bgioArguments, rule, conditionPayload, context) {
-    const targets = conditionPayload.target;
+    const raw = conditionPayload.target;
+    if (raw === void 0) {
+      return { conditionIsMet: false, results: [] };
+    }
+    const targets = Array.isArray(raw) ? raw : [raw];
     const results = targets.map((target) => {
       const loopContext = {
         ...context,
@@ -8657,14 +8973,13 @@ var EveryCondition = class extends Condition {
 };
 
 // src/game-factory/condition/contains-condition.ts
-var import_matches2 = __toESM(require_matches());
 var ContainsCondition = class extends Condition {
   checkCondition(bgioArguments, rule, payload, context) {
-    const target = payload.target;
-    if (!target) {
+    const container = payload.target;
+    if (!container) {
       return { matches: [], conditionIsMet: false };
     } else {
-      const candidates = target.entities ?? target.spaces;
+      const candidates = ("entities" in container ? container.entities : void 0) ?? ("spaces" in container ? container.spaces : void 0);
       const matches2 = candidates?.filter((entity) => checkConditions(
         bgioArguments,
         rule.conditions,
@@ -8680,13 +8995,19 @@ var ContainsCondition = class extends Condition {
 var import_pick2 = __toESM(require_pick());
 var ContainsSame = class extends Condition {
   checkCondition(bgioArguments, rule, conditionPayload, _newContext) {
-    const { targets } = conditionPayload;
-    if (targets.length === 1 && targets[0].entities?.length) {
+    const targets = (conditionPayload.targets ?? []).filter(Boolean);
+    const containers = targets.map((t2) => {
+      if ("entities" in t2 || "spaces" in t2) return t2;
+      throw new Error("ContainsSame: each target must be an EngineEntityContainer");
+    });
+    const getCandidates = (c2) => ("entities" in c2 ? c2.entities : void 0) ?? ("spaces" in c2 ? c2.spaces : void 0) ?? [];
+    if (containers.length === 1 && getCandidates(containers[0]).length) {
       return { conditionIsMet: true };
     }
-    const [first, ...restEntities] = targets;
-    const conditionIsMet = (first.entities ?? []).some((entity) => {
+    const [first, ...restContainers] = containers;
+    const conditionIsMet = getCandidates(first).some((entity) => {
       const e = entity;
+      assertRecord(e.rule, "ContainsSame: entity.rule must be a record");
       const condition2 = conditionFactory({
         conditionType: "Contains",
         conditions: [{
@@ -8695,7 +9016,7 @@ var ContainsSame = class extends Condition {
         }]
       });
       if (!condition2) return false;
-      return restEntities.every((ent) => {
+      return restContainers.every((ent) => {
         return condition2.isMet(bgioArguments, { target: ent });
       });
     });
@@ -8704,7 +9025,7 @@ var ContainsSame = class extends Condition {
 };
 
 // src/utils/grid-contains-sequence.ts
-var import_matches3 = __toESM(require_matches());
+var import_matches2 = __toESM(require_matches());
 var directions = [
   [1, 0],
   // horizontal
@@ -8725,15 +9046,18 @@ function getSequenceKey(sequencePattern, context) {
   return JSON.stringify({ pattern: sequencePattern, context: contextKey2 });
 }
 function getGridStateKey(grid) {
-  const spaces = grid.entities || [];
+  const spaces = grid.spaces || [];
   return spaces.map((space2) => {
-    const entities = space2.entities || [];
+    const entities = space2?.entities || [];
     if (entities.length === 0) return "empty";
     return entities.map((entity) => {
+      const unknownEntity = entity;
+      assertRecord(unknownEntity, "Grid state hashing expects entity to be a plain object");
+      const entityRecord = unknownEntity;
       const sortedKeys = Object.keys(entity).sort();
       const stateObj = {};
       sortedKeys.forEach((key) => {
-        stateObj[key] = entity[key];
+        stateObj[key] = entityRecord[key];
       });
       return JSON.stringify(stateObj);
     }).sort().join("|");
@@ -8762,7 +9086,7 @@ function findSequencesInLine(bgioArguments, lineSpaces, sequencePattern, minSequ
   return matches2;
 }
 function getLineStartingPoints(grid, dx, dy) {
-  const { width, height } = grid.attributes;
+  const { width, height } = grid.rule;
   const starts = [];
   if (dx === 1 && dy === 0) {
     for (let y2 = 0; y2 < height; y2++) starts.push([0, y2]);
@@ -8828,7 +9152,6 @@ function checkSpaceConditions(bgioArguments, space2, conditions, chunkMatches = 
     {
       target: space2,
       targets: [space2, ...chunkMatches]
-      // for ContainsSame, other group conditions
     },
     context
   ).conditionsAreMet;
@@ -8875,13 +9198,11 @@ function gridContainsSequence(bgioArguments, grid, sequencePattern, context) {
 
 // src/game-factory/condition/in-line-condition.ts
 var InLineCondition = class extends Condition {
-  checkCondition(bgioArguments, rule, payload, context) {
-    const { G: G2 } = bgioArguments;
-    const { target } = payload;
-    const parent = G2.bank.findParent(payload.target);
+  checkCondition(bgioArguments, rule, _payload, context) {
+    const { target, grid } = rule;
     const { matches: allMatches } = gridContainsSequence(
       bgioArguments,
-      parent,
+      grid,
       rule.sequence,
       context
     );
@@ -8894,10 +9215,11 @@ var InLineCondition = class extends Condition {
 
 // src/game-factory/condition/has-line-condition.ts
 var HasLineCondition = class extends Condition {
-  checkCondition(bgioArguments, rule, payload, context) {
+  checkCondition(bgioArguments, rule, _payload, context) {
+    const gridTarget = rule.target;
     const { matches: matches2 } = gridContainsSequence(
       bgioArguments,
-      payload.target,
+      gridTarget,
       rule.sequence,
       context
     );
@@ -8907,24 +9229,48 @@ var HasLineCondition = class extends Condition {
 
 // src/game-factory/condition/is-full-condition.ts
 var IsFull = class extends Condition {
-  checkCondition(_bgioArguments, _rule, payload, _context) {
-    const t2 = payload.target;
+  checkCondition(_bgioArguments, rule, _payload, _context) {
+    const t2 = rule.target;
+    const spaces = t2?.spaces;
+    if (!spaces) {
+      return { conditionIsMet: false };
+    }
     return {
-      conditionIsMet: t2.spaces.every((space2) => space2?.entities?.length)
+      conditionIsMet: spaces.every((space2) => space2?.entities?.length)
     };
   }
 };
 
 // src/utils/simulate-move.ts
+function isAbstractPick(arg) {
+  return Boolean(
+    arg && typeof arg === "object" && "abstract" in arg && arg.abstract
+  );
+}
+function getEntityId(arg) {
+  if (typeof arg === "number") return arg;
+  if (arg && typeof arg === "object") return arg.entityId;
+}
 function simulateMove(bgioArguments, payload, context) {
   const simulatedG = deserialize(serialize(bgioArguments.G), registry);
   const newBgioArguments = {
     ...bgioArguments,
     G: simulatedG
   };
-  const simulatedPayload = { ...payload, arguments: {} };
+  const simulatedPayload = {
+    ...payload,
+    arguments: {}
+  };
   Object.entries(payload.arguments).forEach(([argName, arg]) => {
-    simulatedPayload.arguments[argName] = arg.abstract ? arg : simulatedG.bank.locate(typeof arg === "number" ? arg : arg.entityId);
+    if (arg === void 0) return;
+    if (isAbstractPick(arg)) {
+      simulatedPayload.arguments[argName] = arg;
+      return;
+    }
+    const id = getEntityId(arg);
+    if (typeof id === "number") {
+      simulatedPayload.arguments[argName] = simulatedG.bank.locate(id);
+    }
   });
   context.moveInstance.doMove(
     newBgioArguments,
@@ -8943,31 +9289,56 @@ var argNameMap = {
   TakeFrom: ["source", "destination"],
   SetState: ["entity", "state"]
 };
+function isEntityLike(value2) {
+  return Boolean(value2 && typeof value2 === "object" && typeof value2.entityId === "number");
+}
+function isPreparedMoveArgument(value2) {
+  return typeof value2 === "number" || Boolean(value2 && typeof value2 === "object" && value2.abstract === true);
+}
 var WouldCondition = class extends Condition {
   checkCondition(bgioArguments, rule, conditionPayload, context) {
     const target = conditionPayload.target;
-    const targets = conditionPayload.targets ?? [target];
+    if (!context.moveInstance) {
+      return { conditionIsMet: false };
+    }
+    const targets = conditionPayload.targets ?? (Array.isArray(target) ? target : [target]);
     const moveType = context.moveInstance?.rule?.moveType;
     const argNames = moveType ? argNameMap[moveType] : void 0;
     const payload = {
       arguments: targets.reduce((acc, t2, i2) => {
         const key = argNames?.[i2] ?? `arg${i2}`;
-        return { ...acc, [key]: t2 };
+        if (isPreparedMoveArgument(t2)) {
+          return { ...acc, [key]: t2 };
+        }
+        if (isEntityLike(t2)) {
+          return { ...acc, [key]: t2.entityId };
+        }
+        return acc;
       }, {})
     };
+    if (!("events" in bgioArguments)) {
+      throw new Error("WouldCondition: requires full boardgame.io move context (DefaultPluginAPIs)");
+    }
     const simulatedG = simulateMove(
       bgioArguments,
       payload,
-      context
+      { ...context, moveInstance: context.moveInstance }
     );
     let simulatedConditionsPayload = {};
-    if (target) {
+    if (Array.isArray(target)) {
       simulatedConditionsPayload = {
-        target: simulatedG.bank.locate(target.entityId)
+        targets: target.filter(isEntityLike).map((t2) => simulatedG.bank.locate(t2.entityId))
       };
+    } else if (target) {
+      if (isEntityLike(target)) {
+        simulatedConditionsPayload = {
+          target: simulatedG.bank.locate(target.entityId)
+        };
+      }
     } else if (targets) {
+      const entityTargets = targets.filter(isEntityLike);
       simulatedConditionsPayload = {
-        targets: targets.map((t2) => simulatedG.bank.locate(t2.entityId))
+        targets: entityTargets.map((t2) => simulatedG.bank.locate(t2.entityId))
       };
     }
     const conditionResults = checkConditions(
@@ -8979,7 +9350,10 @@ var WouldCondition = class extends Condition {
     const conditionIsMet = conditionResults.conditionsAreMet;
     const results = conditionIsMet ? restoreReferences(
       conditionResults.results,
-      (entityId) => bgioArguments.G.bank.locate(entityId)
+      (entityId) => {
+        if (typeof entityId !== "number") return entityId;
+        return bankOf(bgioArguments).locate(entityId);
+      }
     ) : conditionResults.results;
     return {
       results,
@@ -8995,7 +9369,7 @@ function restoreReferences(obj, getOriginalEntity, seen = /* @__PURE__ */ new We
     return obj;
   }
   seen.add(obj);
-  if (obj.entityId !== void 0) {
+  if (isEntityLike(obj)) {
     return getOriginalEntity(obj.entityId);
   }
   if (Array.isArray(obj)) {
@@ -9011,7 +9385,7 @@ function restoreReferences(obj, getOriginalEntity, seen = /* @__PURE__ */ new We
 }
 
 // src/utils/any-valid-moves.ts
-var import_isPlainObject3 = __toESM(require_isPlainObject());
+var import_isPlainObject7 = __toESM(require_isPlainObject());
 function findMoveArgumentReferences(obj, refs = /* @__PURE__ */ new Set()) {
   if (!obj || typeof obj !== "object") {
     return refs;
@@ -9022,8 +9396,10 @@ function findMoveArgumentReferences(obj, refs = /* @__PURE__ */ new Set()) {
       refs.add(String(o2.path[1]));
     }
   }
-  for (const value2 of Object.values(obj)) {
-    findMoveArgumentReferences(value2, refs);
+  if (isRecord(obj)) {
+    for (const value2 of Object.values(obj)) {
+      findMoveArgumentReferences(value2, refs);
+    }
   }
   return refs;
 }
@@ -9070,7 +9446,7 @@ function findValidCombination(bgioArguments, moveInstance, ruleArguments, ordere
     ...context,
     moveArguments: currentArgs
   };
-  const matches2 = (0, import_isPlainObject3.default)(arg) ? resolveEntity(
+  const matches2 = (0, import_isPlainObject7.default)(arg) && isRecord(arg) ? resolveEntity(
     bgioArguments,
     { ...arg, matchMultiple: true },
     updatedContext,
@@ -9093,23 +9469,22 @@ function findValidCombination(bgioArguments, moveInstance, ruleArguments, ordere
   });
 }
 function areThereValidMoves(bgioArguments, moves) {
-  const bgio = bgioArguments;
   return Object.values(moves).some((move) => {
     const moveInstance = move?.moveInstance;
     if (!moveInstance) return false;
     const context = { moveInstance };
     const rule = resolveProperties(
-      bgio,
+      bgioArguments,
       moveInstance.rule,
       context
     );
     const ruleArguments = rule.arguments ?? {};
     if (Object.keys(ruleArguments).length === 0) {
-      return moveInstance.isValid(bgio, { arguments: {} }, context);
+      return moveInstance.isValid(bgioArguments, { arguments: {} }, context);
     }
     const orderedArgNames = getArgumentOrder(ruleArguments);
     return findValidCombination(
-      bgio,
+      bgioArguments,
       moveInstance,
       ruleArguments,
       orderedArgNames,
@@ -9141,7 +9516,7 @@ var NoPossibleMoves = class extends Condition {
 };
 
 // src/game-factory/condition/evaluate-condition.ts
-var import_matches4 = __toESM(require_matches());
+var import_matches3 = __toESM(require_matches());
 var Evaluate = class extends Condition {
   checkCondition(bgioArguments, rule, payload, context) {
     const newContext = { ...context };
@@ -9160,11 +9535,16 @@ var Evaluate = class extends Condition {
 // src/game-factory/condition/position-condition.ts
 var Position = class extends Condition {
   checkCondition(bgioArguments, rule, conditionPayload, _newContext) {
-    const target = conditionPayload.target;
-    const parent = bgioArguments.G.bank.findParent(target);
+    const raw = conditionPayload.target;
+    const maybeTarget = Array.isArray(raw) ? raw[0] : raw;
+    if (!maybeTarget) return { conditionIsMet: false };
+    expectResolvedEngineEntity(maybeTarget, "Position: target must resolve to an EngineEntity");
+    const target = maybeTarget;
+    const parent = bankOf(bgioArguments).findParent(target);
+    expectResolvedEngineEntityContainer(parent, "Position: target must have a container parent");
     let conditionIsMet = false;
     if (rule.position === "First") {
-      conditionIsMet = parent.entities.indexOf(target) === 0;
+      conditionIsMet = "entities" in parent && parent.entities.indexOf(target) === 0;
     }
     return { conditionIsMet };
   }
@@ -9175,44 +9555,44 @@ function conditionFactory(rule) {
   if (typeof rule !== "object" || rule === null || !("conditionType" in rule)) {
     return void 0;
   }
-  const r2 = rule;
-  if (r2.conditionType === "Is") {
-    return new Is(r2);
-  } else if (r2.conditionType === "Not") {
-    return new NotCondition(r2);
-  } else if (r2.conditionType === "Or") {
-    return new Or(r2);
-  } else if (r2.conditionType === "Some") {
-    return new SomeCondition(r2);
-  } else if (r2.conditionType === "Contains") {
-    return new ContainsCondition(r2);
-  } else if (r2.conditionType === "ContainsSame") {
-    return new ContainsSame(r2);
-  } else if (r2.conditionType === "Every") {
-    return new EveryCondition(r2);
-  } else if (r2.conditionType === "InLine") {
-    return new InLineCondition(r2);
-  } else if (r2.conditionType === "HasLine") {
-    return new HasLineCondition(r2);
-  } else if (r2.conditionType === "IsFull") {
-    return new IsFull(r2);
-  } else if (r2.conditionType === "Would") {
-    return new WouldCondition(r2);
-  } else if (r2.conditionType === "NoPossibleMoves") {
-    return new NoPossibleMoves(r2);
-  } else if (r2.conditionType === "Evaluate") {
-    return new Evaluate(r2);
-  } else if (r2.conditionType === "Position") {
-    return new Position(r2);
+  if (rule.conditionType === "Is") {
+    return new Is(rule);
+  } else if (rule.conditionType === "Not") {
+    return new NotCondition(rule);
+  } else if (rule.conditionType === "Or") {
+    return new Or(rule);
+  } else if (rule.conditionType === "Some") {
+    return new SomeCondition(rule);
+  } else if (rule.conditionType === "Contains") {
+    return new ContainsCondition(rule);
+  } else if (rule.conditionType === "ContainsSame") {
+    return new ContainsSame(rule);
+  } else if (rule.conditionType === "Every") {
+    return new EveryCondition(rule);
+  } else if (rule.conditionType === "InLine") {
+    return new InLineCondition(rule);
+  } else if (rule.conditionType === "HasLine") {
+    return new HasLineCondition(rule);
+  } else if (rule.conditionType === "IsFull") {
+    return new IsFull(rule);
+  } else if (rule.conditionType === "Would") {
+    return new WouldCondition(rule);
+  } else if (rule.conditionType === "NoPossibleMoves") {
+    return new NoPossibleMoves(rule);
+  } else if (rule.conditionType === "Evaluate") {
+    return new Evaluate(rule);
+  } else if (rule.conditionType === "Position") {
+    return new Position(rule);
   }
   return void 0;
 }
 
 // src/utils/check-conditions.ts
-function checkConditions(bgioArguments, conditions = [], payload = {}, context = {}) {
+function runCheckConditions(bgioArguments, conditions, payload, context) {
+  const list = Array.isArray(conditions) ? conditions : conditions ? [conditions] : [];
   const results = [];
   let failedAt;
-  for (const conditionRule of conditions) {
+  for (const conditionRule of list) {
     const result = conditionFactory(conditionRule).check(bgioArguments, payload, context);
     if (!result.conditionIsMet) {
       failedAt = conditionRule;
@@ -9224,8 +9604,17 @@ function checkConditions(bgioArguments, conditions = [], payload = {}, context =
   return {
     results,
     failedAt,
-    conditionsAreMet: results.length === conditions.length
+    conditionsAreMet: results.length === list.length
   };
+}
+function checkConditions(bgioArguments, conditions = [], payload = {}, context = {}) {
+  const typedConditions = Array.isArray(conditions) ? conditions : conditions;
+  return runCheckConditions(
+    bgioArguments,
+    typedConditions,
+    payload,
+    context
+  );
 }
 
 // src/game-factory/bank/bank-slot.ts
@@ -9274,7 +9663,7 @@ var BankSlot = class {
   }
   returnToBank(entity) {
     if (entity.rule.state) {
-      entity.state = entity.rule.state;
+      entity.state = { ...entity.rule.state };
     } else {
       delete entity.state;
     }
@@ -9287,6 +9676,9 @@ var BankSlot = class {
 var bank_slot_default = BankSlot;
 
 // src/game-factory/bank/bank.ts
+function isRemovableParent(value2) {
+  return Boolean(value2 && typeof value2.remove === "function");
+}
 var Bank = class {
   constructor(entityRules) {
     this.currentEntityId = 0;
@@ -9307,11 +9699,47 @@ var Bank = class {
     this.track(entity);
     return entity;
   }
+  /**
+   * Create a real entity instance without tracking it in this bank.
+   * Used for evaluating slot-matching conditions against an example entity.
+   */
+  createUntrackedEntity(definition, options, id) {
+    const Ctor = registry[definition.entityType || "Entity"];
+    return new Ctor(
+      {
+        bank: this,
+        fromBank: true,
+        ...options
+      },
+      definition,
+      id
+    );
+  }
+  createSlotExampleEntity(bgioArguments, slot, context) {
+    let nextTempId = -1;
+    const ephemeralBank = {
+      createEntity: (def) => this.createUntrackedEntity(def, { bank: ephemeralBank }, nextTempId--)
+    };
+    const resolvedState = slot.rule.state !== void 0 ? resolveProperties(bgioArguments, slot.rule.state, context) : void 0;
+    const resolvedRule = {
+      ...slot.rule,
+      ...resolvedState === void 0 ? {} : { state: resolvedState }
+    };
+    return this.createUntrackedEntity(
+      resolvedRule,
+      { bank: ephemeralBank },
+      nextTempId--
+    );
+  }
   track(entity) {
     this.tracker[entity.entityId] = entity;
   }
   locate(entityId) {
-    return this.tracker[entityId];
+    const entity = this.tracker[entityId];
+    if (!entity) {
+      throw new Error(`Bank.locate: entity ${entityId} not found`);
+    }
+    return entity;
   }
   findAll(bgioArguments, rule, context) {
     if (!rule.conditions) {
@@ -9334,15 +9762,20 @@ var Bank = class {
     return rule.matchMultiple ? this.findAll(bgioArguments, rule, context) : this.findOne(bgioArguments, rule, context);
   }
   findParent(entity) {
-    return (0, import_find.default)(
-      this.tracker,
-      (ent) => ent.entities?.includes(entity) || ent.spaces?.includes(entity)
-    );
+    if (!entity || typeof entity !== "object") return void 0;
+    const child = entity;
+    return (0, import_find.default)(this.tracker, (ent) => {
+      const ewc = ent;
+      return Boolean(
+        ewc.entities?.includes(child) || ewc.spaces?.includes(child)
+      );
+    });
   }
   getOne(bgioArguments, rule, context) {
     const slot = this.getSlot(bgioArguments, rule, context);
     if (!slot) {
       console.error(`No matching slot for ${JSON.stringify(rule)}`);
+      throw new Error("Bank.getOne: no matching slot");
     }
     return slot.getOne(bgioArguments, { state: rule.state }, context);
   }
@@ -9353,32 +9786,42 @@ var Bank = class {
     }
     return slots.reduce((acc, slot) => [
       ...acc,
-      ...slot.getMultiple(bgioArguments, count, { state: rule.state })
+      ...slot.getMultiple(bgioArguments, count, { state: rule.state }, context)
     ], []);
   }
   getSlot(bgioArguments, rule, context) {
-    return this.slots.find(
-      (slot) => checkConditions(
+    return this.slots.find((slot) => {
+      const example = this.createSlotExampleEntity(bgioArguments, slot, context);
+      return checkConditions(
         bgioArguments,
         rule.conditions,
-        { target: slot },
+        { target: example },
         context
-      ).conditionsAreMet
-    );
+      ).conditionsAreMet;
+    });
   }
   getSlots(bgioArguments, rule, context) {
-    return this.slots.filter(
-      (slot) => checkConditions(
+    return this.slots.filter((slot) => {
+      const example = this.createSlotExampleEntity(bgioArguments, slot, context);
+      return checkConditions(
         bgioArguments,
         rule.conditions,
-        { target: slot },
+        { target: example },
         context
-      ).conditionsAreMet
-    );
+      ).conditionsAreMet;
+    });
   }
   returnToBank(bgioArguments, entity) {
-    this.findParent(entity).remove(entity);
-    this.getSlot(bgioArguments, entity.rule, {}).returnToBank(entity);
+    const parent = this.findParent(entity);
+    if (!isRemovableParent(parent)) {
+      throw new Error("Bank.returnToBank: could not find removable parent for entity");
+    }
+    parent.remove(entity);
+    const slot = this.getSlot(bgioArguments, entity.rule, {});
+    if (!slot) {
+      throw new Error("Bank.returnToBank: no matching slot for entity rule");
+    }
+    slot.returnToBank(entity);
     delete this.tracker[entity.entityId];
   }
 };
@@ -9412,8 +9855,9 @@ var Move = class {
   checkValidity(bgioArguments, payload, context) {
     const moveArguments = "arguments" in this.rule && this.rule.arguments ? this.rule.arguments : {};
     const argRuleEntries = Object.entries(moveArguments);
+    const payloadArgs = payload.arguments ?? {};
     if (!argRuleEntries.every(([argName]) => {
-      const arg = payload.arguments[argName];
+      const arg = payloadArgs[argName];
       return arg !== void 0 && (!Array.isArray(arg) || arg.length);
     })) {
       return false;
@@ -9421,7 +9865,7 @@ var Move = class {
     const argumentResults = {};
     for (let i2 = 0, len = argRuleEntries.length; i2 < len; i2++) {
       const [argName, argRule] = argRuleEntries[i2];
-      const payloadArg = payload.arguments[argName];
+      const payloadArg = payloadArgs[argName];
       const args = Array.isArray(payloadArg) ? payloadArg : [payloadArg];
       const argResults = [];
       for (let j2 = 0, lenj = args.length; j2 < lenj; j2++) {
@@ -9430,7 +9874,7 @@ var Move = class {
           bgioArguments,
           argRule.conditions,
           { target: arg },
-          { ...context, moveArguments: payload.arguments }
+          { ...context, moveArguments: payloadArgs }
         );
         argResults.push(result);
         if (!result.conditionsAreMet) {
@@ -9451,7 +9895,7 @@ var Move = class {
       bgioArguments,
       this.rule.conditions,
       {},
-      { ...context, moveArguments: payload.arguments }
+      { ...context, moveArguments: payloadArgs }
     );
     return {
       argumentResults,
@@ -9474,28 +9918,28 @@ var Move = class {
       this.rule,
       context
     );
+    const ruleArguments = "arguments" in rule && rule.arguments ? rule.arguments : {};
+    const resolvedArguments = Object.entries(ruleArguments).reduce((acc, [argName, arg]) => ({
+      ...acc,
+      [argName]: payload?.arguments?.[argName] ?? arg
+    }), {});
     const resolvedPayload = {
       ...payload,
-      arguments: Object.entries(rule.arguments ?? {}).reduce((acc, [argName, arg]) => ({
-        ...acc,
-        [argName]: payload?.arguments?.[argName] ?? arg
-      }), {})
+      arguments: resolvedArguments
     };
     if (rule.name) {
-      bgioArguments.G._meta.previousPayloads[rule.name] = resolvedPayload;
+      const { G: G2 } = bgioArguments;
+      G2._meta.previousPayloads[rule.name] = resolvedPayload;
     }
     let conditionResults;
     if (!skipCheck) {
       conditionResults = this.checkValidity(bgioArguments, resolvedPayload, context);
-    }
-    if (!skipCheck && conditionResults !== false && !conditionResults.conditionsAreMet) {
-      return import_core.INVALID_MOVE;
-    } else {
-      this.do(bgioArguments, rule, resolvedPayload, context);
-      if (context) {
-        context.previousArguments = resolvedPayload.arguments;
+      if (conditionResults !== false && !conditionResults.conditionsAreMet) {
+        return import_core.INVALID_MOVE;
       }
     }
+    this.do(bgioArguments, rule, resolvedPayload, context);
+    context.previousArguments = resolvedPayload.arguments;
     return { conditionResults };
   }
   do(_bgioArguments, _rule, _resolvedPayload, _context) {
@@ -9517,27 +9961,30 @@ var Move = class {
 
 // src/game-factory/move/move-entity.ts
 var MoveEntity = class extends Move {
-  do(bgioArguments, rule, resolvedPayload) {
+  do(bgioArguments, rule, resolvedPayload, _context) {
+    const { position } = rule;
     const { entity, destination } = resolvedPayload.arguments;
-    const g2 = bgioArguments;
+    const bank = bankOf(bgioArguments);
+    const removeFromParent = (e) => {
+      bank.findParent(e)?.remove(e);
+    };
     if (Array.isArray(entity)) {
       entity.forEach((e) => {
-        g2.G.bank.findParent(e)?.remove(e);
-        destination.placeEntity(e, rule.position);
+        removeFromParent(e);
+        destination.placeEntity(e, position);
       });
     } else {
-      g2.G.bank.findParent(entity)?.remove(entity);
-      destination.placeEntity(entity, rule.position);
+      removeFromParent(entity);
+      destination.placeEntity(entity, position);
     }
   }
 };
 
 // src/game-factory/move/remove-entity.ts
 var RemoveEntity = class extends Move {
-  do(bgioArguments, _rule, resolvedPayload) {
+  do(bgioArguments, _rule, resolvedPayload, _context) {
     const { entity } = resolvedPayload.arguments;
-    const bgio = bgioArguments;
-    bankOf(bgio).returnToBank(bgio, entity);
+    bankOf(bgioArguments).returnToBank(bgioArguments, entity);
   }
 };
 
@@ -9545,27 +9992,28 @@ var RemoveEntity = class extends Move {
 var PlaceNew = class extends Move {
   do(bgioArguments, rule, resolvedPayload, context) {
     const { destination } = resolvedPayload.arguments;
-    const bgio = bgioArguments;
     const r2 = rule;
-    const bank = bankOf(bgio);
+    const bank = bankOf(bgioArguments);
+    const entityConditions = Array.isArray(r2.entity?.conditions) ? r2.entity.conditions : r2.entity?.conditions ? [r2.entity.conditions] : [];
+    const moveConditions = Array.isArray(r2.conditions) ? r2.conditions : r2.conditions ? [r2.conditions] : [];
     const entities = r2.matchMultiple ? bank.getMultiple(
-      bgio,
+      bgioArguments,
       {
         ...r2.entity,
         conditions: [
-          ...r2.entity?.conditions || [],
-          ...r2.conditions || []
+          ...entityConditions,
+          ...moveConditions
         ]
       },
       r2.count ?? 1,
       context
     ) : [bank.getOne(
-      bgio,
+      bgioArguments,
       {
         ...r2.entity,
         conditions: [
-          ...r2.entity?.conditions || [],
-          ...r2.conditions || []
+          ...entityConditions,
+          ...moveConditions
         ]
       },
       context
@@ -9578,19 +10026,18 @@ var PlaceNew = class extends Move {
 
 // src/game-factory/move/take-from.ts
 var TakeFrom = class extends Move {
-  do(_bgioArguments, rule, resolvedPayload) {
+  do(_bgioArguments, rule, resolvedPayload, _context) {
+    const r2 = rule;
     const { source, destination } = resolvedPayload.arguments;
     destination.placeEntity(
-      source.takeOne(
-        rule.arguments.source.position
-      )
+      source.takeOne(r2.arguments.source.position)
     );
   }
 };
 
 // src/game-factory/move/set-state.ts
 var SetState = class extends Move {
-  do(_unused, _rule, resolvedPayload) {
+  do(_unused, _rule, resolvedPayload, _context) {
     const { entity, state } = resolvedPayload.arguments;
     entity.state = {
       ...entity.state,
@@ -9616,11 +10063,12 @@ function doMoves(bgioArguments, moves = [], context) {
 
 // src/game-factory/move/set-active-players.ts
 var SetActivePlayers = class extends Move {
-  do(bgioArguments, rule, _unused, context) {
+  do(bgioArguments, rule, _resolvedPayload, context) {
+    const r2 = rule;
     const b2 = bgioArguments;
-    b2.events.setActivePlayers(rule.options);
+    b2.events.setActivePlayers(r2.options);
     const phaseName = b2.ctx.phase;
-    const stageName = rule.options.currentPlayer?.stage;
+    const stageName = r2.options.currentPlayer?.stage;
     const phaseOrRoot = context.game.phases?.[phaseName] ?? context.game;
     const stage = phaseOrRoot?.turn?.stages?.[stageName];
     doMoves(
@@ -9636,14 +10084,14 @@ var SetActivePlayers = class extends Move {
 
 // src/game-factory/move/end-turn.ts
 var EndTurn = class extends Move {
-  do(bgioArguments) {
+  do(bgioArguments, _rule, _resolvedPayload, _context) {
     bgioArguments.events.endTurn();
   }
 };
 
 // src/game-factory/move/pass-turn.ts
 var PassTurn = class extends Move {
-  do(bgioArguments) {
+  do(bgioArguments, _rule, _resolvedPayload, _context) {
     const a2 = bgioArguments;
     if (a2.G._meta.passedPlayers.length < a2.ctx.numPlayers) {
       a2.G._meta.passedPlayers.push(a2.ctx.currentPlayer);
@@ -9655,13 +10103,14 @@ var PassTurn = class extends Move {
 // src/game-factory/move/for-each.ts
 var ForEach = class extends Move {
   do(bgioArguments, rule, resolvedPayload, context) {
+    const { move } = rule;
     const { targets } = resolvedPayload.arguments;
     targets.forEach((target) => {
       const loopContext = {
         ...context,
         loopTarget: target
       };
-      getMoveInstance(rule.move).doMove(
+      getMoveInstance(move).doMove(
         bgioArguments,
         void 0,
         loopContext
@@ -9672,14 +10121,14 @@ var ForEach = class extends Move {
 
 // src/game-factory/move/pass.ts
 var Pass = class extends Move {
-  do(bgioArguments) {
+  do(bgioArguments, _rule, _resolvedPayload, _context) {
     bgioArguments.events.endTurn();
   }
 };
 
 // src/game-factory/move/shuffle.ts
 var Shuffle = class extends Move {
-  do(bgioArguments, _rule, resolvedPayload) {
+  do(bgioArguments, _rule, resolvedPayload, _context) {
     const { target } = resolvedPayload.arguments;
     const b2 = bgioArguments;
     target.entities = b2.random.Shuffle(target.entities);
@@ -9689,27 +10138,23 @@ var Shuffle = class extends Move {
 // src/game-factory/move/move-factory.ts
 function moveFactory(moveRule, game) {
   const moveInstance = getMoveInstance(moveRule);
-  if (!moveInstance) {
-    throw new Error("moveFactory: unknown moveType");
-  }
   const compatibleMove = function(bgioArguments, serializablePayload) {
     const newBgioArguments = deserializeBgioArguments(bgioArguments);
     const { G: G2 } = newBgioArguments;
     const payload = revivePayload(serializablePayload, G2);
-    const context = { moveInstance, game };
-    const moveConditionResults = moveInstance.doMove(newBgioArguments, payload, context);
-    context.moveConditionResults = [moveConditionResults];
+    const factoryContext = { moveInstance, game, moveConditionResults: [] };
+    const moveConditionResults = moveInstance.doMove(newBgioArguments, payload, factoryContext);
+    factoryContext.moveConditionResults.push(moveConditionResults);
     if (moveConditionResults !== import_core2.INVALID_MOVE && moveRule.then) {
       for (const automaticMoveRule of moveRule.then) {
         const auto = getMoveInstance(automaticMoveRule);
-        if (!auto) continue;
         const result = auto.doMove(
           newBgioArguments,
           {},
-          { ...context }
+          { ...factoryContext }
           // spread here so prevArguments doesn't change for sibling
         );
-        context.moveConditionResults.push(result);
+        factoryContext.moveConditionResults.push(result);
       }
     }
     return JSON.parse(serialize(G2));
@@ -9722,10 +10167,11 @@ function revivePayload(serializablePayload, G2) {
     return void 0;
   }
   const payload = deserialize(JSON.stringify(serializablePayload), registry);
-  payload.arguments = Object.entries(payload.arguments).reduce((acc, [key, argOrEntityId]) => ({
-    ...acc,
-    [key]: typeof argOrEntityId === "number" ? G2.bank.locate(argOrEntityId) : argOrEntityId
-  }), {});
+  const rawArgs = payload.arguments ?? {};
+  payload.arguments = Object.entries(rawArgs).reduce((acc, [key, argOrEntityId]) => {
+    const hydrated = typeof argOrEntityId === "number" ? G2.bank.locate(argOrEntityId) : argOrEntityId;
+    return { ...acc, [key]: hydrated };
+  }, {});
   return payload;
 }
 function getMoveInstance(moveRule) {
@@ -9752,6 +10198,8 @@ function getMoveInstance(moveRule) {
       return new EndTurn(moveRule);
     case "PassTurn":
       return new PassTurn(moveRule);
+    default:
+      throw new Error(`moveFactory: unknown moveType ${moveRule.moveType}`);
   }
 }
 
@@ -9771,6 +10219,4277 @@ function transformJSON(data, rules) {
   });
 }
 
+// node_modules/zod/lib/index.mjs
+var util;
+(function(util2) {
+  util2.assertEqual = (val) => val;
+  function assertIs(_arg) {
+  }
+  util2.assertIs = assertIs;
+  function assertNever(_x) {
+    throw new Error();
+  }
+  util2.assertNever = assertNever;
+  util2.arrayToEnum = (items) => {
+    const obj = {};
+    for (const item of items) {
+      obj[item] = item;
+    }
+    return obj;
+  };
+  util2.getValidEnumValues = (obj) => {
+    const validKeys = util2.objectKeys(obj).filter((k2) => typeof obj[obj[k2]] !== "number");
+    const filtered = {};
+    for (const k2 of validKeys) {
+      filtered[k2] = obj[k2];
+    }
+    return util2.objectValues(filtered);
+  };
+  util2.objectValues = (obj) => {
+    return util2.objectKeys(obj).map(function(e) {
+      return obj[e];
+    });
+  };
+  util2.objectKeys = typeof Object.keys === "function" ? (obj) => Object.keys(obj) : (object2) => {
+    const keys2 = [];
+    for (const key in object2) {
+      if (Object.prototype.hasOwnProperty.call(object2, key)) {
+        keys2.push(key);
+      }
+    }
+    return keys2;
+  };
+  util2.find = (arr, checker) => {
+    for (const item of arr) {
+      if (checker(item))
+        return item;
+    }
+    return void 0;
+  };
+  util2.isInteger = typeof Number.isInteger === "function" ? (val) => Number.isInteger(val) : (val) => typeof val === "number" && isFinite(val) && Math.floor(val) === val;
+  function joinValues(array, separator = " | ") {
+    return array.map((val) => typeof val === "string" ? `'${val}'` : val).join(separator);
+  }
+  util2.joinValues = joinValues;
+  util2.jsonStringifyReplacer = (_2, value2) => {
+    if (typeof value2 === "bigint") {
+      return value2.toString();
+    }
+    return value2;
+  };
+})(util || (util = {}));
+var objectUtil;
+(function(objectUtil2) {
+  objectUtil2.mergeShapes = (first, second) => {
+    return {
+      ...first,
+      ...second
+      // second overwrites first
+    };
+  };
+})(objectUtil || (objectUtil = {}));
+var ZodParsedType = util.arrayToEnum([
+  "string",
+  "nan",
+  "number",
+  "integer",
+  "float",
+  "boolean",
+  "date",
+  "bigint",
+  "symbol",
+  "function",
+  "undefined",
+  "null",
+  "array",
+  "object",
+  "unknown",
+  "promise",
+  "void",
+  "never",
+  "map",
+  "set"
+]);
+var getParsedType = (data) => {
+  const t2 = typeof data;
+  switch (t2) {
+    case "undefined":
+      return ZodParsedType.undefined;
+    case "string":
+      return ZodParsedType.string;
+    case "number":
+      return isNaN(data) ? ZodParsedType.nan : ZodParsedType.number;
+    case "boolean":
+      return ZodParsedType.boolean;
+    case "function":
+      return ZodParsedType.function;
+    case "bigint":
+      return ZodParsedType.bigint;
+    case "symbol":
+      return ZodParsedType.symbol;
+    case "object":
+      if (Array.isArray(data)) {
+        return ZodParsedType.array;
+      }
+      if (data === null) {
+        return ZodParsedType.null;
+      }
+      if (data.then && typeof data.then === "function" && data.catch && typeof data.catch === "function") {
+        return ZodParsedType.promise;
+      }
+      if (typeof Map !== "undefined" && data instanceof Map) {
+        return ZodParsedType.map;
+      }
+      if (typeof Set !== "undefined" && data instanceof Set) {
+        return ZodParsedType.set;
+      }
+      if (typeof Date !== "undefined" && data instanceof Date) {
+        return ZodParsedType.date;
+      }
+      return ZodParsedType.object;
+    default:
+      return ZodParsedType.unknown;
+  }
+};
+var ZodIssueCode = util.arrayToEnum([
+  "invalid_type",
+  "invalid_literal",
+  "custom",
+  "invalid_union",
+  "invalid_union_discriminator",
+  "invalid_enum_value",
+  "unrecognized_keys",
+  "invalid_arguments",
+  "invalid_return_type",
+  "invalid_date",
+  "invalid_string",
+  "too_small",
+  "too_big",
+  "invalid_intersection_types",
+  "not_multiple_of",
+  "not_finite"
+]);
+var quotelessJson = (obj) => {
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(/"([^"]+)":/g, "$1:");
+};
+var ZodError = class _ZodError extends Error {
+  get errors() {
+    return this.issues;
+  }
+  constructor(issues) {
+    super();
+    this.issues = [];
+    this.addIssue = (sub2) => {
+      this.issues = [...this.issues, sub2];
+    };
+    this.addIssues = (subs = []) => {
+      this.issues = [...this.issues, ...subs];
+    };
+    const actualProto = new.target.prototype;
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(this, actualProto);
+    } else {
+      this.__proto__ = actualProto;
+    }
+    this.name = "ZodError";
+    this.issues = issues;
+  }
+  format(_mapper) {
+    const mapper = _mapper || function(issue) {
+      return issue.message;
+    };
+    const fieldErrors = { _errors: [] };
+    const processError = (error2) => {
+      for (const issue of error2.issues) {
+        if (issue.code === "invalid_union") {
+          issue.unionErrors.map(processError);
+        } else if (issue.code === "invalid_return_type") {
+          processError(issue.returnTypeError);
+        } else if (issue.code === "invalid_arguments") {
+          processError(issue.argumentsError);
+        } else if (issue.path.length === 0) {
+          fieldErrors._errors.push(mapper(issue));
+        } else {
+          let curr = fieldErrors;
+          let i2 = 0;
+          while (i2 < issue.path.length) {
+            const el = issue.path[i2];
+            const terminal = i2 === issue.path.length - 1;
+            if (!terminal) {
+              curr[el] = curr[el] || { _errors: [] };
+            } else {
+              curr[el] = curr[el] || { _errors: [] };
+              curr[el]._errors.push(mapper(issue));
+            }
+            curr = curr[el];
+            i2++;
+          }
+        }
+      }
+    };
+    processError(this);
+    return fieldErrors;
+  }
+  static assert(value2) {
+    if (!(value2 instanceof _ZodError)) {
+      throw new Error(`Not a ZodError: ${value2}`);
+    }
+  }
+  toString() {
+    return this.message;
+  }
+  get message() {
+    return JSON.stringify(this.issues, util.jsonStringifyReplacer, 2);
+  }
+  get isEmpty() {
+    return this.issues.length === 0;
+  }
+  flatten(mapper = (issue) => issue.message) {
+    const fieldErrors = {};
+    const formErrors = [];
+    for (const sub2 of this.issues) {
+      if (sub2.path.length > 0) {
+        fieldErrors[sub2.path[0]] = fieldErrors[sub2.path[0]] || [];
+        fieldErrors[sub2.path[0]].push(mapper(sub2));
+      } else {
+        formErrors.push(mapper(sub2));
+      }
+    }
+    return { formErrors, fieldErrors };
+  }
+  get formErrors() {
+    return this.flatten();
+  }
+};
+ZodError.create = (issues) => {
+  const error2 = new ZodError(issues);
+  return error2;
+};
+var errorMap = (issue, _ctx) => {
+  let message;
+  switch (issue.code) {
+    case ZodIssueCode.invalid_type:
+      if (issue.received === ZodParsedType.undefined) {
+        message = "Required";
+      } else {
+        message = `Expected ${issue.expected}, received ${issue.received}`;
+      }
+      break;
+    case ZodIssueCode.invalid_literal:
+      message = `Invalid literal value, expected ${JSON.stringify(issue.expected, util.jsonStringifyReplacer)}`;
+      break;
+    case ZodIssueCode.unrecognized_keys:
+      message = `Unrecognized key(s) in object: ${util.joinValues(issue.keys, ", ")}`;
+      break;
+    case ZodIssueCode.invalid_union:
+      message = `Invalid input`;
+      break;
+    case ZodIssueCode.invalid_union_discriminator:
+      message = `Invalid discriminator value. Expected ${util.joinValues(issue.options)}`;
+      break;
+    case ZodIssueCode.invalid_enum_value:
+      message = `Invalid enum value. Expected ${util.joinValues(issue.options)}, received '${issue.received}'`;
+      break;
+    case ZodIssueCode.invalid_arguments:
+      message = `Invalid function arguments`;
+      break;
+    case ZodIssueCode.invalid_return_type:
+      message = `Invalid function return type`;
+      break;
+    case ZodIssueCode.invalid_date:
+      message = `Invalid date`;
+      break;
+    case ZodIssueCode.invalid_string:
+      if (typeof issue.validation === "object") {
+        if ("includes" in issue.validation) {
+          message = `Invalid input: must include "${issue.validation.includes}"`;
+          if (typeof issue.validation.position === "number") {
+            message = `${message} at one or more positions greater than or equal to ${issue.validation.position}`;
+          }
+        } else if ("startsWith" in issue.validation) {
+          message = `Invalid input: must start with "${issue.validation.startsWith}"`;
+        } else if ("endsWith" in issue.validation) {
+          message = `Invalid input: must end with "${issue.validation.endsWith}"`;
+        } else {
+          util.assertNever(issue.validation);
+        }
+      } else if (issue.validation !== "regex") {
+        message = `Invalid ${issue.validation}`;
+      } else {
+        message = "Invalid";
+      }
+      break;
+    case ZodIssueCode.too_small:
+      if (issue.type === "array")
+        message = `Array must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `more than`} ${issue.minimum} element(s)`;
+      else if (issue.type === "string")
+        message = `String must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `over`} ${issue.minimum} character(s)`;
+      else if (issue.type === "number")
+        message = `Number must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${issue.minimum}`;
+      else if (issue.type === "date")
+        message = `Date must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${new Date(Number(issue.minimum))}`;
+      else
+        message = "Invalid input";
+      break;
+    case ZodIssueCode.too_big:
+      if (issue.type === "array")
+        message = `Array must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `less than`} ${issue.maximum} element(s)`;
+      else if (issue.type === "string")
+        message = `String must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `under`} ${issue.maximum} character(s)`;
+      else if (issue.type === "number")
+        message = `Number must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
+      else if (issue.type === "bigint")
+        message = `BigInt must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
+      else if (issue.type === "date")
+        message = `Date must be ${issue.exact ? `exactly` : issue.inclusive ? `smaller than or equal to` : `smaller than`} ${new Date(Number(issue.maximum))}`;
+      else
+        message = "Invalid input";
+      break;
+    case ZodIssueCode.custom:
+      message = `Invalid input`;
+      break;
+    case ZodIssueCode.invalid_intersection_types:
+      message = `Intersection results could not be merged`;
+      break;
+    case ZodIssueCode.not_multiple_of:
+      message = `Number must be a multiple of ${issue.multipleOf}`;
+      break;
+    case ZodIssueCode.not_finite:
+      message = "Number must be finite";
+      break;
+    default:
+      message = _ctx.defaultError;
+      util.assertNever(issue);
+  }
+  return { message };
+};
+var overrideErrorMap = errorMap;
+function setErrorMap(map) {
+  overrideErrorMap = map;
+}
+function getErrorMap() {
+  return overrideErrorMap;
+}
+var makeIssue = (params) => {
+  const { data, path, errorMaps, issueData } = params;
+  const fullPath = [...path, ...issueData.path || []];
+  const fullIssue = {
+    ...issueData,
+    path: fullPath
+  };
+  if (issueData.message !== void 0) {
+    return {
+      ...issueData,
+      path: fullPath,
+      message: issueData.message
+    };
+  }
+  let errorMessage = "";
+  const maps = errorMaps.filter((m) => !!m).slice().reverse();
+  for (const map of maps) {
+    errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
+  }
+  return {
+    ...issueData,
+    path: fullPath,
+    message: errorMessage
+  };
+};
+var EMPTY_PATH = [];
+function addIssueToContext(ctx, issueData) {
+  const overrideMap = getErrorMap();
+  const issue = makeIssue({
+    issueData,
+    data: ctx.data,
+    path: ctx.path,
+    errorMaps: [
+      ctx.common.contextualErrorMap,
+      // contextual error map is first priority
+      ctx.schemaErrorMap,
+      // then schema-bound map if available
+      overrideMap,
+      // then global override map
+      overrideMap === errorMap ? void 0 : errorMap
+      // then global default map
+    ].filter((x2) => !!x2)
+  });
+  ctx.common.issues.push(issue);
+}
+var ParseStatus = class _ParseStatus {
+  constructor() {
+    this.value = "valid";
+  }
+  dirty() {
+    if (this.value === "valid")
+      this.value = "dirty";
+  }
+  abort() {
+    if (this.value !== "aborted")
+      this.value = "aborted";
+  }
+  static mergeArray(status, results) {
+    const arrayValue = [];
+    for (const s2 of results) {
+      if (s2.status === "aborted")
+        return INVALID;
+      if (s2.status === "dirty")
+        status.dirty();
+      arrayValue.push(s2.value);
+    }
+    return { status: status.value, value: arrayValue };
+  }
+  static async mergeObjectAsync(status, pairs) {
+    const syncPairs = [];
+    for (const pair of pairs) {
+      const key = await pair.key;
+      const value2 = await pair.value;
+      syncPairs.push({
+        key,
+        value: value2
+      });
+    }
+    return _ParseStatus.mergeObjectSync(status, syncPairs);
+  }
+  static mergeObjectSync(status, pairs) {
+    const finalObject = {};
+    for (const pair of pairs) {
+      const { key, value: value2 } = pair;
+      if (key.status === "aborted")
+        return INVALID;
+      if (value2.status === "aborted")
+        return INVALID;
+      if (key.status === "dirty")
+        status.dirty();
+      if (value2.status === "dirty")
+        status.dirty();
+      if (key.value !== "__proto__" && (typeof value2.value !== "undefined" || pair.alwaysSet)) {
+        finalObject[key.value] = value2.value;
+      }
+    }
+    return { status: status.value, value: finalObject };
+  }
+};
+var INVALID = Object.freeze({
+  status: "aborted"
+});
+var DIRTY = (value2) => ({ status: "dirty", value: value2 });
+var OK = (value2) => ({ status: "valid", value: value2 });
+var isAborted = (x2) => x2.status === "aborted";
+var isDirty = (x2) => x2.status === "dirty";
+var isValid = (x2) => x2.status === "valid";
+var isAsync = (x2) => typeof Promise !== "undefined" && x2 instanceof Promise;
+function __classPrivateFieldGet(receiver, state, kind, f2) {
+  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
+}
+function __classPrivateFieldSet(receiver, state, value2, kind, f2) {
+  if (kind === "m") throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f2.call(receiver, value2) : f2 ? f2.value = value2 : state.set(receiver, value2), value2;
+}
+var errorUtil;
+(function(errorUtil2) {
+  errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
+  errorUtil2.toString = (message) => typeof message === "string" ? message : message === null || message === void 0 ? void 0 : message.message;
+})(errorUtil || (errorUtil = {}));
+var _ZodEnum_cache;
+var _ZodNativeEnum_cache;
+var ParseInputLazyPath = class {
+  constructor(parent, value2, path, key) {
+    this._cachedPath = [];
+    this.parent = parent;
+    this.data = value2;
+    this._path = path;
+    this._key = key;
+  }
+  get path() {
+    if (!this._cachedPath.length) {
+      if (this._key instanceof Array) {
+        this._cachedPath.push(...this._path, ...this._key);
+      } else {
+        this._cachedPath.push(...this._path, this._key);
+      }
+    }
+    return this._cachedPath;
+  }
+};
+var handleResult = (ctx, result) => {
+  if (isValid(result)) {
+    return { success: true, data: result.value };
+  } else {
+    if (!ctx.common.issues.length) {
+      throw new Error("Validation failed but no issues detected.");
+    }
+    return {
+      success: false,
+      get error() {
+        if (this._error)
+          return this._error;
+        const error2 = new ZodError(ctx.common.issues);
+        this._error = error2;
+        return this._error;
+      }
+    };
+  }
+};
+function processCreateParams(params) {
+  if (!params)
+    return {};
+  const { errorMap: errorMap2, invalid_type_error, required_error, description } = params;
+  if (errorMap2 && (invalid_type_error || required_error)) {
+    throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);
+  }
+  if (errorMap2)
+    return { errorMap: errorMap2, description };
+  const customMap = (iss, ctx) => {
+    var _a, _b;
+    const { message } = params;
+    if (iss.code === "invalid_enum_value") {
+      return { message: message !== null && message !== void 0 ? message : ctx.defaultError };
+    }
+    if (typeof ctx.data === "undefined") {
+      return { message: (_a = message !== null && message !== void 0 ? message : required_error) !== null && _a !== void 0 ? _a : ctx.defaultError };
+    }
+    if (iss.code !== "invalid_type")
+      return { message: ctx.defaultError };
+    return { message: (_b = message !== null && message !== void 0 ? message : invalid_type_error) !== null && _b !== void 0 ? _b : ctx.defaultError };
+  };
+  return { errorMap: customMap, description };
+}
+var ZodType = class {
+  get description() {
+    return this._def.description;
+  }
+  _getType(input) {
+    return getParsedType(input.data);
+  }
+  _getOrReturnCtx(input, ctx) {
+    return ctx || {
+      common: input.parent.common,
+      data: input.data,
+      parsedType: getParsedType(input.data),
+      schemaErrorMap: this._def.errorMap,
+      path: input.path,
+      parent: input.parent
+    };
+  }
+  _processInputParams(input) {
+    return {
+      status: new ParseStatus(),
+      ctx: {
+        common: input.parent.common,
+        data: input.data,
+        parsedType: getParsedType(input.data),
+        schemaErrorMap: this._def.errorMap,
+        path: input.path,
+        parent: input.parent
+      }
+    };
+  }
+  _parseSync(input) {
+    const result = this._parse(input);
+    if (isAsync(result)) {
+      throw new Error("Synchronous parse encountered promise.");
+    }
+    return result;
+  }
+  _parseAsync(input) {
+    const result = this._parse(input);
+    return Promise.resolve(result);
+  }
+  parse(data, params) {
+    const result = this.safeParse(data, params);
+    if (result.success)
+      return result.data;
+    throw result.error;
+  }
+  safeParse(data, params) {
+    var _a;
+    const ctx = {
+      common: {
+        issues: [],
+        async: (_a = params === null || params === void 0 ? void 0 : params.async) !== null && _a !== void 0 ? _a : false,
+        contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap
+      },
+      path: (params === null || params === void 0 ? void 0 : params.path) || [],
+      schemaErrorMap: this._def.errorMap,
+      parent: null,
+      data,
+      parsedType: getParsedType(data)
+    };
+    const result = this._parseSync({ data, path: ctx.path, parent: ctx });
+    return handleResult(ctx, result);
+  }
+  "~validate"(data) {
+    var _a, _b;
+    const ctx = {
+      common: {
+        issues: [],
+        async: !!this["~standard"].async
+      },
+      path: [],
+      schemaErrorMap: this._def.errorMap,
+      parent: null,
+      data,
+      parsedType: getParsedType(data)
+    };
+    if (!this["~standard"].async) {
+      try {
+        const result = this._parseSync({ data, path: [], parent: ctx });
+        return isValid(result) ? {
+          value: result.value
+        } : {
+          issues: ctx.common.issues
+        };
+      } catch (err) {
+        if ((_b = (_a = err === null || err === void 0 ? void 0 : err.message) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === null || _b === void 0 ? void 0 : _b.includes("encountered")) {
+          this["~standard"].async = true;
+        }
+        ctx.common = {
+          issues: [],
+          async: true
+        };
+      }
+    }
+    return this._parseAsync({ data, path: [], parent: ctx }).then((result) => isValid(result) ? {
+      value: result.value
+    } : {
+      issues: ctx.common.issues
+    });
+  }
+  async parseAsync(data, params) {
+    const result = await this.safeParseAsync(data, params);
+    if (result.success)
+      return result.data;
+    throw result.error;
+  }
+  async safeParseAsync(data, params) {
+    const ctx = {
+      common: {
+        issues: [],
+        contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap,
+        async: true
+      },
+      path: (params === null || params === void 0 ? void 0 : params.path) || [],
+      schemaErrorMap: this._def.errorMap,
+      parent: null,
+      data,
+      parsedType: getParsedType(data)
+    };
+    const maybeAsyncResult = this._parse({ data, path: ctx.path, parent: ctx });
+    const result = await (isAsync(maybeAsyncResult) ? maybeAsyncResult : Promise.resolve(maybeAsyncResult));
+    return handleResult(ctx, result);
+  }
+  refine(check, message) {
+    const getIssueProperties = (val) => {
+      if (typeof message === "string" || typeof message === "undefined") {
+        return { message };
+      } else if (typeof message === "function") {
+        return message(val);
+      } else {
+        return message;
+      }
+    };
+    return this._refinement((val, ctx) => {
+      const result = check(val);
+      const setError = () => ctx.addIssue({
+        code: ZodIssueCode.custom,
+        ...getIssueProperties(val)
+      });
+      if (typeof Promise !== "undefined" && result instanceof Promise) {
+        return result.then((data) => {
+          if (!data) {
+            setError();
+            return false;
+          } else {
+            return true;
+          }
+        });
+      }
+      if (!result) {
+        setError();
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+  refinement(check, refinementData) {
+    return this._refinement((val, ctx) => {
+      if (!check(val)) {
+        ctx.addIssue(typeof refinementData === "function" ? refinementData(val, ctx) : refinementData);
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+  _refinement(refinement) {
+    return new ZodEffects({
+      schema: this,
+      typeName: ZodFirstPartyTypeKind.ZodEffects,
+      effect: { type: "refinement", refinement }
+    });
+  }
+  superRefine(refinement) {
+    return this._refinement(refinement);
+  }
+  constructor(def) {
+    this.spa = this.safeParseAsync;
+    this._def = def;
+    this.parse = this.parse.bind(this);
+    this.safeParse = this.safeParse.bind(this);
+    this.parseAsync = this.parseAsync.bind(this);
+    this.safeParseAsync = this.safeParseAsync.bind(this);
+    this.spa = this.spa.bind(this);
+    this.refine = this.refine.bind(this);
+    this.refinement = this.refinement.bind(this);
+    this.superRefine = this.superRefine.bind(this);
+    this.optional = this.optional.bind(this);
+    this.nullable = this.nullable.bind(this);
+    this.nullish = this.nullish.bind(this);
+    this.array = this.array.bind(this);
+    this.promise = this.promise.bind(this);
+    this.or = this.or.bind(this);
+    this.and = this.and.bind(this);
+    this.transform = this.transform.bind(this);
+    this.brand = this.brand.bind(this);
+    this.default = this.default.bind(this);
+    this.catch = this.catch.bind(this);
+    this.describe = this.describe.bind(this);
+    this.pipe = this.pipe.bind(this);
+    this.readonly = this.readonly.bind(this);
+    this.isNullable = this.isNullable.bind(this);
+    this.isOptional = this.isOptional.bind(this);
+    this["~standard"] = {
+      version: 1,
+      vendor: "zod",
+      validate: (data) => this["~validate"](data)
+    };
+  }
+  optional() {
+    return ZodOptional.create(this, this._def);
+  }
+  nullable() {
+    return ZodNullable.create(this, this._def);
+  }
+  nullish() {
+    return this.nullable().optional();
+  }
+  array() {
+    return ZodArray.create(this);
+  }
+  promise() {
+    return ZodPromise.create(this, this._def);
+  }
+  or(option) {
+    return ZodUnion.create([this, option], this._def);
+  }
+  and(incoming) {
+    return ZodIntersection.create(this, incoming, this._def);
+  }
+  transform(transform) {
+    return new ZodEffects({
+      ...processCreateParams(this._def),
+      schema: this,
+      typeName: ZodFirstPartyTypeKind.ZodEffects,
+      effect: { type: "transform", transform }
+    });
+  }
+  default(def) {
+    const defaultValueFunc = typeof def === "function" ? def : () => def;
+    return new ZodDefault({
+      ...processCreateParams(this._def),
+      innerType: this,
+      defaultValue: defaultValueFunc,
+      typeName: ZodFirstPartyTypeKind.ZodDefault
+    });
+  }
+  brand() {
+    return new ZodBranded({
+      typeName: ZodFirstPartyTypeKind.ZodBranded,
+      type: this,
+      ...processCreateParams(this._def)
+    });
+  }
+  catch(def) {
+    const catchValueFunc = typeof def === "function" ? def : () => def;
+    return new ZodCatch({
+      ...processCreateParams(this._def),
+      innerType: this,
+      catchValue: catchValueFunc,
+      typeName: ZodFirstPartyTypeKind.ZodCatch
+    });
+  }
+  describe(description) {
+    const This = this.constructor;
+    return new This({
+      ...this._def,
+      description
+    });
+  }
+  pipe(target) {
+    return ZodPipeline.create(this, target);
+  }
+  readonly() {
+    return ZodReadonly.create(this);
+  }
+  isOptional() {
+    return this.safeParse(void 0).success;
+  }
+  isNullable() {
+    return this.safeParse(null).success;
+  }
+};
+var cuidRegex = /^c[^\s-]{8,}$/i;
+var cuid2Regex = /^[0-9a-z]+$/;
+var ulidRegex = /^[0-9A-HJKMNP-TV-Z]{26}$/i;
+var uuidRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i;
+var nanoidRegex = /^[a-z0-9_-]{21}$/i;
+var jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
+var durationRegex = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/;
+var emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i;
+var _emojiRegex = `^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$`;
+var emojiRegex;
+var ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/;
+var ipv4CidrRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/;
+var ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+var ipv6CidrRegex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/;
+var base64Regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+var base64urlRegex = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/;
+var dateRegexSource = `((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))`;
+var dateRegex = new RegExp(`^${dateRegexSource}$`);
+function timeRegexSource(args) {
+  let regex = `([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d`;
+  if (args.precision) {
+    regex = `${regex}\\.\\d{${args.precision}}`;
+  } else if (args.precision == null) {
+    regex = `${regex}(\\.\\d+)?`;
+  }
+  return regex;
+}
+function timeRegex(args) {
+  return new RegExp(`^${timeRegexSource(args)}$`);
+}
+function datetimeRegex(args) {
+  let regex = `${dateRegexSource}T${timeRegexSource(args)}`;
+  const opts = [];
+  opts.push(args.local ? `Z?` : `Z`);
+  if (args.offset)
+    opts.push(`([+-]\\d{2}:?\\d{2})`);
+  regex = `${regex}(${opts.join("|")})`;
+  return new RegExp(`^${regex}$`);
+}
+function isValidIP(ip, version) {
+  if ((version === "v4" || !version) && ipv4Regex.test(ip)) {
+    return true;
+  }
+  if ((version === "v6" || !version) && ipv6Regex.test(ip)) {
+    return true;
+  }
+  return false;
+}
+function isValidJWT(jwt, alg) {
+  if (!jwtRegex.test(jwt))
+    return false;
+  try {
+    const [header] = jwt.split(".");
+    const base64 = header.replace(/-/g, "+").replace(/_/g, "/").padEnd(header.length + (4 - header.length % 4) % 4, "=");
+    const decoded = JSON.parse(atob(base64));
+    if (typeof decoded !== "object" || decoded === null)
+      return false;
+    if (!decoded.typ || !decoded.alg)
+      return false;
+    if (alg && decoded.alg !== alg)
+      return false;
+    return true;
+  } catch (_a) {
+    return false;
+  }
+}
+function isValidCidr(ip, version) {
+  if ((version === "v4" || !version) && ipv4CidrRegex.test(ip)) {
+    return true;
+  }
+  if ((version === "v6" || !version) && ipv6CidrRegex.test(ip)) {
+    return true;
+  }
+  return false;
+}
+var ZodString = class _ZodString extends ZodType {
+  _parse(input) {
+    if (this._def.coerce) {
+      input.data = String(input.data);
+    }
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.string) {
+      const ctx2 = this._getOrReturnCtx(input);
+      addIssueToContext(ctx2, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.string,
+        received: ctx2.parsedType
+      });
+      return INVALID;
+    }
+    const status = new ParseStatus();
+    let ctx = void 0;
+    for (const check of this._def.checks) {
+      if (check.kind === "min") {
+        if (input.data.length < check.value) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_small,
+            minimum: check.value,
+            type: "string",
+            inclusive: true,
+            exact: false,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "max") {
+        if (input.data.length > check.value) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_big,
+            maximum: check.value,
+            type: "string",
+            inclusive: true,
+            exact: false,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "length") {
+        const tooBig = input.data.length > check.value;
+        const tooSmall = input.data.length < check.value;
+        if (tooBig || tooSmall) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          if (tooBig) {
+            addIssueToContext(ctx, {
+              code: ZodIssueCode.too_big,
+              maximum: check.value,
+              type: "string",
+              inclusive: true,
+              exact: true,
+              message: check.message
+            });
+          } else if (tooSmall) {
+            addIssueToContext(ctx, {
+              code: ZodIssueCode.too_small,
+              minimum: check.value,
+              type: "string",
+              inclusive: true,
+              exact: true,
+              message: check.message
+            });
+          }
+          status.dirty();
+        }
+      } else if (check.kind === "email") {
+        if (!emailRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "email",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "emoji") {
+        if (!emojiRegex) {
+          emojiRegex = new RegExp(_emojiRegex, "u");
+        }
+        if (!emojiRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "emoji",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "uuid") {
+        if (!uuidRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "uuid",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "nanoid") {
+        if (!nanoidRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "nanoid",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "cuid") {
+        if (!cuidRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "cuid",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "cuid2") {
+        if (!cuid2Regex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "cuid2",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "ulid") {
+        if (!ulidRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "ulid",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "url") {
+        try {
+          new URL(input.data);
+        } catch (_a) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "url",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "regex") {
+        check.regex.lastIndex = 0;
+        const testResult = check.regex.test(input.data);
+        if (!testResult) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "regex",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "trim") {
+        input.data = input.data.trim();
+      } else if (check.kind === "includes") {
+        if (!input.data.includes(check.value, check.position)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_string,
+            validation: { includes: check.value, position: check.position },
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "toLowerCase") {
+        input.data = input.data.toLowerCase();
+      } else if (check.kind === "toUpperCase") {
+        input.data = input.data.toUpperCase();
+      } else if (check.kind === "startsWith") {
+        if (!input.data.startsWith(check.value)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_string,
+            validation: { startsWith: check.value },
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "endsWith") {
+        if (!input.data.endsWith(check.value)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_string,
+            validation: { endsWith: check.value },
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "datetime") {
+        const regex = datetimeRegex(check);
+        if (!regex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_string,
+            validation: "datetime",
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "date") {
+        const regex = dateRegex;
+        if (!regex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_string,
+            validation: "date",
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "time") {
+        const regex = timeRegex(check);
+        if (!regex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_string,
+            validation: "time",
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "duration") {
+        if (!durationRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "duration",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "ip") {
+        if (!isValidIP(input.data, check.version)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "ip",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "jwt") {
+        if (!isValidJWT(input.data, check.alg)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "jwt",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "cidr") {
+        if (!isValidCidr(input.data, check.version)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "cidr",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "base64") {
+        if (!base64Regex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "base64",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "base64url") {
+        if (!base64urlRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "base64url",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else {
+        util.assertNever(check);
+      }
+    }
+    return { status: status.value, value: input.data };
+  }
+  _regex(regex, validation, message) {
+    return this.refinement((data) => regex.test(data), {
+      validation,
+      code: ZodIssueCode.invalid_string,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  _addCheck(check) {
+    return new _ZodString({
+      ...this._def,
+      checks: [...this._def.checks, check]
+    });
+  }
+  email(message) {
+    return this._addCheck({ kind: "email", ...errorUtil.errToObj(message) });
+  }
+  url(message) {
+    return this._addCheck({ kind: "url", ...errorUtil.errToObj(message) });
+  }
+  emoji(message) {
+    return this._addCheck({ kind: "emoji", ...errorUtil.errToObj(message) });
+  }
+  uuid(message) {
+    return this._addCheck({ kind: "uuid", ...errorUtil.errToObj(message) });
+  }
+  nanoid(message) {
+    return this._addCheck({ kind: "nanoid", ...errorUtil.errToObj(message) });
+  }
+  cuid(message) {
+    return this._addCheck({ kind: "cuid", ...errorUtil.errToObj(message) });
+  }
+  cuid2(message) {
+    return this._addCheck({ kind: "cuid2", ...errorUtil.errToObj(message) });
+  }
+  ulid(message) {
+    return this._addCheck({ kind: "ulid", ...errorUtil.errToObj(message) });
+  }
+  base64(message) {
+    return this._addCheck({ kind: "base64", ...errorUtil.errToObj(message) });
+  }
+  base64url(message) {
+    return this._addCheck({
+      kind: "base64url",
+      ...errorUtil.errToObj(message)
+    });
+  }
+  jwt(options) {
+    return this._addCheck({ kind: "jwt", ...errorUtil.errToObj(options) });
+  }
+  ip(options) {
+    return this._addCheck({ kind: "ip", ...errorUtil.errToObj(options) });
+  }
+  cidr(options) {
+    return this._addCheck({ kind: "cidr", ...errorUtil.errToObj(options) });
+  }
+  datetime(options) {
+    var _a, _b;
+    if (typeof options === "string") {
+      return this._addCheck({
+        kind: "datetime",
+        precision: null,
+        offset: false,
+        local: false,
+        message: options
+      });
+    }
+    return this._addCheck({
+      kind: "datetime",
+      precision: typeof (options === null || options === void 0 ? void 0 : options.precision) === "undefined" ? null : options === null || options === void 0 ? void 0 : options.precision,
+      offset: (_a = options === null || options === void 0 ? void 0 : options.offset) !== null && _a !== void 0 ? _a : false,
+      local: (_b = options === null || options === void 0 ? void 0 : options.local) !== null && _b !== void 0 ? _b : false,
+      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
+    });
+  }
+  date(message) {
+    return this._addCheck({ kind: "date", message });
+  }
+  time(options) {
+    if (typeof options === "string") {
+      return this._addCheck({
+        kind: "time",
+        precision: null,
+        message: options
+      });
+    }
+    return this._addCheck({
+      kind: "time",
+      precision: typeof (options === null || options === void 0 ? void 0 : options.precision) === "undefined" ? null : options === null || options === void 0 ? void 0 : options.precision,
+      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
+    });
+  }
+  duration(message) {
+    return this._addCheck({ kind: "duration", ...errorUtil.errToObj(message) });
+  }
+  regex(regex, message) {
+    return this._addCheck({
+      kind: "regex",
+      regex,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  includes(value2, options) {
+    return this._addCheck({
+      kind: "includes",
+      value: value2,
+      position: options === null || options === void 0 ? void 0 : options.position,
+      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
+    });
+  }
+  startsWith(value2, message) {
+    return this._addCheck({
+      kind: "startsWith",
+      value: value2,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  endsWith(value2, message) {
+    return this._addCheck({
+      kind: "endsWith",
+      value: value2,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  min(minLength, message) {
+    return this._addCheck({
+      kind: "min",
+      value: minLength,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  max(maxLength, message) {
+    return this._addCheck({
+      kind: "max",
+      value: maxLength,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  length(len, message) {
+    return this._addCheck({
+      kind: "length",
+      value: len,
+      ...errorUtil.errToObj(message)
+    });
+  }
+  /**
+   * Equivalent to `.min(1)`
+   */
+  nonempty(message) {
+    return this.min(1, errorUtil.errToObj(message));
+  }
+  trim() {
+    return new _ZodString({
+      ...this._def,
+      checks: [...this._def.checks, { kind: "trim" }]
+    });
+  }
+  toLowerCase() {
+    return new _ZodString({
+      ...this._def,
+      checks: [...this._def.checks, { kind: "toLowerCase" }]
+    });
+  }
+  toUpperCase() {
+    return new _ZodString({
+      ...this._def,
+      checks: [...this._def.checks, { kind: "toUpperCase" }]
+    });
+  }
+  get isDatetime() {
+    return !!this._def.checks.find((ch) => ch.kind === "datetime");
+  }
+  get isDate() {
+    return !!this._def.checks.find((ch) => ch.kind === "date");
+  }
+  get isTime() {
+    return !!this._def.checks.find((ch) => ch.kind === "time");
+  }
+  get isDuration() {
+    return !!this._def.checks.find((ch) => ch.kind === "duration");
+  }
+  get isEmail() {
+    return !!this._def.checks.find((ch) => ch.kind === "email");
+  }
+  get isURL() {
+    return !!this._def.checks.find((ch) => ch.kind === "url");
+  }
+  get isEmoji() {
+    return !!this._def.checks.find((ch) => ch.kind === "emoji");
+  }
+  get isUUID() {
+    return !!this._def.checks.find((ch) => ch.kind === "uuid");
+  }
+  get isNANOID() {
+    return !!this._def.checks.find((ch) => ch.kind === "nanoid");
+  }
+  get isCUID() {
+    return !!this._def.checks.find((ch) => ch.kind === "cuid");
+  }
+  get isCUID2() {
+    return !!this._def.checks.find((ch) => ch.kind === "cuid2");
+  }
+  get isULID() {
+    return !!this._def.checks.find((ch) => ch.kind === "ulid");
+  }
+  get isIP() {
+    return !!this._def.checks.find((ch) => ch.kind === "ip");
+  }
+  get isCIDR() {
+    return !!this._def.checks.find((ch) => ch.kind === "cidr");
+  }
+  get isBase64() {
+    return !!this._def.checks.find((ch) => ch.kind === "base64");
+  }
+  get isBase64url() {
+    return !!this._def.checks.find((ch) => ch.kind === "base64url");
+  }
+  get minLength() {
+    let min2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "min") {
+        if (min2 === null || ch.value > min2)
+          min2 = ch.value;
+      }
+    }
+    return min2;
+  }
+  get maxLength() {
+    let max2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "max") {
+        if (max2 === null || ch.value < max2)
+          max2 = ch.value;
+      }
+    }
+    return max2;
+  }
+};
+ZodString.create = (params) => {
+  var _a;
+  return new ZodString({
+    checks: [],
+    typeName: ZodFirstPartyTypeKind.ZodString,
+    coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
+    ...processCreateParams(params)
+  });
+};
+function floatSafeRemainder(val, step) {
+  const valDecCount = (val.toString().split(".")[1] || "").length;
+  const stepDecCount = (step.toString().split(".")[1] || "").length;
+  const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
+  const valInt = parseInt(val.toFixed(decCount).replace(".", ""));
+  const stepInt = parseInt(step.toFixed(decCount).replace(".", ""));
+  return valInt % stepInt / Math.pow(10, decCount);
+}
+var ZodNumber = class _ZodNumber extends ZodType {
+  constructor() {
+    super(...arguments);
+    this.min = this.gte;
+    this.max = this.lte;
+    this.step = this.multipleOf;
+  }
+  _parse(input) {
+    if (this._def.coerce) {
+      input.data = Number(input.data);
+    }
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.number) {
+      const ctx2 = this._getOrReturnCtx(input);
+      addIssueToContext(ctx2, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.number,
+        received: ctx2.parsedType
+      });
+      return INVALID;
+    }
+    let ctx = void 0;
+    const status = new ParseStatus();
+    for (const check of this._def.checks) {
+      if (check.kind === "int") {
+        if (!util.isInteger(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.invalid_type,
+            expected: "integer",
+            received: "float",
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "min") {
+        const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
+        if (tooSmall) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_small,
+            minimum: check.value,
+            type: "number",
+            inclusive: check.inclusive,
+            exact: false,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "max") {
+        const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
+        if (tooBig) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_big,
+            maximum: check.value,
+            type: "number",
+            inclusive: check.inclusive,
+            exact: false,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "multipleOf") {
+        if (floatSafeRemainder(input.data, check.value) !== 0) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.not_multiple_of,
+            multipleOf: check.value,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "finite") {
+        if (!Number.isFinite(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.not_finite,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else {
+        util.assertNever(check);
+      }
+    }
+    return { status: status.value, value: input.data };
+  }
+  gte(value2, message) {
+    return this.setLimit("min", value2, true, errorUtil.toString(message));
+  }
+  gt(value2, message) {
+    return this.setLimit("min", value2, false, errorUtil.toString(message));
+  }
+  lte(value2, message) {
+    return this.setLimit("max", value2, true, errorUtil.toString(message));
+  }
+  lt(value2, message) {
+    return this.setLimit("max", value2, false, errorUtil.toString(message));
+  }
+  setLimit(kind, value2, inclusive, message) {
+    return new _ZodNumber({
+      ...this._def,
+      checks: [
+        ...this._def.checks,
+        {
+          kind,
+          value: value2,
+          inclusive,
+          message: errorUtil.toString(message)
+        }
+      ]
+    });
+  }
+  _addCheck(check) {
+    return new _ZodNumber({
+      ...this._def,
+      checks: [...this._def.checks, check]
+    });
+  }
+  int(message) {
+    return this._addCheck({
+      kind: "int",
+      message: errorUtil.toString(message)
+    });
+  }
+  positive(message) {
+    return this._addCheck({
+      kind: "min",
+      value: 0,
+      inclusive: false,
+      message: errorUtil.toString(message)
+    });
+  }
+  negative(message) {
+    return this._addCheck({
+      kind: "max",
+      value: 0,
+      inclusive: false,
+      message: errorUtil.toString(message)
+    });
+  }
+  nonpositive(message) {
+    return this._addCheck({
+      kind: "max",
+      value: 0,
+      inclusive: true,
+      message: errorUtil.toString(message)
+    });
+  }
+  nonnegative(message) {
+    return this._addCheck({
+      kind: "min",
+      value: 0,
+      inclusive: true,
+      message: errorUtil.toString(message)
+    });
+  }
+  multipleOf(value2, message) {
+    return this._addCheck({
+      kind: "multipleOf",
+      value: value2,
+      message: errorUtil.toString(message)
+    });
+  }
+  finite(message) {
+    return this._addCheck({
+      kind: "finite",
+      message: errorUtil.toString(message)
+    });
+  }
+  safe(message) {
+    return this._addCheck({
+      kind: "min",
+      inclusive: true,
+      value: Number.MIN_SAFE_INTEGER,
+      message: errorUtil.toString(message)
+    })._addCheck({
+      kind: "max",
+      inclusive: true,
+      value: Number.MAX_SAFE_INTEGER,
+      message: errorUtil.toString(message)
+    });
+  }
+  get minValue() {
+    let min2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "min") {
+        if (min2 === null || ch.value > min2)
+          min2 = ch.value;
+      }
+    }
+    return min2;
+  }
+  get maxValue() {
+    let max2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "max") {
+        if (max2 === null || ch.value < max2)
+          max2 = ch.value;
+      }
+    }
+    return max2;
+  }
+  get isInt() {
+    return !!this._def.checks.find((ch) => ch.kind === "int" || ch.kind === "multipleOf" && util.isInteger(ch.value));
+  }
+  get isFinite() {
+    let max2 = null, min2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "finite" || ch.kind === "int" || ch.kind === "multipleOf") {
+        return true;
+      } else if (ch.kind === "min") {
+        if (min2 === null || ch.value > min2)
+          min2 = ch.value;
+      } else if (ch.kind === "max") {
+        if (max2 === null || ch.value < max2)
+          max2 = ch.value;
+      }
+    }
+    return Number.isFinite(min2) && Number.isFinite(max2);
+  }
+};
+ZodNumber.create = (params) => {
+  return new ZodNumber({
+    checks: [],
+    typeName: ZodFirstPartyTypeKind.ZodNumber,
+    coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
+    ...processCreateParams(params)
+  });
+};
+var ZodBigInt = class _ZodBigInt extends ZodType {
+  constructor() {
+    super(...arguments);
+    this.min = this.gte;
+    this.max = this.lte;
+  }
+  _parse(input) {
+    if (this._def.coerce) {
+      try {
+        input.data = BigInt(input.data);
+      } catch (_a) {
+        return this._getInvalidInput(input);
+      }
+    }
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.bigint) {
+      return this._getInvalidInput(input);
+    }
+    let ctx = void 0;
+    const status = new ParseStatus();
+    for (const check of this._def.checks) {
+      if (check.kind === "min") {
+        const tooSmall = check.inclusive ? input.data < check.value : input.data <= check.value;
+        if (tooSmall) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_small,
+            type: "bigint",
+            minimum: check.value,
+            inclusive: check.inclusive,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "max") {
+        const tooBig = check.inclusive ? input.data > check.value : input.data >= check.value;
+        if (tooBig) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_big,
+            type: "bigint",
+            maximum: check.value,
+            inclusive: check.inclusive,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "multipleOf") {
+        if (input.data % check.value !== BigInt(0)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.not_multiple_of,
+            multipleOf: check.value,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else {
+        util.assertNever(check);
+      }
+    }
+    return { status: status.value, value: input.data };
+  }
+  _getInvalidInput(input) {
+    const ctx = this._getOrReturnCtx(input);
+    addIssueToContext(ctx, {
+      code: ZodIssueCode.invalid_type,
+      expected: ZodParsedType.bigint,
+      received: ctx.parsedType
+    });
+    return INVALID;
+  }
+  gte(value2, message) {
+    return this.setLimit("min", value2, true, errorUtil.toString(message));
+  }
+  gt(value2, message) {
+    return this.setLimit("min", value2, false, errorUtil.toString(message));
+  }
+  lte(value2, message) {
+    return this.setLimit("max", value2, true, errorUtil.toString(message));
+  }
+  lt(value2, message) {
+    return this.setLimit("max", value2, false, errorUtil.toString(message));
+  }
+  setLimit(kind, value2, inclusive, message) {
+    return new _ZodBigInt({
+      ...this._def,
+      checks: [
+        ...this._def.checks,
+        {
+          kind,
+          value: value2,
+          inclusive,
+          message: errorUtil.toString(message)
+        }
+      ]
+    });
+  }
+  _addCheck(check) {
+    return new _ZodBigInt({
+      ...this._def,
+      checks: [...this._def.checks, check]
+    });
+  }
+  positive(message) {
+    return this._addCheck({
+      kind: "min",
+      value: BigInt(0),
+      inclusive: false,
+      message: errorUtil.toString(message)
+    });
+  }
+  negative(message) {
+    return this._addCheck({
+      kind: "max",
+      value: BigInt(0),
+      inclusive: false,
+      message: errorUtil.toString(message)
+    });
+  }
+  nonpositive(message) {
+    return this._addCheck({
+      kind: "max",
+      value: BigInt(0),
+      inclusive: true,
+      message: errorUtil.toString(message)
+    });
+  }
+  nonnegative(message) {
+    return this._addCheck({
+      kind: "min",
+      value: BigInt(0),
+      inclusive: true,
+      message: errorUtil.toString(message)
+    });
+  }
+  multipleOf(value2, message) {
+    return this._addCheck({
+      kind: "multipleOf",
+      value: value2,
+      message: errorUtil.toString(message)
+    });
+  }
+  get minValue() {
+    let min2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "min") {
+        if (min2 === null || ch.value > min2)
+          min2 = ch.value;
+      }
+    }
+    return min2;
+  }
+  get maxValue() {
+    let max2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "max") {
+        if (max2 === null || ch.value < max2)
+          max2 = ch.value;
+      }
+    }
+    return max2;
+  }
+};
+ZodBigInt.create = (params) => {
+  var _a;
+  return new ZodBigInt({
+    checks: [],
+    typeName: ZodFirstPartyTypeKind.ZodBigInt,
+    coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
+    ...processCreateParams(params)
+  });
+};
+var ZodBoolean = class extends ZodType {
+  _parse(input) {
+    if (this._def.coerce) {
+      input.data = Boolean(input.data);
+    }
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.boolean) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.boolean,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+};
+ZodBoolean.create = (params) => {
+  return new ZodBoolean({
+    typeName: ZodFirstPartyTypeKind.ZodBoolean,
+    coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
+    ...processCreateParams(params)
+  });
+};
+var ZodDate = class _ZodDate extends ZodType {
+  _parse(input) {
+    if (this._def.coerce) {
+      input.data = new Date(input.data);
+    }
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.date) {
+      const ctx2 = this._getOrReturnCtx(input);
+      addIssueToContext(ctx2, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.date,
+        received: ctx2.parsedType
+      });
+      return INVALID;
+    }
+    if (isNaN(input.data.getTime())) {
+      const ctx2 = this._getOrReturnCtx(input);
+      addIssueToContext(ctx2, {
+        code: ZodIssueCode.invalid_date
+      });
+      return INVALID;
+    }
+    const status = new ParseStatus();
+    let ctx = void 0;
+    for (const check of this._def.checks) {
+      if (check.kind === "min") {
+        if (input.data.getTime() < check.value) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_small,
+            message: check.message,
+            inclusive: true,
+            exact: false,
+            minimum: check.value,
+            type: "date"
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "max") {
+        if (input.data.getTime() > check.value) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.too_big,
+            message: check.message,
+            inclusive: true,
+            exact: false,
+            maximum: check.value,
+            type: "date"
+          });
+          status.dirty();
+        }
+      } else {
+        util.assertNever(check);
+      }
+    }
+    return {
+      status: status.value,
+      value: new Date(input.data.getTime())
+    };
+  }
+  _addCheck(check) {
+    return new _ZodDate({
+      ...this._def,
+      checks: [...this._def.checks, check]
+    });
+  }
+  min(minDate, message) {
+    return this._addCheck({
+      kind: "min",
+      value: minDate.getTime(),
+      message: errorUtil.toString(message)
+    });
+  }
+  max(maxDate, message) {
+    return this._addCheck({
+      kind: "max",
+      value: maxDate.getTime(),
+      message: errorUtil.toString(message)
+    });
+  }
+  get minDate() {
+    let min2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "min") {
+        if (min2 === null || ch.value > min2)
+          min2 = ch.value;
+      }
+    }
+    return min2 != null ? new Date(min2) : null;
+  }
+  get maxDate() {
+    let max2 = null;
+    for (const ch of this._def.checks) {
+      if (ch.kind === "max") {
+        if (max2 === null || ch.value < max2)
+          max2 = ch.value;
+      }
+    }
+    return max2 != null ? new Date(max2) : null;
+  }
+};
+ZodDate.create = (params) => {
+  return new ZodDate({
+    checks: [],
+    coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
+    typeName: ZodFirstPartyTypeKind.ZodDate,
+    ...processCreateParams(params)
+  });
+};
+var ZodSymbol = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.symbol) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.symbol,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+};
+ZodSymbol.create = (params) => {
+  return new ZodSymbol({
+    typeName: ZodFirstPartyTypeKind.ZodSymbol,
+    ...processCreateParams(params)
+  });
+};
+var ZodUndefined = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.undefined) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.undefined,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+};
+ZodUndefined.create = (params) => {
+  return new ZodUndefined({
+    typeName: ZodFirstPartyTypeKind.ZodUndefined,
+    ...processCreateParams(params)
+  });
+};
+var ZodNull = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.null) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.null,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+};
+ZodNull.create = (params) => {
+  return new ZodNull({
+    typeName: ZodFirstPartyTypeKind.ZodNull,
+    ...processCreateParams(params)
+  });
+};
+var ZodAny = class extends ZodType {
+  constructor() {
+    super(...arguments);
+    this._any = true;
+  }
+  _parse(input) {
+    return OK(input.data);
+  }
+};
+ZodAny.create = (params) => {
+  return new ZodAny({
+    typeName: ZodFirstPartyTypeKind.ZodAny,
+    ...processCreateParams(params)
+  });
+};
+var ZodUnknown = class extends ZodType {
+  constructor() {
+    super(...arguments);
+    this._unknown = true;
+  }
+  _parse(input) {
+    return OK(input.data);
+  }
+};
+ZodUnknown.create = (params) => {
+  return new ZodUnknown({
+    typeName: ZodFirstPartyTypeKind.ZodUnknown,
+    ...processCreateParams(params)
+  });
+};
+var ZodNever = class extends ZodType {
+  _parse(input) {
+    const ctx = this._getOrReturnCtx(input);
+    addIssueToContext(ctx, {
+      code: ZodIssueCode.invalid_type,
+      expected: ZodParsedType.never,
+      received: ctx.parsedType
+    });
+    return INVALID;
+  }
+};
+ZodNever.create = (params) => {
+  return new ZodNever({
+    typeName: ZodFirstPartyTypeKind.ZodNever,
+    ...processCreateParams(params)
+  });
+};
+var ZodVoid = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.undefined) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.void,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+};
+ZodVoid.create = (params) => {
+  return new ZodVoid({
+    typeName: ZodFirstPartyTypeKind.ZodVoid,
+    ...processCreateParams(params)
+  });
+};
+var ZodArray = class _ZodArray extends ZodType {
+  _parse(input) {
+    const { ctx, status } = this._processInputParams(input);
+    const def = this._def;
+    if (ctx.parsedType !== ZodParsedType.array) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.array,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    if (def.exactLength !== null) {
+      const tooBig = ctx.data.length > def.exactLength.value;
+      const tooSmall = ctx.data.length < def.exactLength.value;
+      if (tooBig || tooSmall) {
+        addIssueToContext(ctx, {
+          code: tooBig ? ZodIssueCode.too_big : ZodIssueCode.too_small,
+          minimum: tooSmall ? def.exactLength.value : void 0,
+          maximum: tooBig ? def.exactLength.value : void 0,
+          type: "array",
+          inclusive: true,
+          exact: true,
+          message: def.exactLength.message
+        });
+        status.dirty();
+      }
+    }
+    if (def.minLength !== null) {
+      if (ctx.data.length < def.minLength.value) {
+        addIssueToContext(ctx, {
+          code: ZodIssueCode.too_small,
+          minimum: def.minLength.value,
+          type: "array",
+          inclusive: true,
+          exact: false,
+          message: def.minLength.message
+        });
+        status.dirty();
+      }
+    }
+    if (def.maxLength !== null) {
+      if (ctx.data.length > def.maxLength.value) {
+        addIssueToContext(ctx, {
+          code: ZodIssueCode.too_big,
+          maximum: def.maxLength.value,
+          type: "array",
+          inclusive: true,
+          exact: false,
+          message: def.maxLength.message
+        });
+        status.dirty();
+      }
+    }
+    if (ctx.common.async) {
+      return Promise.all([...ctx.data].map((item, i2) => {
+        return def.type._parseAsync(new ParseInputLazyPath(ctx, item, ctx.path, i2));
+      })).then((result2) => {
+        return ParseStatus.mergeArray(status, result2);
+      });
+    }
+    const result = [...ctx.data].map((item, i2) => {
+      return def.type._parseSync(new ParseInputLazyPath(ctx, item, ctx.path, i2));
+    });
+    return ParseStatus.mergeArray(status, result);
+  }
+  get element() {
+    return this._def.type;
+  }
+  min(minLength, message) {
+    return new _ZodArray({
+      ...this._def,
+      minLength: { value: minLength, message: errorUtil.toString(message) }
+    });
+  }
+  max(maxLength, message) {
+    return new _ZodArray({
+      ...this._def,
+      maxLength: { value: maxLength, message: errorUtil.toString(message) }
+    });
+  }
+  length(len, message) {
+    return new _ZodArray({
+      ...this._def,
+      exactLength: { value: len, message: errorUtil.toString(message) }
+    });
+  }
+  nonempty(message) {
+    return this.min(1, message);
+  }
+};
+ZodArray.create = (schema, params) => {
+  return new ZodArray({
+    type: schema,
+    minLength: null,
+    maxLength: null,
+    exactLength: null,
+    typeName: ZodFirstPartyTypeKind.ZodArray,
+    ...processCreateParams(params)
+  });
+};
+function deepPartialify(schema) {
+  if (schema instanceof ZodObject) {
+    const newShape = {};
+    for (const key in schema.shape) {
+      const fieldSchema = schema.shape[key];
+      newShape[key] = ZodOptional.create(deepPartialify(fieldSchema));
+    }
+    return new ZodObject({
+      ...schema._def,
+      shape: () => newShape
+    });
+  } else if (schema instanceof ZodArray) {
+    return new ZodArray({
+      ...schema._def,
+      type: deepPartialify(schema.element)
+    });
+  } else if (schema instanceof ZodOptional) {
+    return ZodOptional.create(deepPartialify(schema.unwrap()));
+  } else if (schema instanceof ZodNullable) {
+    return ZodNullable.create(deepPartialify(schema.unwrap()));
+  } else if (schema instanceof ZodTuple) {
+    return ZodTuple.create(schema.items.map((item) => deepPartialify(item)));
+  } else {
+    return schema;
+  }
+}
+var ZodObject = class _ZodObject extends ZodType {
+  constructor() {
+    super(...arguments);
+    this._cached = null;
+    this.nonstrict = this.passthrough;
+    this.augment = this.extend;
+  }
+  _getCached() {
+    if (this._cached !== null)
+      return this._cached;
+    const shape = this._def.shape();
+    const keys2 = util.objectKeys(shape);
+    return this._cached = { shape, keys: keys2 };
+  }
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.object) {
+      const ctx2 = this._getOrReturnCtx(input);
+      addIssueToContext(ctx2, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.object,
+        received: ctx2.parsedType
+      });
+      return INVALID;
+    }
+    const { status, ctx } = this._processInputParams(input);
+    const { shape, keys: shapeKeys } = this._getCached();
+    const extraKeys = [];
+    if (!(this._def.catchall instanceof ZodNever && this._def.unknownKeys === "strip")) {
+      for (const key in ctx.data) {
+        if (!shapeKeys.includes(key)) {
+          extraKeys.push(key);
+        }
+      }
+    }
+    const pairs = [];
+    for (const key of shapeKeys) {
+      const keyValidator = shape[key];
+      const value2 = ctx.data[key];
+      pairs.push({
+        key: { status: "valid", value: key },
+        value: keyValidator._parse(new ParseInputLazyPath(ctx, value2, ctx.path, key)),
+        alwaysSet: key in ctx.data
+      });
+    }
+    if (this._def.catchall instanceof ZodNever) {
+      const unknownKeys = this._def.unknownKeys;
+      if (unknownKeys === "passthrough") {
+        for (const key of extraKeys) {
+          pairs.push({
+            key: { status: "valid", value: key },
+            value: { status: "valid", value: ctx.data[key] }
+          });
+        }
+      } else if (unknownKeys === "strict") {
+        if (extraKeys.length > 0) {
+          addIssueToContext(ctx, {
+            code: ZodIssueCode.unrecognized_keys,
+            keys: extraKeys
+          });
+          status.dirty();
+        }
+      } else if (unknownKeys === "strip") ;
+      else {
+        throw new Error(`Internal ZodObject error: invalid unknownKeys value.`);
+      }
+    } else {
+      const catchall = this._def.catchall;
+      for (const key of extraKeys) {
+        const value2 = ctx.data[key];
+        pairs.push({
+          key: { status: "valid", value: key },
+          value: catchall._parse(
+            new ParseInputLazyPath(ctx, value2, ctx.path, key)
+            //, ctx.child(key), value, getParsedType(value)
+          ),
+          alwaysSet: key in ctx.data
+        });
+      }
+    }
+    if (ctx.common.async) {
+      return Promise.resolve().then(async () => {
+        const syncPairs = [];
+        for (const pair of pairs) {
+          const key = await pair.key;
+          const value2 = await pair.value;
+          syncPairs.push({
+            key,
+            value: value2,
+            alwaysSet: pair.alwaysSet
+          });
+        }
+        return syncPairs;
+      }).then((syncPairs) => {
+        return ParseStatus.mergeObjectSync(status, syncPairs);
+      });
+    } else {
+      return ParseStatus.mergeObjectSync(status, pairs);
+    }
+  }
+  get shape() {
+    return this._def.shape();
+  }
+  strict(message) {
+    errorUtil.errToObj;
+    return new _ZodObject({
+      ...this._def,
+      unknownKeys: "strict",
+      ...message !== void 0 ? {
+        errorMap: (issue, ctx) => {
+          var _a, _b, _c, _d;
+          const defaultError = (_c = (_b = (_a = this._def).errorMap) === null || _b === void 0 ? void 0 : _b.call(_a, issue, ctx).message) !== null && _c !== void 0 ? _c : ctx.defaultError;
+          if (issue.code === "unrecognized_keys")
+            return {
+              message: (_d = errorUtil.errToObj(message).message) !== null && _d !== void 0 ? _d : defaultError
+            };
+          return {
+            message: defaultError
+          };
+        }
+      } : {}
+    });
+  }
+  strip() {
+    return new _ZodObject({
+      ...this._def,
+      unknownKeys: "strip"
+    });
+  }
+  passthrough() {
+    return new _ZodObject({
+      ...this._def,
+      unknownKeys: "passthrough"
+    });
+  }
+  // const AugmentFactory =
+  //   <Def extends ZodObjectDef>(def: Def) =>
+  //   <Augmentation extends ZodRawShape>(
+  //     augmentation: Augmentation
+  //   ): ZodObject<
+  //     extendShape<ReturnType<Def["shape"]>, Augmentation>,
+  //     Def["unknownKeys"],
+  //     Def["catchall"]
+  //   > => {
+  //     return new ZodObject({
+  //       ...def,
+  //       shape: () => ({
+  //         ...def.shape(),
+  //         ...augmentation,
+  //       }),
+  //     }) as any;
+  //   };
+  extend(augmentation) {
+    return new _ZodObject({
+      ...this._def,
+      shape: () => ({
+        ...this._def.shape(),
+        ...augmentation
+      })
+    });
+  }
+  /**
+   * Prior to zod@1.0.12 there was a bug in the
+   * inferred type of merged objects. Please
+   * upgrade if you are experiencing issues.
+   */
+  merge(merging) {
+    const merged = new _ZodObject({
+      unknownKeys: merging._def.unknownKeys,
+      catchall: merging._def.catchall,
+      shape: () => ({
+        ...this._def.shape(),
+        ...merging._def.shape()
+      }),
+      typeName: ZodFirstPartyTypeKind.ZodObject
+    });
+    return merged;
+  }
+  // merge<
+  //   Incoming extends AnyZodObject,
+  //   Augmentation extends Incoming["shape"],
+  //   NewOutput extends {
+  //     [k in keyof Augmentation | keyof Output]: k extends keyof Augmentation
+  //       ? Augmentation[k]["_output"]
+  //       : k extends keyof Output
+  //       ? Output[k]
+  //       : never;
+  //   },
+  //   NewInput extends {
+  //     [k in keyof Augmentation | keyof Input]: k extends keyof Augmentation
+  //       ? Augmentation[k]["_input"]
+  //       : k extends keyof Input
+  //       ? Input[k]
+  //       : never;
+  //   }
+  // >(
+  //   merging: Incoming
+  // ): ZodObject<
+  //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
+  //   Incoming["_def"]["unknownKeys"],
+  //   Incoming["_def"]["catchall"],
+  //   NewOutput,
+  //   NewInput
+  // > {
+  //   const merged: any = new ZodObject({
+  //     unknownKeys: merging._def.unknownKeys,
+  //     catchall: merging._def.catchall,
+  //     shape: () =>
+  //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+  //     typeName: ZodFirstPartyTypeKind.ZodObject,
+  //   }) as any;
+  //   return merged;
+  // }
+  setKey(key, schema) {
+    return this.augment({ [key]: schema });
+  }
+  // merge<Incoming extends AnyZodObject>(
+  //   merging: Incoming
+  // ): //ZodObject<T & Incoming["_shape"], UnknownKeys, Catchall> = (merging) => {
+  // ZodObject<
+  //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
+  //   Incoming["_def"]["unknownKeys"],
+  //   Incoming["_def"]["catchall"]
+  // > {
+  //   // const mergedShape = objectUtil.mergeShapes(
+  //   //   this._def.shape(),
+  //   //   merging._def.shape()
+  //   // );
+  //   const merged: any = new ZodObject({
+  //     unknownKeys: merging._def.unknownKeys,
+  //     catchall: merging._def.catchall,
+  //     shape: () =>
+  //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+  //     typeName: ZodFirstPartyTypeKind.ZodObject,
+  //   }) as any;
+  //   return merged;
+  // }
+  catchall(index) {
+    return new _ZodObject({
+      ...this._def,
+      catchall: index
+    });
+  }
+  pick(mask) {
+    const shape = {};
+    util.objectKeys(mask).forEach((key) => {
+      if (mask[key] && this.shape[key]) {
+        shape[key] = this.shape[key];
+      }
+    });
+    return new _ZodObject({
+      ...this._def,
+      shape: () => shape
+    });
+  }
+  omit(mask) {
+    const shape = {};
+    util.objectKeys(this.shape).forEach((key) => {
+      if (!mask[key]) {
+        shape[key] = this.shape[key];
+      }
+    });
+    return new _ZodObject({
+      ...this._def,
+      shape: () => shape
+    });
+  }
+  /**
+   * @deprecated
+   */
+  deepPartial() {
+    return deepPartialify(this);
+  }
+  partial(mask) {
+    const newShape = {};
+    util.objectKeys(this.shape).forEach((key) => {
+      const fieldSchema = this.shape[key];
+      if (mask && !mask[key]) {
+        newShape[key] = fieldSchema;
+      } else {
+        newShape[key] = fieldSchema.optional();
+      }
+    });
+    return new _ZodObject({
+      ...this._def,
+      shape: () => newShape
+    });
+  }
+  required(mask) {
+    const newShape = {};
+    util.objectKeys(this.shape).forEach((key) => {
+      if (mask && !mask[key]) {
+        newShape[key] = this.shape[key];
+      } else {
+        const fieldSchema = this.shape[key];
+        let newField = fieldSchema;
+        while (newField instanceof ZodOptional) {
+          newField = newField._def.innerType;
+        }
+        newShape[key] = newField;
+      }
+    });
+    return new _ZodObject({
+      ...this._def,
+      shape: () => newShape
+    });
+  }
+  keyof() {
+    return createZodEnum(util.objectKeys(this.shape));
+  }
+};
+ZodObject.create = (shape, params) => {
+  return new ZodObject({
+    shape: () => shape,
+    unknownKeys: "strip",
+    catchall: ZodNever.create(),
+    typeName: ZodFirstPartyTypeKind.ZodObject,
+    ...processCreateParams(params)
+  });
+};
+ZodObject.strictCreate = (shape, params) => {
+  return new ZodObject({
+    shape: () => shape,
+    unknownKeys: "strict",
+    catchall: ZodNever.create(),
+    typeName: ZodFirstPartyTypeKind.ZodObject,
+    ...processCreateParams(params)
+  });
+};
+ZodObject.lazycreate = (shape, params) => {
+  return new ZodObject({
+    shape,
+    unknownKeys: "strip",
+    catchall: ZodNever.create(),
+    typeName: ZodFirstPartyTypeKind.ZodObject,
+    ...processCreateParams(params)
+  });
+};
+var ZodUnion = class extends ZodType {
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    const options = this._def.options;
+    function handleResults(results) {
+      for (const result of results) {
+        if (result.result.status === "valid") {
+          return result.result;
+        }
+      }
+      for (const result of results) {
+        if (result.result.status === "dirty") {
+          ctx.common.issues.push(...result.ctx.common.issues);
+          return result.result;
+        }
+      }
+      const unionErrors = results.map((result) => new ZodError(result.ctx.common.issues));
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_union,
+        unionErrors
+      });
+      return INVALID;
+    }
+    if (ctx.common.async) {
+      return Promise.all(options.map(async (option) => {
+        const childCtx = {
+          ...ctx,
+          common: {
+            ...ctx.common,
+            issues: []
+          },
+          parent: null
+        };
+        return {
+          result: await option._parseAsync({
+            data: ctx.data,
+            path: ctx.path,
+            parent: childCtx
+          }),
+          ctx: childCtx
+        };
+      })).then(handleResults);
+    } else {
+      let dirty = void 0;
+      const issues = [];
+      for (const option of options) {
+        const childCtx = {
+          ...ctx,
+          common: {
+            ...ctx.common,
+            issues: []
+          },
+          parent: null
+        };
+        const result = option._parseSync({
+          data: ctx.data,
+          path: ctx.path,
+          parent: childCtx
+        });
+        if (result.status === "valid") {
+          return result;
+        } else if (result.status === "dirty" && !dirty) {
+          dirty = { result, ctx: childCtx };
+        }
+        if (childCtx.common.issues.length) {
+          issues.push(childCtx.common.issues);
+        }
+      }
+      if (dirty) {
+        ctx.common.issues.push(...dirty.ctx.common.issues);
+        return dirty.result;
+      }
+      const unionErrors = issues.map((issues2) => new ZodError(issues2));
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_union,
+        unionErrors
+      });
+      return INVALID;
+    }
+  }
+  get options() {
+    return this._def.options;
+  }
+};
+ZodUnion.create = (types, params) => {
+  return new ZodUnion({
+    options: types,
+    typeName: ZodFirstPartyTypeKind.ZodUnion,
+    ...processCreateParams(params)
+  });
+};
+var getDiscriminator = (type) => {
+  if (type instanceof ZodLazy) {
+    return getDiscriminator(type.schema);
+  } else if (type instanceof ZodEffects) {
+    return getDiscriminator(type.innerType());
+  } else if (type instanceof ZodLiteral) {
+    return [type.value];
+  } else if (type instanceof ZodEnum) {
+    return type.options;
+  } else if (type instanceof ZodNativeEnum) {
+    return util.objectValues(type.enum);
+  } else if (type instanceof ZodDefault) {
+    return getDiscriminator(type._def.innerType);
+  } else if (type instanceof ZodUndefined) {
+    return [void 0];
+  } else if (type instanceof ZodNull) {
+    return [null];
+  } else if (type instanceof ZodOptional) {
+    return [void 0, ...getDiscriminator(type.unwrap())];
+  } else if (type instanceof ZodNullable) {
+    return [null, ...getDiscriminator(type.unwrap())];
+  } else if (type instanceof ZodBranded) {
+    return getDiscriminator(type.unwrap());
+  } else if (type instanceof ZodReadonly) {
+    return getDiscriminator(type.unwrap());
+  } else if (type instanceof ZodCatch) {
+    return getDiscriminator(type._def.innerType);
+  } else {
+    return [];
+  }
+};
+var ZodDiscriminatedUnion = class _ZodDiscriminatedUnion extends ZodType {
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.object) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.object,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    const discriminator = this.discriminator;
+    const discriminatorValue = ctx.data[discriminator];
+    const option = this.optionsMap.get(discriminatorValue);
+    if (!option) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_union_discriminator,
+        options: Array.from(this.optionsMap.keys()),
+        path: [discriminator]
+      });
+      return INVALID;
+    }
+    if (ctx.common.async) {
+      return option._parseAsync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      });
+    } else {
+      return option._parseSync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      });
+    }
+  }
+  get discriminator() {
+    return this._def.discriminator;
+  }
+  get options() {
+    return this._def.options;
+  }
+  get optionsMap() {
+    return this._def.optionsMap;
+  }
+  /**
+   * The constructor of the discriminated union schema. Its behaviour is very similar to that of the normal z.union() constructor.
+   * However, it only allows a union of objects, all of which need to share a discriminator property. This property must
+   * have a different value for each object in the union.
+   * @param discriminator the name of the discriminator property
+   * @param types an array of object schemas
+   * @param params
+   */
+  static create(discriminator, options, params) {
+    const optionsMap = /* @__PURE__ */ new Map();
+    for (const type of options) {
+      const discriminatorValues = getDiscriminator(type.shape[discriminator]);
+      if (!discriminatorValues.length) {
+        throw new Error(`A discriminator value for key \`${discriminator}\` could not be extracted from all schema options`);
+      }
+      for (const value2 of discriminatorValues) {
+        if (optionsMap.has(value2)) {
+          throw new Error(`Discriminator property ${String(discriminator)} has duplicate value ${String(value2)}`);
+        }
+        optionsMap.set(value2, type);
+      }
+    }
+    return new _ZodDiscriminatedUnion({
+      typeName: ZodFirstPartyTypeKind.ZodDiscriminatedUnion,
+      discriminator,
+      options,
+      optionsMap,
+      ...processCreateParams(params)
+    });
+  }
+};
+function mergeValues(a2, b2) {
+  const aType = getParsedType(a2);
+  const bType = getParsedType(b2);
+  if (a2 === b2) {
+    return { valid: true, data: a2 };
+  } else if (aType === ZodParsedType.object && bType === ZodParsedType.object) {
+    const bKeys = util.objectKeys(b2);
+    const sharedKeys = util.objectKeys(a2).filter((key) => bKeys.indexOf(key) !== -1);
+    const newObj = { ...a2, ...b2 };
+    for (const key of sharedKeys) {
+      const sharedValue = mergeValues(a2[key], b2[key]);
+      if (!sharedValue.valid) {
+        return { valid: false };
+      }
+      newObj[key] = sharedValue.data;
+    }
+    return { valid: true, data: newObj };
+  } else if (aType === ZodParsedType.array && bType === ZodParsedType.array) {
+    if (a2.length !== b2.length) {
+      return { valid: false };
+    }
+    const newArray = [];
+    for (let index = 0; index < a2.length; index++) {
+      const itemA = a2[index];
+      const itemB = b2[index];
+      const sharedValue = mergeValues(itemA, itemB);
+      if (!sharedValue.valid) {
+        return { valid: false };
+      }
+      newArray.push(sharedValue.data);
+    }
+    return { valid: true, data: newArray };
+  } else if (aType === ZodParsedType.date && bType === ZodParsedType.date && +a2 === +b2) {
+    return { valid: true, data: a2 };
+  } else {
+    return { valid: false };
+  }
+}
+var ZodIntersection = class extends ZodType {
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    const handleParsed = (parsedLeft, parsedRight) => {
+      if (isAborted(parsedLeft) || isAborted(parsedRight)) {
+        return INVALID;
+      }
+      const merged = mergeValues(parsedLeft.value, parsedRight.value);
+      if (!merged.valid) {
+        addIssueToContext(ctx, {
+          code: ZodIssueCode.invalid_intersection_types
+        });
+        return INVALID;
+      }
+      if (isDirty(parsedLeft) || isDirty(parsedRight)) {
+        status.dirty();
+      }
+      return { status: status.value, value: merged.data };
+    };
+    if (ctx.common.async) {
+      return Promise.all([
+        this._def.left._parseAsync({
+          data: ctx.data,
+          path: ctx.path,
+          parent: ctx
+        }),
+        this._def.right._parseAsync({
+          data: ctx.data,
+          path: ctx.path,
+          parent: ctx
+        })
+      ]).then(([left, right]) => handleParsed(left, right));
+    } else {
+      return handleParsed(this._def.left._parseSync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      }), this._def.right._parseSync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      }));
+    }
+  }
+};
+ZodIntersection.create = (left, right, params) => {
+  return new ZodIntersection({
+    left,
+    right,
+    typeName: ZodFirstPartyTypeKind.ZodIntersection,
+    ...processCreateParams(params)
+  });
+};
+var ZodTuple = class _ZodTuple extends ZodType {
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.array) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.array,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    if (ctx.data.length < this._def.items.length) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.too_small,
+        minimum: this._def.items.length,
+        inclusive: true,
+        exact: false,
+        type: "array"
+      });
+      return INVALID;
+    }
+    const rest = this._def.rest;
+    if (!rest && ctx.data.length > this._def.items.length) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.too_big,
+        maximum: this._def.items.length,
+        inclusive: true,
+        exact: false,
+        type: "array"
+      });
+      status.dirty();
+    }
+    const items = [...ctx.data].map((item, itemIndex) => {
+      const schema = this._def.items[itemIndex] || this._def.rest;
+      if (!schema)
+        return null;
+      return schema._parse(new ParseInputLazyPath(ctx, item, ctx.path, itemIndex));
+    }).filter((x2) => !!x2);
+    if (ctx.common.async) {
+      return Promise.all(items).then((results) => {
+        return ParseStatus.mergeArray(status, results);
+      });
+    } else {
+      return ParseStatus.mergeArray(status, items);
+    }
+  }
+  get items() {
+    return this._def.items;
+  }
+  rest(rest) {
+    return new _ZodTuple({
+      ...this._def,
+      rest
+    });
+  }
+};
+ZodTuple.create = (schemas, params) => {
+  if (!Array.isArray(schemas)) {
+    throw new Error("You must pass an array of schemas to z.tuple([ ... ])");
+  }
+  return new ZodTuple({
+    items: schemas,
+    typeName: ZodFirstPartyTypeKind.ZodTuple,
+    rest: null,
+    ...processCreateParams(params)
+  });
+};
+var ZodRecord = class _ZodRecord extends ZodType {
+  get keySchema() {
+    return this._def.keyType;
+  }
+  get valueSchema() {
+    return this._def.valueType;
+  }
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.object) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.object,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    const pairs = [];
+    const keyType = this._def.keyType;
+    const valueType = this._def.valueType;
+    for (const key in ctx.data) {
+      pairs.push({
+        key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, key)),
+        value: valueType._parse(new ParseInputLazyPath(ctx, ctx.data[key], ctx.path, key)),
+        alwaysSet: key in ctx.data
+      });
+    }
+    if (ctx.common.async) {
+      return ParseStatus.mergeObjectAsync(status, pairs);
+    } else {
+      return ParseStatus.mergeObjectSync(status, pairs);
+    }
+  }
+  get element() {
+    return this._def.valueType;
+  }
+  static create(first, second, third) {
+    if (second instanceof ZodType) {
+      return new _ZodRecord({
+        keyType: first,
+        valueType: second,
+        typeName: ZodFirstPartyTypeKind.ZodRecord,
+        ...processCreateParams(third)
+      });
+    }
+    return new _ZodRecord({
+      keyType: ZodString.create(),
+      valueType: first,
+      typeName: ZodFirstPartyTypeKind.ZodRecord,
+      ...processCreateParams(second)
+    });
+  }
+};
+var ZodMap = class extends ZodType {
+  get keySchema() {
+    return this._def.keyType;
+  }
+  get valueSchema() {
+    return this._def.valueType;
+  }
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.map) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.map,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    const keyType = this._def.keyType;
+    const valueType = this._def.valueType;
+    const pairs = [...ctx.data.entries()].map(([key, value2], index) => {
+      return {
+        key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, [index, "key"])),
+        value: valueType._parse(new ParseInputLazyPath(ctx, value2, ctx.path, [index, "value"]))
+      };
+    });
+    if (ctx.common.async) {
+      const finalMap = /* @__PURE__ */ new Map();
+      return Promise.resolve().then(async () => {
+        for (const pair of pairs) {
+          const key = await pair.key;
+          const value2 = await pair.value;
+          if (key.status === "aborted" || value2.status === "aborted") {
+            return INVALID;
+          }
+          if (key.status === "dirty" || value2.status === "dirty") {
+            status.dirty();
+          }
+          finalMap.set(key.value, value2.value);
+        }
+        return { status: status.value, value: finalMap };
+      });
+    } else {
+      const finalMap = /* @__PURE__ */ new Map();
+      for (const pair of pairs) {
+        const key = pair.key;
+        const value2 = pair.value;
+        if (key.status === "aborted" || value2.status === "aborted") {
+          return INVALID;
+        }
+        if (key.status === "dirty" || value2.status === "dirty") {
+          status.dirty();
+        }
+        finalMap.set(key.value, value2.value);
+      }
+      return { status: status.value, value: finalMap };
+    }
+  }
+};
+ZodMap.create = (keyType, valueType, params) => {
+  return new ZodMap({
+    valueType,
+    keyType,
+    typeName: ZodFirstPartyTypeKind.ZodMap,
+    ...processCreateParams(params)
+  });
+};
+var ZodSet = class _ZodSet extends ZodType {
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.set) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.set,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    const def = this._def;
+    if (def.minSize !== null) {
+      if (ctx.data.size < def.minSize.value) {
+        addIssueToContext(ctx, {
+          code: ZodIssueCode.too_small,
+          minimum: def.minSize.value,
+          type: "set",
+          inclusive: true,
+          exact: false,
+          message: def.minSize.message
+        });
+        status.dirty();
+      }
+    }
+    if (def.maxSize !== null) {
+      if (ctx.data.size > def.maxSize.value) {
+        addIssueToContext(ctx, {
+          code: ZodIssueCode.too_big,
+          maximum: def.maxSize.value,
+          type: "set",
+          inclusive: true,
+          exact: false,
+          message: def.maxSize.message
+        });
+        status.dirty();
+      }
+    }
+    const valueType = this._def.valueType;
+    function finalizeSet(elements2) {
+      const parsedSet = /* @__PURE__ */ new Set();
+      for (const element2 of elements2) {
+        if (element2.status === "aborted")
+          return INVALID;
+        if (element2.status === "dirty")
+          status.dirty();
+        parsedSet.add(element2.value);
+      }
+      return { status: status.value, value: parsedSet };
+    }
+    const elements = [...ctx.data.values()].map((item, i2) => valueType._parse(new ParseInputLazyPath(ctx, item, ctx.path, i2)));
+    if (ctx.common.async) {
+      return Promise.all(elements).then((elements2) => finalizeSet(elements2));
+    } else {
+      return finalizeSet(elements);
+    }
+  }
+  min(minSize, message) {
+    return new _ZodSet({
+      ...this._def,
+      minSize: { value: minSize, message: errorUtil.toString(message) }
+    });
+  }
+  max(maxSize, message) {
+    return new _ZodSet({
+      ...this._def,
+      maxSize: { value: maxSize, message: errorUtil.toString(message) }
+    });
+  }
+  size(size, message) {
+    return this.min(size, message).max(size, message);
+  }
+  nonempty(message) {
+    return this.min(1, message);
+  }
+};
+ZodSet.create = (valueType, params) => {
+  return new ZodSet({
+    valueType,
+    minSize: null,
+    maxSize: null,
+    typeName: ZodFirstPartyTypeKind.ZodSet,
+    ...processCreateParams(params)
+  });
+};
+var ZodFunction = class _ZodFunction extends ZodType {
+  constructor() {
+    super(...arguments);
+    this.validate = this.implement;
+  }
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.function) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.function,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    function makeArgsIssue(args, error2) {
+      return makeIssue({
+        data: args,
+        path: ctx.path,
+        errorMaps: [
+          ctx.common.contextualErrorMap,
+          ctx.schemaErrorMap,
+          getErrorMap(),
+          errorMap
+        ].filter((x2) => !!x2),
+        issueData: {
+          code: ZodIssueCode.invalid_arguments,
+          argumentsError: error2
+        }
+      });
+    }
+    function makeReturnsIssue(returns, error2) {
+      return makeIssue({
+        data: returns,
+        path: ctx.path,
+        errorMaps: [
+          ctx.common.contextualErrorMap,
+          ctx.schemaErrorMap,
+          getErrorMap(),
+          errorMap
+        ].filter((x2) => !!x2),
+        issueData: {
+          code: ZodIssueCode.invalid_return_type,
+          returnTypeError: error2
+        }
+      });
+    }
+    const params = { errorMap: ctx.common.contextualErrorMap };
+    const fn2 = ctx.data;
+    if (this._def.returns instanceof ZodPromise) {
+      const me = this;
+      return OK(async function(...args) {
+        const error2 = new ZodError([]);
+        const parsedArgs = await me._def.args.parseAsync(args, params).catch((e) => {
+          error2.addIssue(makeArgsIssue(args, e));
+          throw error2;
+        });
+        const result = await Reflect.apply(fn2, this, parsedArgs);
+        const parsedReturns = await me._def.returns._def.type.parseAsync(result, params).catch((e) => {
+          error2.addIssue(makeReturnsIssue(result, e));
+          throw error2;
+        });
+        return parsedReturns;
+      });
+    } else {
+      const me = this;
+      return OK(function(...args) {
+        const parsedArgs = me._def.args.safeParse(args, params);
+        if (!parsedArgs.success) {
+          throw new ZodError([makeArgsIssue(args, parsedArgs.error)]);
+        }
+        const result = Reflect.apply(fn2, this, parsedArgs.data);
+        const parsedReturns = me._def.returns.safeParse(result, params);
+        if (!parsedReturns.success) {
+          throw new ZodError([makeReturnsIssue(result, parsedReturns.error)]);
+        }
+        return parsedReturns.data;
+      });
+    }
+  }
+  parameters() {
+    return this._def.args;
+  }
+  returnType() {
+    return this._def.returns;
+  }
+  args(...items) {
+    return new _ZodFunction({
+      ...this._def,
+      args: ZodTuple.create(items).rest(ZodUnknown.create())
+    });
+  }
+  returns(returnType) {
+    return new _ZodFunction({
+      ...this._def,
+      returns: returnType
+    });
+  }
+  implement(func) {
+    const validatedFunc = this.parse(func);
+    return validatedFunc;
+  }
+  strictImplement(func) {
+    const validatedFunc = this.parse(func);
+    return validatedFunc;
+  }
+  static create(args, returns, params) {
+    return new _ZodFunction({
+      args: args ? args : ZodTuple.create([]).rest(ZodUnknown.create()),
+      returns: returns || ZodUnknown.create(),
+      typeName: ZodFirstPartyTypeKind.ZodFunction,
+      ...processCreateParams(params)
+    });
+  }
+};
+var ZodLazy = class extends ZodType {
+  get schema() {
+    return this._def.getter();
+  }
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    const lazySchema = this._def.getter();
+    return lazySchema._parse({ data: ctx.data, path: ctx.path, parent: ctx });
+  }
+};
+ZodLazy.create = (getter, params) => {
+  return new ZodLazy({
+    getter,
+    typeName: ZodFirstPartyTypeKind.ZodLazy,
+    ...processCreateParams(params)
+  });
+};
+var ZodLiteral = class extends ZodType {
+  _parse(input) {
+    if (input.data !== this._def.value) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        received: ctx.data,
+        code: ZodIssueCode.invalid_literal,
+        expected: this._def.value
+      });
+      return INVALID;
+    }
+    return { status: "valid", value: input.data };
+  }
+  get value() {
+    return this._def.value;
+  }
+};
+ZodLiteral.create = (value2, params) => {
+  return new ZodLiteral({
+    value: value2,
+    typeName: ZodFirstPartyTypeKind.ZodLiteral,
+    ...processCreateParams(params)
+  });
+};
+function createZodEnum(values, params) {
+  return new ZodEnum({
+    values,
+    typeName: ZodFirstPartyTypeKind.ZodEnum,
+    ...processCreateParams(params)
+  });
+}
+var ZodEnum = class _ZodEnum extends ZodType {
+  constructor() {
+    super(...arguments);
+    _ZodEnum_cache.set(this, void 0);
+  }
+  _parse(input) {
+    if (typeof input.data !== "string") {
+      const ctx = this._getOrReturnCtx(input);
+      const expectedValues = this._def.values;
+      addIssueToContext(ctx, {
+        expected: util.joinValues(expectedValues),
+        received: ctx.parsedType,
+        code: ZodIssueCode.invalid_type
+      });
+      return INVALID;
+    }
+    if (!__classPrivateFieldGet(this, _ZodEnum_cache, "f")) {
+      __classPrivateFieldSet(this, _ZodEnum_cache, new Set(this._def.values), "f");
+    }
+    if (!__classPrivateFieldGet(this, _ZodEnum_cache, "f").has(input.data)) {
+      const ctx = this._getOrReturnCtx(input);
+      const expectedValues = this._def.values;
+      addIssueToContext(ctx, {
+        received: ctx.data,
+        code: ZodIssueCode.invalid_enum_value,
+        options: expectedValues
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+  get options() {
+    return this._def.values;
+  }
+  get enum() {
+    const enumValues = {};
+    for (const val of this._def.values) {
+      enumValues[val] = val;
+    }
+    return enumValues;
+  }
+  get Values() {
+    const enumValues = {};
+    for (const val of this._def.values) {
+      enumValues[val] = val;
+    }
+    return enumValues;
+  }
+  get Enum() {
+    const enumValues = {};
+    for (const val of this._def.values) {
+      enumValues[val] = val;
+    }
+    return enumValues;
+  }
+  extract(values, newDef = this._def) {
+    return _ZodEnum.create(values, {
+      ...this._def,
+      ...newDef
+    });
+  }
+  exclude(values, newDef = this._def) {
+    return _ZodEnum.create(this.options.filter((opt) => !values.includes(opt)), {
+      ...this._def,
+      ...newDef
+    });
+  }
+};
+_ZodEnum_cache = /* @__PURE__ */ new WeakMap();
+ZodEnum.create = createZodEnum;
+var ZodNativeEnum = class extends ZodType {
+  constructor() {
+    super(...arguments);
+    _ZodNativeEnum_cache.set(this, void 0);
+  }
+  _parse(input) {
+    const nativeEnumValues = util.getValidEnumValues(this._def.values);
+    const ctx = this._getOrReturnCtx(input);
+    if (ctx.parsedType !== ZodParsedType.string && ctx.parsedType !== ZodParsedType.number) {
+      const expectedValues = util.objectValues(nativeEnumValues);
+      addIssueToContext(ctx, {
+        expected: util.joinValues(expectedValues),
+        received: ctx.parsedType,
+        code: ZodIssueCode.invalid_type
+      });
+      return INVALID;
+    }
+    if (!__classPrivateFieldGet(this, _ZodNativeEnum_cache, "f")) {
+      __classPrivateFieldSet(this, _ZodNativeEnum_cache, new Set(util.getValidEnumValues(this._def.values)), "f");
+    }
+    if (!__classPrivateFieldGet(this, _ZodNativeEnum_cache, "f").has(input.data)) {
+      const expectedValues = util.objectValues(nativeEnumValues);
+      addIssueToContext(ctx, {
+        received: ctx.data,
+        code: ZodIssueCode.invalid_enum_value,
+        options: expectedValues
+      });
+      return INVALID;
+    }
+    return OK(input.data);
+  }
+  get enum() {
+    return this._def.values;
+  }
+};
+_ZodNativeEnum_cache = /* @__PURE__ */ new WeakMap();
+ZodNativeEnum.create = (values, params) => {
+  return new ZodNativeEnum({
+    values,
+    typeName: ZodFirstPartyTypeKind.ZodNativeEnum,
+    ...processCreateParams(params)
+  });
+};
+var ZodPromise = class extends ZodType {
+  unwrap() {
+    return this._def.type;
+  }
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    if (ctx.parsedType !== ZodParsedType.promise && ctx.common.async === false) {
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.promise,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    const promisified = ctx.parsedType === ZodParsedType.promise ? ctx.data : Promise.resolve(ctx.data);
+    return OK(promisified.then((data) => {
+      return this._def.type.parseAsync(data, {
+        path: ctx.path,
+        errorMap: ctx.common.contextualErrorMap
+      });
+    }));
+  }
+};
+ZodPromise.create = (schema, params) => {
+  return new ZodPromise({
+    type: schema,
+    typeName: ZodFirstPartyTypeKind.ZodPromise,
+    ...processCreateParams(params)
+  });
+};
+var ZodEffects = class extends ZodType {
+  innerType() {
+    return this._def.schema;
+  }
+  sourceType() {
+    return this._def.schema._def.typeName === ZodFirstPartyTypeKind.ZodEffects ? this._def.schema.sourceType() : this._def.schema;
+  }
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    const effect = this._def.effect || null;
+    const checkCtx = {
+      addIssue: (arg) => {
+        addIssueToContext(ctx, arg);
+        if (arg.fatal) {
+          status.abort();
+        } else {
+          status.dirty();
+        }
+      },
+      get path() {
+        return ctx.path;
+      }
+    };
+    checkCtx.addIssue = checkCtx.addIssue.bind(checkCtx);
+    if (effect.type === "preprocess") {
+      const processed = effect.transform(ctx.data, checkCtx);
+      if (ctx.common.async) {
+        return Promise.resolve(processed).then(async (processed2) => {
+          if (status.value === "aborted")
+            return INVALID;
+          const result = await this._def.schema._parseAsync({
+            data: processed2,
+            path: ctx.path,
+            parent: ctx
+          });
+          if (result.status === "aborted")
+            return INVALID;
+          if (result.status === "dirty")
+            return DIRTY(result.value);
+          if (status.value === "dirty")
+            return DIRTY(result.value);
+          return result;
+        });
+      } else {
+        if (status.value === "aborted")
+          return INVALID;
+        const result = this._def.schema._parseSync({
+          data: processed,
+          path: ctx.path,
+          parent: ctx
+        });
+        if (result.status === "aborted")
+          return INVALID;
+        if (result.status === "dirty")
+          return DIRTY(result.value);
+        if (status.value === "dirty")
+          return DIRTY(result.value);
+        return result;
+      }
+    }
+    if (effect.type === "refinement") {
+      const executeRefinement = (acc) => {
+        const result = effect.refinement(acc, checkCtx);
+        if (ctx.common.async) {
+          return Promise.resolve(result);
+        }
+        if (result instanceof Promise) {
+          throw new Error("Async refinement encountered during synchronous parse operation. Use .parseAsync instead.");
+        }
+        return acc;
+      };
+      if (ctx.common.async === false) {
+        const inner = this._def.schema._parseSync({
+          data: ctx.data,
+          path: ctx.path,
+          parent: ctx
+        });
+        if (inner.status === "aborted")
+          return INVALID;
+        if (inner.status === "dirty")
+          status.dirty();
+        executeRefinement(inner.value);
+        return { status: status.value, value: inner.value };
+      } else {
+        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((inner) => {
+          if (inner.status === "aborted")
+            return INVALID;
+          if (inner.status === "dirty")
+            status.dirty();
+          return executeRefinement(inner.value).then(() => {
+            return { status: status.value, value: inner.value };
+          });
+        });
+      }
+    }
+    if (effect.type === "transform") {
+      if (ctx.common.async === false) {
+        const base = this._def.schema._parseSync({
+          data: ctx.data,
+          path: ctx.path,
+          parent: ctx
+        });
+        if (!isValid(base))
+          return base;
+        const result = effect.transform(base.value, checkCtx);
+        if (result instanceof Promise) {
+          throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
+        }
+        return { status: status.value, value: result };
+      } else {
+        return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base) => {
+          if (!isValid(base))
+            return base;
+          return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({ status: status.value, value: result }));
+        });
+      }
+    }
+    util.assertNever(effect);
+  }
+};
+ZodEffects.create = (schema, effect, params) => {
+  return new ZodEffects({
+    schema,
+    typeName: ZodFirstPartyTypeKind.ZodEffects,
+    effect,
+    ...processCreateParams(params)
+  });
+};
+ZodEffects.createWithPreprocess = (preprocess, schema, params) => {
+  return new ZodEffects({
+    schema,
+    effect: { type: "preprocess", transform: preprocess },
+    typeName: ZodFirstPartyTypeKind.ZodEffects,
+    ...processCreateParams(params)
+  });
+};
+var ZodOptional = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType === ZodParsedType.undefined) {
+      return OK(void 0);
+    }
+    return this._def.innerType._parse(input);
+  }
+  unwrap() {
+    return this._def.innerType;
+  }
+};
+ZodOptional.create = (type, params) => {
+  return new ZodOptional({
+    innerType: type,
+    typeName: ZodFirstPartyTypeKind.ZodOptional,
+    ...processCreateParams(params)
+  });
+};
+var ZodNullable = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType === ZodParsedType.null) {
+      return OK(null);
+    }
+    return this._def.innerType._parse(input);
+  }
+  unwrap() {
+    return this._def.innerType;
+  }
+};
+ZodNullable.create = (type, params) => {
+  return new ZodNullable({
+    innerType: type,
+    typeName: ZodFirstPartyTypeKind.ZodNullable,
+    ...processCreateParams(params)
+  });
+};
+var ZodDefault = class extends ZodType {
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    let data = ctx.data;
+    if (ctx.parsedType === ZodParsedType.undefined) {
+      data = this._def.defaultValue();
+    }
+    return this._def.innerType._parse({
+      data,
+      path: ctx.path,
+      parent: ctx
+    });
+  }
+  removeDefault() {
+    return this._def.innerType;
+  }
+};
+ZodDefault.create = (type, params) => {
+  return new ZodDefault({
+    innerType: type,
+    typeName: ZodFirstPartyTypeKind.ZodDefault,
+    defaultValue: typeof params.default === "function" ? params.default : () => params.default,
+    ...processCreateParams(params)
+  });
+};
+var ZodCatch = class extends ZodType {
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    const newCtx = {
+      ...ctx,
+      common: {
+        ...ctx.common,
+        issues: []
+      }
+    };
+    const result = this._def.innerType._parse({
+      data: newCtx.data,
+      path: newCtx.path,
+      parent: {
+        ...newCtx
+      }
+    });
+    if (isAsync(result)) {
+      return result.then((result2) => {
+        return {
+          status: "valid",
+          value: result2.status === "valid" ? result2.value : this._def.catchValue({
+            get error() {
+              return new ZodError(newCtx.common.issues);
+            },
+            input: newCtx.data
+          })
+        };
+      });
+    } else {
+      return {
+        status: "valid",
+        value: result.status === "valid" ? result.value : this._def.catchValue({
+          get error() {
+            return new ZodError(newCtx.common.issues);
+          },
+          input: newCtx.data
+        })
+      };
+    }
+  }
+  removeCatch() {
+    return this._def.innerType;
+  }
+};
+ZodCatch.create = (type, params) => {
+  return new ZodCatch({
+    innerType: type,
+    typeName: ZodFirstPartyTypeKind.ZodCatch,
+    catchValue: typeof params.catch === "function" ? params.catch : () => params.catch,
+    ...processCreateParams(params)
+  });
+};
+var ZodNaN = class extends ZodType {
+  _parse(input) {
+    const parsedType = this._getType(input);
+    if (parsedType !== ZodParsedType.nan) {
+      const ctx = this._getOrReturnCtx(input);
+      addIssueToContext(ctx, {
+        code: ZodIssueCode.invalid_type,
+        expected: ZodParsedType.nan,
+        received: ctx.parsedType
+      });
+      return INVALID;
+    }
+    return { status: "valid", value: input.data };
+  }
+};
+ZodNaN.create = (params) => {
+  return new ZodNaN({
+    typeName: ZodFirstPartyTypeKind.ZodNaN,
+    ...processCreateParams(params)
+  });
+};
+var BRAND = Symbol("zod_brand");
+var ZodBranded = class extends ZodType {
+  _parse(input) {
+    const { ctx } = this._processInputParams(input);
+    const data = ctx.data;
+    return this._def.type._parse({
+      data,
+      path: ctx.path,
+      parent: ctx
+    });
+  }
+  unwrap() {
+    return this._def.type;
+  }
+};
+var ZodPipeline = class _ZodPipeline extends ZodType {
+  _parse(input) {
+    const { status, ctx } = this._processInputParams(input);
+    if (ctx.common.async) {
+      const handleAsync = async () => {
+        const inResult = await this._def.in._parseAsync({
+          data: ctx.data,
+          path: ctx.path,
+          parent: ctx
+        });
+        if (inResult.status === "aborted")
+          return INVALID;
+        if (inResult.status === "dirty") {
+          status.dirty();
+          return DIRTY(inResult.value);
+        } else {
+          return this._def.out._parseAsync({
+            data: inResult.value,
+            path: ctx.path,
+            parent: ctx
+          });
+        }
+      };
+      return handleAsync();
+    } else {
+      const inResult = this._def.in._parseSync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      });
+      if (inResult.status === "aborted")
+        return INVALID;
+      if (inResult.status === "dirty") {
+        status.dirty();
+        return {
+          status: "dirty",
+          value: inResult.value
+        };
+      } else {
+        return this._def.out._parseSync({
+          data: inResult.value,
+          path: ctx.path,
+          parent: ctx
+        });
+      }
+    }
+  }
+  static create(a2, b2) {
+    return new _ZodPipeline({
+      in: a2,
+      out: b2,
+      typeName: ZodFirstPartyTypeKind.ZodPipeline
+    });
+  }
+};
+var ZodReadonly = class extends ZodType {
+  _parse(input) {
+    const result = this._def.innerType._parse(input);
+    const freeze = (data) => {
+      if (isValid(data)) {
+        data.value = Object.freeze(data.value);
+      }
+      return data;
+    };
+    return isAsync(result) ? result.then((data) => freeze(data)) : freeze(result);
+  }
+  unwrap() {
+    return this._def.innerType;
+  }
+};
+ZodReadonly.create = (type, params) => {
+  return new ZodReadonly({
+    innerType: type,
+    typeName: ZodFirstPartyTypeKind.ZodReadonly,
+    ...processCreateParams(params)
+  });
+};
+function cleanParams(params, data) {
+  const p2 = typeof params === "function" ? params(data) : typeof params === "string" ? { message: params } : params;
+  const p22 = typeof p2 === "string" ? { message: p2 } : p2;
+  return p22;
+}
+function custom(check, _params = {}, fatal) {
+  if (check)
+    return ZodAny.create().superRefine((data, ctx) => {
+      var _a, _b;
+      const r2 = check(data);
+      if (r2 instanceof Promise) {
+        return r2.then((r3) => {
+          var _a2, _b2;
+          if (!r3) {
+            const params = cleanParams(_params, data);
+            const _fatal = (_b2 = (_a2 = params.fatal) !== null && _a2 !== void 0 ? _a2 : fatal) !== null && _b2 !== void 0 ? _b2 : true;
+            ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+          }
+        });
+      }
+      if (!r2) {
+        const params = cleanParams(_params, data);
+        const _fatal = (_b = (_a = params.fatal) !== null && _a !== void 0 ? _a : fatal) !== null && _b !== void 0 ? _b : true;
+        ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+      }
+      return;
+    });
+  return ZodAny.create();
+}
+var late = {
+  object: ZodObject.lazycreate
+};
+var ZodFirstPartyTypeKind;
+(function(ZodFirstPartyTypeKind2) {
+  ZodFirstPartyTypeKind2["ZodString"] = "ZodString";
+  ZodFirstPartyTypeKind2["ZodNumber"] = "ZodNumber";
+  ZodFirstPartyTypeKind2["ZodNaN"] = "ZodNaN";
+  ZodFirstPartyTypeKind2["ZodBigInt"] = "ZodBigInt";
+  ZodFirstPartyTypeKind2["ZodBoolean"] = "ZodBoolean";
+  ZodFirstPartyTypeKind2["ZodDate"] = "ZodDate";
+  ZodFirstPartyTypeKind2["ZodSymbol"] = "ZodSymbol";
+  ZodFirstPartyTypeKind2["ZodUndefined"] = "ZodUndefined";
+  ZodFirstPartyTypeKind2["ZodNull"] = "ZodNull";
+  ZodFirstPartyTypeKind2["ZodAny"] = "ZodAny";
+  ZodFirstPartyTypeKind2["ZodUnknown"] = "ZodUnknown";
+  ZodFirstPartyTypeKind2["ZodNever"] = "ZodNever";
+  ZodFirstPartyTypeKind2["ZodVoid"] = "ZodVoid";
+  ZodFirstPartyTypeKind2["ZodArray"] = "ZodArray";
+  ZodFirstPartyTypeKind2["ZodObject"] = "ZodObject";
+  ZodFirstPartyTypeKind2["ZodUnion"] = "ZodUnion";
+  ZodFirstPartyTypeKind2["ZodDiscriminatedUnion"] = "ZodDiscriminatedUnion";
+  ZodFirstPartyTypeKind2["ZodIntersection"] = "ZodIntersection";
+  ZodFirstPartyTypeKind2["ZodTuple"] = "ZodTuple";
+  ZodFirstPartyTypeKind2["ZodRecord"] = "ZodRecord";
+  ZodFirstPartyTypeKind2["ZodMap"] = "ZodMap";
+  ZodFirstPartyTypeKind2["ZodSet"] = "ZodSet";
+  ZodFirstPartyTypeKind2["ZodFunction"] = "ZodFunction";
+  ZodFirstPartyTypeKind2["ZodLazy"] = "ZodLazy";
+  ZodFirstPartyTypeKind2["ZodLiteral"] = "ZodLiteral";
+  ZodFirstPartyTypeKind2["ZodEnum"] = "ZodEnum";
+  ZodFirstPartyTypeKind2["ZodEffects"] = "ZodEffects";
+  ZodFirstPartyTypeKind2["ZodNativeEnum"] = "ZodNativeEnum";
+  ZodFirstPartyTypeKind2["ZodOptional"] = "ZodOptional";
+  ZodFirstPartyTypeKind2["ZodNullable"] = "ZodNullable";
+  ZodFirstPartyTypeKind2["ZodDefault"] = "ZodDefault";
+  ZodFirstPartyTypeKind2["ZodCatch"] = "ZodCatch";
+  ZodFirstPartyTypeKind2["ZodPromise"] = "ZodPromise";
+  ZodFirstPartyTypeKind2["ZodBranded"] = "ZodBranded";
+  ZodFirstPartyTypeKind2["ZodPipeline"] = "ZodPipeline";
+  ZodFirstPartyTypeKind2["ZodReadonly"] = "ZodReadonly";
+})(ZodFirstPartyTypeKind || (ZodFirstPartyTypeKind = {}));
+var instanceOfType = (cls, params = {
+  message: `Input not instance of ${cls.name}`
+}) => custom((data) => data instanceof cls, params);
+var stringType = ZodString.create;
+var numberType = ZodNumber.create;
+var nanType = ZodNaN.create;
+var bigIntType = ZodBigInt.create;
+var booleanType = ZodBoolean.create;
+var dateType = ZodDate.create;
+var symbolType = ZodSymbol.create;
+var undefinedType = ZodUndefined.create;
+var nullType = ZodNull.create;
+var anyType = ZodAny.create;
+var unknownType = ZodUnknown.create;
+var neverType = ZodNever.create;
+var voidType = ZodVoid.create;
+var arrayType = ZodArray.create;
+var objectType = ZodObject.create;
+var strictObjectType = ZodObject.strictCreate;
+var unionType = ZodUnion.create;
+var discriminatedUnionType = ZodDiscriminatedUnion.create;
+var intersectionType = ZodIntersection.create;
+var tupleType = ZodTuple.create;
+var recordType = ZodRecord.create;
+var mapType = ZodMap.create;
+var setType = ZodSet.create;
+var functionType = ZodFunction.create;
+var lazyType = ZodLazy.create;
+var literalType = ZodLiteral.create;
+var enumType = ZodEnum.create;
+var nativeEnumType = ZodNativeEnum.create;
+var promiseType = ZodPromise.create;
+var effectsType = ZodEffects.create;
+var optionalType = ZodOptional.create;
+var nullableType = ZodNullable.create;
+var preprocessType = ZodEffects.createWithPreprocess;
+var pipelineType = ZodPipeline.create;
+var ostring = () => stringType().optional();
+var onumber = () => numberType().optional();
+var oboolean = () => booleanType().optional();
+var coerce = {
+  string: (arg) => ZodString.create({ ...arg, coerce: true }),
+  number: (arg) => ZodNumber.create({ ...arg, coerce: true }),
+  boolean: (arg) => ZodBoolean.create({
+    ...arg,
+    coerce: true
+  }),
+  bigint: (arg) => ZodBigInt.create({ ...arg, coerce: true }),
+  date: (arg) => ZodDate.create({ ...arg, coerce: true })
+};
+var NEVER = INVALID;
+var z = /* @__PURE__ */ Object.freeze({
+  __proto__: null,
+  defaultErrorMap: errorMap,
+  setErrorMap,
+  getErrorMap,
+  makeIssue,
+  EMPTY_PATH,
+  addIssueToContext,
+  ParseStatus,
+  INVALID,
+  DIRTY,
+  OK,
+  isAborted,
+  isDirty,
+  isValid,
+  isAsync,
+  get util() {
+    return util;
+  },
+  get objectUtil() {
+    return objectUtil;
+  },
+  ZodParsedType,
+  getParsedType,
+  ZodType,
+  datetimeRegex,
+  ZodString,
+  ZodNumber,
+  ZodBigInt,
+  ZodBoolean,
+  ZodDate,
+  ZodSymbol,
+  ZodUndefined,
+  ZodNull,
+  ZodAny,
+  ZodUnknown,
+  ZodNever,
+  ZodVoid,
+  ZodArray,
+  ZodObject,
+  ZodUnion,
+  ZodDiscriminatedUnion,
+  ZodIntersection,
+  ZodTuple,
+  ZodRecord,
+  ZodMap,
+  ZodSet,
+  ZodFunction,
+  ZodLazy,
+  ZodLiteral,
+  ZodEnum,
+  ZodNativeEnum,
+  ZodPromise,
+  ZodEffects,
+  ZodTransformer: ZodEffects,
+  ZodOptional,
+  ZodNullable,
+  ZodDefault,
+  ZodCatch,
+  ZodNaN,
+  BRAND,
+  ZodBranded,
+  ZodPipeline,
+  ZodReadonly,
+  custom,
+  Schema: ZodType,
+  ZodSchema: ZodType,
+  late,
+  get ZodFirstPartyTypeKind() {
+    return ZodFirstPartyTypeKind;
+  },
+  coerce,
+  any: anyType,
+  array: arrayType,
+  bigint: bigIntType,
+  boolean: booleanType,
+  date: dateType,
+  discriminatedUnion: discriminatedUnionType,
+  effect: effectsType,
+  "enum": enumType,
+  "function": functionType,
+  "instanceof": instanceOfType,
+  intersection: intersectionType,
+  lazy: lazyType,
+  literal: literalType,
+  map: mapType,
+  nan: nanType,
+  nativeEnum: nativeEnumType,
+  never: neverType,
+  "null": nullType,
+  nullable: nullableType,
+  number: numberType,
+  object: objectType,
+  oboolean,
+  onumber,
+  optional: optionalType,
+  ostring,
+  pipeline: pipelineType,
+  preprocess: preprocessType,
+  promise: promiseType,
+  record: recordType,
+  set: setType,
+  strictObject: strictObjectType,
+  string: stringType,
+  symbol: symbolType,
+  transformer: effectsType,
+  tuple: tupleType,
+  "undefined": undefinedType,
+  union: unionType,
+  unknown: unknownType,
+  "void": voidType,
+  NEVER,
+  ZodIssueCode,
+  quotelessJson,
+  ZodError
+});
+
+// src/types/schemas/zod-helpers.ts
+function formatZodIssuePath(path) {
+  if (!path.length) return "<root>";
+  return path.map((seg) => typeof seg === "number" ? `[${seg}]` : `${seg}`).join(".").replace(/\.?\[(\d+)\]/g, "[$1]");
+}
+function formatZodError(error2) {
+  return error2.issues.map((issue) => {
+    const at = formatZodIssuePath(issue.path);
+    return `${at}: ${issue.message}`;
+  }).join("; ");
+}
+function parseOrThrow(schema, value2, label) {
+  const parsed = schema.safeParse(value2);
+  if (!parsed.success) {
+    throw new Error(`${label}: ${formatZodError(parsed.error)}`);
+  }
+  return parsed.data;
+}
+
+// src/types/schemas/value-ref.schema.ts
+var PathSegmentSchema = z.union([
+  z.string(),
+  z.number(),
+  z.object({
+    flatten: z.boolean(),
+    map: z.array(z.string()).optional()
+  }).strict()
+]);
+var CtxPathRefSchema = z.object({
+  type: z.literal("ctxPath"),
+  path: z.array(z.union([z.string(), z.number()]))
+}).strict();
+var ContextPathRefSchema = z.object({
+  type: z.literal("contextPath"),
+  path: z.array(PathSegmentSchema)
+}).strict();
+var GamePathRefSchema = z.object({
+  type: z.literal("gamePath"),
+  path: z.array(z.union([z.string(), z.number()]))
+}).strict();
+var ExpressionRefSchema = z.object({
+  type: z.literal("expression"),
+  expression: z.string(),
+  arguments: z.record(z.string(), z.unknown())
+}).strict();
+var RelativeCoordinatesRefSchema = z.object({
+  type: z.literal("relativeCoordinates"),
+  target: z.unknown().optional(),
+  location: z.union([
+    z.tuple([z.number(), z.number()]),
+    z.unknown()
+  ])
+}).strict();
+var CoordinatesRefSchema = z.object({
+  type: z.enum(["coordinates", "Coordinates"]),
+  target: z.unknown().optional()
+}).strict();
+var RelativePathRefSchema = z.object({
+  type: z.enum(["relativePath", "RelativePath"]),
+  target: z.unknown(),
+  path: z.array(z.union([z.string(), z.number()]))
+}).strict();
+var ParentRefSchema = z.object({
+  type: z.enum(["parent", "Parent"]),
+  target: z.unknown().optional()
+}).strict();
+var MapRefSchema = z.object({
+  type: z.literal("map"),
+  targets: z.unknown(),
+  mapping: z.unknown()
+}).strict();
+var MapMaxRefSchema = z.object({
+  type: z.literal("mapMax"),
+  targets: z.unknown(),
+  mapping: z.unknown()
+}).strict();
+var PickRefSchema = z.object({
+  type: z.enum(["pick", "Pick"]),
+  target: z.unknown(),
+  properties: z.array(z.string())
+}).strict();
+var CountRefSchema = z.object({
+  type: z.literal("count"),
+  conditions: z.array(z.unknown())
+}).strict();
+var ValueRefSchema = z.union([
+  CtxPathRefSchema,
+  ContextPathRefSchema,
+  GamePathRefSchema,
+  ExpressionRefSchema,
+  RelativeCoordinatesRefSchema,
+  CoordinatesRefSchema,
+  RelativePathRefSchema,
+  ParentRefSchema,
+  MapRefSchema,
+  MapMaxRefSchema,
+  PickRefSchema,
+  CountRefSchema
+]);
+
+// src/types/schemas/condition.schema.ts
+var IsConditionSchema = z.object({
+  conditionType: z.literal("Is"),
+  target: z.unknown().optional()
+}).passthrough();
+var ContainsConditionSchema = z.object({
+  conditionType: z.literal("Contains"),
+  target: z.unknown().optional()
+}).passthrough();
+var NotConditionSchema = z.object({
+  conditionType: z.literal("Not"),
+  conditions: z.array(z.unknown())
+}).passthrough();
+var OrConditionSchema = z.object({
+  conditionType: z.literal("Or"),
+  conditions: z.array(z.unknown())
+}).passthrough();
+var SomeConditionSchema = z.object({
+  conditionType: z.literal("Some"),
+  target: z.unknown(),
+  conditions: z.array(z.unknown())
+}).passthrough();
+var EveryConditionSchema = z.object({
+  conditionType: z.literal("Every"),
+  target: z.unknown(),
+  conditions: z.array(z.unknown())
+}).passthrough();
+var InLineConditionSchema = z.object({
+  conditionType: z.literal("InLine"),
+  target: ValueRefSchema.optional(),
+  sequence: z.array(z.unknown())
+}).passthrough();
+var HasLineConditionSchema = z.object({
+  conditionType: z.literal("HasLine"),
+  target: z.unknown(),
+  sequence: z.array(z.unknown())
+}).passthrough();
+var IsFullConditionSchema = z.object({
+  conditionType: z.literal("IsFull"),
+  target: z.unknown()
+}).passthrough();
+var NoPossibleMovesConditionSchema = z.object({
+  conditionType: z.literal("NoPossibleMoves")
+}).passthrough();
+var PositionConditionSchema = z.object({
+  conditionType: z.literal("Position")
+}).passthrough();
+var EvaluateConditionSchema = z.object({
+  conditionType: z.literal("Evaluate"),
+  expression: z.string(),
+  arguments: z.record(z.string(), z.unknown())
+}).passthrough();
+var WouldConditionSchema = z.object({
+  conditionType: z.literal("Would"),
+  conditions: z.array(z.unknown()).optional()
+}).passthrough();
+var ConditionSchema = z.union([
+  z.string(),
+  IsConditionSchema,
+  ContainsConditionSchema,
+  NotConditionSchema,
+  OrConditionSchema,
+  SomeConditionSchema,
+  EveryConditionSchema,
+  InLineConditionSchema,
+  HasLineConditionSchema,
+  IsFullConditionSchema,
+  NoPossibleMovesConditionSchema,
+  PositionConditionSchema,
+  EvaluateConditionSchema,
+  WouldConditionSchema
+]);
+
+// src/types/schemas/authored-rules.schema.ts
+var EntitySchema = z.object({
+  entityType: z.string()
+}).passthrough();
+var TurnConfigSchema = z.object({
+  minMoves: z.number().optional(),
+  maxMoves: z.number().optional()
+}).passthrough();
+var MoveDefinitionSchema = z.object({
+  moveType: z.string()
+}).passthrough();
+var PhaseConfigSchema = z.object({
+  turn: TurnConfigSchema.optional(),
+  moves: z.record(z.string(), z.unknown()).optional(),
+  endIf: z.unknown().optional(),
+  onBegin: z.unknown().optional(),
+  onEnd: z.unknown().optional(),
+  // Common authored conveniences:
+  initialPlacements: z.array(z.unknown()).optional(),
+  initialMoves: z.array(MoveDefinitionSchema).optional(),
+  conditions: z.union([ConditionSchema, z.array(ConditionSchema)]).optional()
+}).passthrough();
+var AuthoredGameRulesSchema = z.object({
+  numPlayers: z.number().int().positive().optional(),
+  minPlayers: z.number().int().positive().optional(),
+  maxPlayers: z.number().int().positive().optional(),
+  entities: z.array(EntitySchema).optional(),
+  sharedBoard: z.array(z.unknown()).optional(),
+  personalBoard: z.array(z.unknown()).optional(),
+  turn: TurnConfigSchema.optional(),
+  endIf: z.unknown().optional(),
+  phases: z.record(z.string(), PhaseConfigSchema).optional(),
+  // Allow authored refs/expressions anywhere else; this isn't structural validation, but
+  // gives early failures for the most common mistakes.
+  // (We validate refs more precisely at the specific ref boundaries.)
+  _valueRefs: z.array(ValueRefSchema).optional()
+}).passthrough();
+
 // src/game-factory/expand-game-rules.ts
 var invariantEntities = [
   {
@@ -9787,37 +14506,47 @@ var invariantEntities = [
     count: "Infinity"
   }
 ];
-function expandEntities(rules) {
-  rules.entities = [
+function expandEntities(entities) {
+  return [
     ...invariantEntities,
-    ...rules.entities || []
+    ...entities || []
   ];
 }
 function expandInitialPlacements(rules, entities) {
-  if (rules.sharedBoard) {
-    const sharedBoard = rules.sharedBoard;
-    const sharedBoardPlacements = sharedBoard.map((matcher) => ({ entity: matcher, destination: { name: "sharedBoard" } }));
-    if (!rules.initialPlacements) rules.initialPlacements = [];
-    rules.initialPlacements.unshift(...sharedBoardPlacements);
+  const next = { ...rules };
+  if (next.sharedBoard) {
+    const sharedBoard = next.sharedBoard;
+    const sharedBoardPlacements = sharedBoard.map((matcher) => ({
+      entity: matcher,
+      destination: { name: "sharedBoard" }
+    }));
+    if (!next.initialPlacements) next.initialPlacements = [];
+    next.initialPlacements = [
+      ...sharedBoardPlacements,
+      ...next.initialPlacements
+    ];
   }
-  if (rules.personalBoard) {
+  if (next.personalBoard) {
     entities.push({
       entityType: "Board",
       name: "personalBoard",
       perPlayer: true
     });
-    const personalBoard = rules.personalBoard;
+    const personalBoard = next.personalBoard;
     const personalBoardPlacements = personalBoard.map((matcher) => ({
       entity: matcher,
       destination: {
         name: "personalBoard"
       }
     }));
-    if (!rules.initialPlacements) rules.initialPlacements = [];
-    rules.initialPlacements.unshift(...personalBoardPlacements);
+    if (!next.initialPlacements) next.initialPlacements = [];
+    next.initialPlacements = [
+      ...personalBoardPlacements,
+      ...next.initialPlacements
+    ];
   }
-  if (rules.initialPlacements) {
-    const initialPlacementMoves = rules.initialPlacements.map((placement) => {
+  if (next.initialPlacements) {
+    const initialPlacementMoves = next.initialPlacements.map((placement) => {
       const { state, ...matcher } = placement.entity;
       const entityDefinition = (0, import_find2.default)(entities, matcher);
       if (placement.destination.name === "personalBoard") {
@@ -9883,10 +14612,14 @@ function expandInitialPlacements(rules, entities) {
         };
       }
     });
-    if (!rules.initialMoves) rules.initialMoves = [];
-    rules.initialMoves.unshift(...initialPlacementMoves);
-    delete rules.initialPlacements;
+    if (!next.initialMoves) next.initialMoves = [];
+    next.initialMoves = [
+      ...initialPlacementMoves,
+      ...next.initialMoves ?? []
+    ];
+    delete next.initialPlacements;
   }
+  return next;
 }
 var keyMappings = [];
 var simpleReplacements = [
@@ -9986,27 +14719,40 @@ var transformationRules = [
   }
 ];
 function expandGameRules(gameRules) {
+  parseOrThrow(AuthoredGameRulesSchema, gameRules, "expandGameRules: invalid authored game rules");
   const rules = transformJSON(gameRules, transformationRules);
-  if (!rules.sharedBoard) {
-    rules.sharedBoard = rules.entities;
-  }
-  if (!rules.turn) {
-    rules.turn = {
-      minMoves: 1,
-      maxMoves: 1
-    };
-  }
-  expandEntities(rules);
-  expandInitialPlacements(rules, rules.entities);
-  if (rules.phases) {
-    Object.entries(rules.phases).forEach((phaseRule) => {
-      expandInitialPlacements(phaseRule, rules.entities);
-    });
-  }
+  const entities = expandEntities(rules.entities);
+  const sharedBoard = rules.sharedBoard ?? entities;
+  const turn = rules.turn ?? { minMoves: 1, maxMoves: 1 };
+  const expandedTopLevel = expandInitialPlacements(
+    {
+      ...rules,
+      entities,
+      sharedBoard,
+      turn
+    },
+    entities
+  );
+  const expandedPhases = expandedTopLevel.phases ? Object.fromEntries(
+    Object.entries(expandedTopLevel.phases).map(([phaseName, phaseRule]) => {
+      const expandedPhase = expandInitialPlacements(
+        phaseRule,
+        entities
+      );
+      return [phaseName, expandedPhase];
+    })
+  ) : void 0;
+  const baseExpanded = {
+    ...expandedTopLevel,
+    entities,
+    sharedBoard,
+    turn,
+    phases: expandedPhases
+  };
   if (gameRules.numPlayers) {
-    gameRules.minPlayers = gameRules.maxPlayers = gameRules.numPlayers;
+    baseExpanded.minPlayers = baseExpanded.maxPlayers = gameRules.numPlayers;
   }
-  return rules;
+  return baseExpanded;
 }
 
 // src/utils/get-scenario-results.ts
@@ -10034,22 +14780,26 @@ function getScenarioResults(bgioArguments, scenarios) {
 }
 
 // src/game-factory/game-factory.ts
+function setupResolveState(setupContext, G2) {
+  return { ...setupContext, G: G2 };
+}
 function gameFactory(gameRules, gameName) {
   const game = { name: gameName };
   const rules = expandGameRules(gameRules);
-  game.setup = (bgioArguments) => {
-    const { ctx } = bgioArguments;
+  game.setup = (setupContext, _setupData) => {
+    const { ctx } = setupContext;
+    const entityDefinitions = expandEntityDefinitions(rules.entities, ctx);
+    const bank = new bank_default(entityDefinitions);
     const initialState = {
       _meta: {
         passedPlayers: [],
         previousPayloads: {}
-      }
+      },
+      bank
     };
-    const entityDefinitions = expandEntityDefinitions(rules.entities, ctx);
-    const bank = new bank_default(entityDefinitions);
-    initialState.bank = bank;
+    const resolveDuringSetup = () => setupResolveState(setupContext, initialState);
     initialState.sharedBoard = bank.getOne(
-      bgioArguments,
+      resolveDuringSetup(),
       {
         conditions: [{
           conditionType: "Is",
@@ -10059,9 +14809,9 @@ function gameFactory(gameRules, gameName) {
       {}
     );
     if (rules.personalBoard) {
-      initialState.personalBoards = bgioArguments.ctx.playOrder.map(
+      initialState.personalBoards = ctx.playOrder.map(
         (playerID) => bank.getOne(
-          bgioArguments,
+          resolveDuringSetup(),
           {
             conditions: [{
               conditionType: "Is",
@@ -10077,7 +14827,7 @@ function gameFactory(gameRules, gameName) {
     }
     rules.initialMoves?.forEach((moveRule) => {
       moveFactory(moveRule, game).moveInstance.doMove(
-        { ...bgioArguments, G: initialState },
+        resolveDuringSetup(),
         void 0,
         {}
       );
@@ -10098,21 +14848,21 @@ function gameFactory(gameRules, gameName) {
   }
   if (rules.endIf) {
     const endIfRules = rules.endIf;
-    game.endIf = (bgioArguments) => {
-      const newBgioArguments = deserializeBgioArguments(bgioArguments);
+    game.endIf = (context) => {
+      const newBgioArguments = deserializeBgioArguments(context);
       return getScenarioResults(newBgioArguments, endIfRules);
     };
   }
   if (!gameRules.DEBUG_DISABLE_SECRET_STATE) {
-    game.playerView = (bgioArguments) => {
-      const { G: G2, playerID } = deserializeBgioArguments(bgioArguments);
+    game.playerView = (context) => {
+      const { G: G2, playerID } = deserializeBgioArguments(context);
       const tracker = G2.bank.tracker;
       Object.values(tracker).forEach((entity) => {
-        if (entity.rule.contentsHiddenFrom === "All" || entity.rule.contentsHiddenFrom === "Others" && (playerID !== entity.rule.player || playerID === void 0)) {
-          if (entity.spaces) {
+        if (entity.rule.contentsHiddenFrom === "All" || entity.rule.contentsHiddenFrom === "Others" && (playerID !== entity.rule.player || playerID === null)) {
+          if ("spaces" in entity && entity.spaces) {
             entity.spaces = entity.rule.hideLength ? [] : entity.spaces.map(() => G2.bank.createEntity());
           }
-          if (entity.entities) {
+          if ("entities" in entity && entity.entities) {
             entity.entities = entity.rule.hideLength ? [] : entity.entities.map(() => G2.bank.createEntity());
           }
         }
@@ -10124,41 +14874,33 @@ function gameFactory(gameRules, gameName) {
 }
 function expandEntityDefinitions(entities, ctx) {
   return entities.reduce((acc, entity) => {
-    const entityCopy = { ...entity };
-    if (entityCopy.perPlayer) {
-      delete entityCopy.perPlayer;
-      if (entityCopy.variants) {
-        entityCopy.variants = new Array(ctx.numPlayers).fill(void 0).reduce((accu, _2, i2) => [
-          ...accu,
-          ...entityCopy.variants.map((variant) => ({ ...variant, player: `${i2}` }))
-        ], []);
-      } else {
-        entityCopy.variants = new Array(ctx.numPlayers).fill(void 0).map((_2, i2) => ({ player: `${i2}` }));
-      }
-    }
-    if (entityCopy.variants) {
-      const variants = entityCopy.variants;
-      delete entityCopy.variants;
+    const source = entity;
+    const { perPlayer, variants } = source;
+    const base = { ...source };
+    delete base.perPlayer;
+    delete base.variants;
+    const expandedBase = base;
+    const expandedVariants = perPlayer ? variants ? Array.from({ length: ctx.numPlayers }).flatMap(
+      (_2, i2) => variants.map((variant) => ({ ...variant, player: `${i2}` }))
+    ) : Array.from({ length: ctx.numPlayers }, (_2, i2) => ({ player: `${i2}` })) : variants;
+    if (expandedVariants && expandedVariants.length) {
       return [
         ...acc,
-        ...variants.map((variant) => ({
-          ...entityCopy,
+        ...expandedVariants.map((variant) => ({
+          ...expandedBase,
           ...variant
         }))
       ];
-    } else {
-      return [
-        ...acc,
-        entityCopy
-      ];
     }
+    return [...acc, expandedBase];
   }, []);
 }
 function createTurn(turnRule, game) {
   const turn = { ...turnRule };
-  turn.onBegin = (bgioArguments) => {
-    const newBgioArguments = deserializeBgioArguments(bgioArguments);
-    const stageRule = turnRule.stages?.[newBgioArguments.ctx.activePlayers?.[newBgioArguments.ctx.currentPlayer]];
+  turn.onBegin = (context) => {
+    const newBgioArguments = deserializeBgioArguments(context);
+    const stageName = newBgioArguments.ctx.activePlayers?.[newBgioArguments.ctx.currentPlayer];
+    const stageRule = stageName != null ? turnRule.stages?.[stageName] : void 0;
     newBgioArguments.G._meta.passedPlayers = newBgioArguments.G._meta.passedPlayers.filter((p2) => p2 !== newBgioArguments.ctx.currentPlayer);
     doMoves(newBgioArguments, turnRule.initialMoves, { game });
     doMoves(newBgioArguments, stageRule?.initialMoves, { game });
@@ -10174,8 +14916,9 @@ function createTurn(turnRule, game) {
   const order = turnRule.order;
   if (order?.playOrder === "RotateFirst") {
     order.first = () => 0;
-    order.next = ({ ctx }) => (ctx.playOrderPos + 1) % ctx.numPlayers;
-    turn.order.playOrder = ({ ctx, G: G2 }) => {
+    order.next = (fnCtx) => (fnCtx.ctx.playOrderPos + 1) % fnCtx.ctx.numPlayers;
+    turn.order.playOrder = (fnCtx) => {
+      const { ctx, G: G2 } = fnCtx;
       return G2._meta.isAfterFirstPhase ? [...ctx.playOrder.slice(1), ctx.playOrder[0]] : ctx.playOrder;
     };
   }
@@ -10189,8 +14932,8 @@ function createPhase(phaseRule, game) {
   if (phaseRule.moves) {
     phase.moves = createMoves(phaseRule.moves, game);
   }
-  phase.onBegin = (bgioArguments) => {
-    const newBgioArguments = deserializeBgioArguments(bgioArguments);
+  phase.onBegin = (context) => {
+    const newBgioArguments = deserializeBgioArguments(context);
     doMoves(newBgioArguments, phaseRule.initialMoves, { game });
     newBgioArguments.G._meta.currentPhaseHasBeenSetUp = true;
     newBgioArguments.G._meta.nextPhase = phaseRule.next;
@@ -10198,8 +14941,8 @@ function createPhase(phaseRule, game) {
   };
   if (phaseRule.endIf) {
     const phaseEndIf = phaseRule.endIf;
-    phase.endIf = (bgioArguments) => {
-      const newBgioArguments = deserializeBgioArguments(bgioArguments);
+    phase.endIf = (context) => {
+      const newBgioArguments = deserializeBgioArguments(context);
       if (newBgioArguments.G._meta.currentPhaseHasBeenSetUp) {
         const result = getScenarioResults(newBgioArguments, phaseEndIf);
         if (result) {
@@ -10208,7 +14951,8 @@ function createPhase(phaseRule, game) {
       }
     };
   }
-  phase.onEnd = ({ G: G2 }) => {
+  phase.onEnd = (context) => {
+    const { G: G2 } = context;
     G2._meta.currentPhaseHasBeenSetUp = false;
     G2._meta.isAfterFirstPhase = true;
   };
@@ -10220,17 +14964,6 @@ function createMoves(moves, game) {
     [name]: moveFactory({ ...moveDefinition, name }, game)
   }), {});
 }
-
-// node_modules/nanoid/non-secure/index.js
-var urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
-var nanoid = (size = 21) => {
-  let id = "";
-  let i2 = size | 0;
-  while (i2--) {
-    id += urlAlphabet[Math.random() * 64 | 0];
-  }
-  return id;
-};
 
 // node_modules/immer/dist/immer.esm.mjs
 function n(n2) {
@@ -10369,7 +15102,7 @@ function A(e, i2, o2, a2, c2, s2, v2) {
 function x(n2, r2, t2) {
   void 0 === t2 && (t2 = false), !n2.l && n2.h.D && n2.m && d(r2, t2);
 }
-function z(n2, r2) {
+function z2(n2, r2) {
   var t2 = n2[Q];
   return (t2 ? p(t2) : n2)[r2];
 }
@@ -10460,7 +15193,7 @@ var en = { get: function(n2, r2) {
     return i3 ? "value" in i3 ? i3.value : null === (e2 = i3.get) || void 0 === e2 ? void 0 : e2.call(n3.k) : void 0;
   }(n2, e, r2);
   var i2 = e[r2];
-  return n2.I || !t(i2) ? i2 : i2 === z(n2.t, r2) ? (E(n2), n2.o[r2] = N(n2.A.h, i2, n2)) : i2;
+  return n2.I || !t(i2) ? i2 : i2 === z2(n2.t, r2) ? (E(n2), n2.o[r2] = N(n2.A.h, i2, n2)) : i2;
 }, has: function(n2, r2) {
   return r2 in p(n2);
 }, ownKeys: function(n2) {
@@ -10469,14 +15202,14 @@ var en = { get: function(n2, r2) {
   var e = I(p(n2), r2);
   if (null == e ? void 0 : e.set) return e.set.call(n2.k, t2), true;
   if (!n2.P) {
-    var i2 = z(p(n2), r2), o2 = null == i2 ? void 0 : i2[Q];
+    var i2 = z2(p(n2), r2), o2 = null == i2 ? void 0 : i2[Q];
     if (o2 && o2.t === t2) return n2.o[r2] = t2, n2.R[r2] = false, true;
     if (c(t2, i2) && (void 0 !== t2 || u(n2.t, r2))) return true;
     E(n2), k(n2);
   }
   return n2.o[r2] === t2 && (void 0 !== t2 || r2 in n2.o) || Number.isNaN(t2) && Number.isNaN(n2.o[r2]) || (n2.o[r2] = t2, n2.R[r2] = true), true;
 }, deleteProperty: function(n2, r2) {
-  return void 0 !== z(n2.t, r2) || r2 in n2.t ? (n2.R[r2] = false, E(n2), k(n2)) : delete n2.R[r2], n2.o && delete n2.o[r2], true;
+  return void 0 !== z2(n2.t, r2) || r2 in n2.t ? (n2.R[r2] = false, E(n2), k(n2)) : delete n2.R[r2], n2.o && delete n2.o[r2], true;
 }, getOwnPropertyDescriptor: function(n2, r2) {
   var t2 = p(n2), e = Reflect.getOwnPropertyDescriptor(t2, r2);
   return e ? { writable: true, configurable: 1 !== n2.i || "length" !== r2, enumerable: e.enumerable, value: t2[r2] } : e;
@@ -22758,6 +27491,55 @@ var Debug = class extends SvelteComponent {
   }
 };
 
+// node_modules/@mnbroatch/boardgame.io/dist/esm/debug.js
+var import_lodash2 = __toESM(require_lodash());
+var import_rfc69022 = __toESM(require_rfc6902());
+var import_setimmediate2 = __toESM(require_setImmediate());
+
+// node_modules/@mnbroatch/boardgame.io/dist/esm/initialize-11d626ca.js
+function InitializeGame({ game, numPlayers, setupData }) {
+  game = ProcessGameConfig(game);
+  if (!numPlayers) {
+    numPlayers = 2;
+  }
+  const ctx = game.flow.ctx(numPlayers);
+  let state = {
+    // User managed state.
+    G: {},
+    // Framework managed state.
+    ctx,
+    // Plugin related state.
+    plugins: {}
+  };
+  state = Setup(state, { game });
+  state = Enhance(state, { game, playerID: void 0 });
+  const pluginAPIs = GetAPIs(state);
+  state.G = game.setup({ ...pluginAPIs, ctx: state.ctx }, setupData);
+  let initial = {
+    ...state,
+    // List of {G, ctx} pairs that can be undone.
+    _undo: [],
+    // List of {G, ctx} pairs that can be redone.
+    _redo: [],
+    // A monotonically non-decreasing ID to ensure that
+    // state updates are only allowed from clients that
+    // are at the same version that the server.
+    _stateID: 0
+  };
+  initial = game.flow.init(initial);
+  [initial] = FlushAndValidate(initial, { game });
+  if (!game.disableUndo) {
+    initial._undo = [
+      {
+        G: initial.G,
+        ctx: initial.ctx,
+        plugins: initial.plugins
+      }
+    ];
+  }
+  return initial;
+}
+
 // node_modules/@babel/runtime/helpers/esm/typeof.js
 function _typeof(o2) {
   "@babel/helpers - typeof";
@@ -22833,7 +27615,7 @@ var ActionTypes = {
     return "@@redux/PROBE_UNKNOWN_ACTION" + randomString();
   }
 };
-function isPlainObject5(obj) {
+function isPlainObject9(obj) {
   if (typeof obj !== "object" || obj === null) return false;
   var proto = obj;
   while (Object.getPrototypeOf(proto) !== null) {
@@ -22945,7 +27727,7 @@ function createStore(reducer, preloadedState, enhancer) {
     };
   }
   function dispatch2(action) {
-    if (!isPlainObject5(action)) {
+    if (!isPlainObject9(action)) {
       throw new Error(false ? formatProdErrorMessage(7) : "Actions must be plain objects. Instead, the actual type was: '" + kindOf(action) + "'. You may need to add middleware to your store setup to handle dispatching other values, such as 'redux-thunk' to handle dispatching functions. See https://redux.js.org/tutorials/fundamentals/part-4-store#middleware and https://redux.js.org/tutorials/fundamentals/part-6-async-logic#using-the-redux-thunk-middleware for examples.");
     }
     if (typeof action.type === "undefined") {
@@ -23062,50 +27844,6 @@ function applyMiddleware() {
   };
 }
 
-// node_modules/@mnbroatch/boardgame.io/dist/esm/initialize-11d626ca.js
-function InitializeGame({ game, numPlayers, setupData }) {
-  game = ProcessGameConfig(game);
-  if (!numPlayers) {
-    numPlayers = 2;
-  }
-  const ctx = game.flow.ctx(numPlayers);
-  let state = {
-    // User managed state.
-    G: {},
-    // Framework managed state.
-    ctx,
-    // Plugin related state.
-    plugins: {}
-  };
-  state = Setup(state, { game });
-  state = Enhance(state, { game, playerID: void 0 });
-  const pluginAPIs = GetAPIs(state);
-  state.G = game.setup({ ...pluginAPIs, ctx: state.ctx }, setupData);
-  let initial = {
-    ...state,
-    // List of {G, ctx} pairs that can be undone.
-    _undo: [],
-    // List of {G, ctx} pairs that can be redone.
-    _redo: [],
-    // A monotonically non-decreasing ID to ensure that
-    // state updates are only allowed from clients that
-    // are at the same version that the server.
-    _stateID: 0
-  };
-  initial = game.flow.init(initial);
-  [initial] = FlushAndValidate(initial, { game });
-  if (!game.disableUndo) {
-    initial._undo = [
-      {
-        G: initial.G,
-        ctx: initial.ctx,
-        plugins: initial.plugins
-      }
-    ];
-  }
-  return initial;
-}
-
 // node_modules/@mnbroatch/boardgame.io/dist/esm/transport-ce07b771.js
 var Transport = class {
   constructor({ transportDataCallback, gameName, playerID, matchID, credentials, numPlayers }) {
@@ -23133,440 +27871,6 @@ var Transport = class {
     this.transportDataCallback(data);
   }
 };
-
-// node_modules/@mnbroatch/boardgame.io/dist/esm/client-2e653027.js
-var DummyImpl = class extends Transport {
-  connect() {
-  }
-  disconnect() {
-  }
-  sendAction() {
-  }
-  sendChatMessage() {
-  }
-  requestSync() {
-  }
-  updateCredentials() {
-  }
-  updateMatchID() {
-  }
-  updatePlayerID() {
-  }
-};
-var DummyTransport = (opts) => new DummyImpl(opts);
-var ClientManager = class {
-  constructor() {
-    this.debugPanel = null;
-    this.currentClient = null;
-    this.clients = /* @__PURE__ */ new Map();
-    this.subscribers = /* @__PURE__ */ new Map();
-  }
-  /**
-   * Register a client with the client manager.
-   */
-  register(client) {
-    this.clients.set(client, client);
-    this.mountDebug(client);
-    this.notifySubscribers();
-  }
-  /**
-   * Unregister a client from the client manager.
-   */
-  unregister(client) {
-    this.clients.delete(client);
-    if (this.currentClient === client) {
-      this.unmountDebug();
-      for (const [client2] of this.clients) {
-        if (this.debugPanel)
-          break;
-        this.mountDebug(client2);
-      }
-    }
-    this.notifySubscribers();
-  }
-  /**
-   * Subscribe to the client manager state.
-   * Calls the passed callback each time the current client changes or a client
-   * registers/unregisters.
-   * Returns a function to unsubscribe from the state updates.
-   */
-  subscribe(callback) {
-    const id = Symbol();
-    this.subscribers.set(id, callback);
-    callback(this.getState());
-    return () => {
-      this.subscribers.delete(id);
-    };
-  }
-  /**
-   * Switch to a client with a matching playerID.
-   */
-  switchPlayerID(playerID) {
-    if (this.currentClient.multiplayer) {
-      for (const [client] of this.clients) {
-        if (client.playerID === playerID && client.debugOpt !== false && client.multiplayer === this.currentClient.multiplayer) {
-          this.switchToClient(client);
-          return;
-        }
-      }
-    }
-    this.currentClient.updatePlayerID(playerID);
-    this.notifySubscribers();
-  }
-  /**
-   * Set the passed client as the active client for debugging.
-   */
-  switchToClient(client) {
-    if (client === this.currentClient)
-      return;
-    this.unmountDebug();
-    this.mountDebug(client);
-    this.notifySubscribers();
-  }
-  /**
-   * Notify all subscribers of changes to the client manager state.
-   */
-  notifySubscribers() {
-    const arg = this.getState();
-    this.subscribers.forEach((cb) => {
-      cb(arg);
-    });
-  }
-  /**
-   * Get the client manager state.
-   */
-  getState() {
-    return {
-      client: this.currentClient,
-      debuggableClients: this.getDebuggableClients()
-    };
-  }
-  /**
-   * Get an array of the registered clients that haven’t disabled the debug panel.
-   */
-  getDebuggableClients() {
-    return [...this.clients.values()].filter((client) => client.debugOpt !== false);
-  }
-  /**
-   * Mount the debug panel using the passed client.
-   */
-  mountDebug(client) {
-    if (client.debugOpt === false || this.debugPanel !== null || typeof document === "undefined") {
-      return;
-    }
-    let DebugImpl;
-    let target = document.body;
-    if (true) {
-      DebugImpl = Debug;
-    }
-    if (client.debugOpt && client.debugOpt !== true) {
-      DebugImpl = client.debugOpt.impl || DebugImpl;
-      target = client.debugOpt.target || target;
-    }
-    if (DebugImpl) {
-      this.currentClient = client;
-      this.debugPanel = new DebugImpl({
-        target,
-        props: { clientManager: this }
-      });
-    }
-  }
-  /**
-   * Unmount the debug panel.
-   */
-  unmountDebug() {
-    this.debugPanel.$destroy();
-    this.debugPanel = null;
-    this.currentClient = null;
-  }
-};
-var GlobalClientManager = new ClientManager();
-function assumedPlayerID(playerID, store, multiplayer) {
-  if (!multiplayer && (playerID === null || playerID === void 0)) {
-    const state = store.getState();
-    playerID = state.ctx.currentPlayer;
-  }
-  return playerID;
-}
-function createDispatchers(storeActionType, innerActionNames, store, playerID, credentials, multiplayer) {
-  const dispatchers = {};
-  for (const name of innerActionNames) {
-    dispatchers[name] = (...args) => {
-      const action = ActionCreators[storeActionType](name, args, assumedPlayerID(playerID, store, multiplayer), credentials);
-      store.dispatch(action);
-    };
-  }
-  return dispatchers;
-}
-var createMoveDispatchers = createDispatchers.bind(null, "makeMove");
-var createEventDispatchers = createDispatchers.bind(null, "gameEvent");
-var createPluginDispatchers = createDispatchers.bind(null, "plugin");
-var _ClientImpl = class {
-  constructor({ game, debug, numPlayers, multiplayer, matchID, playerID, credentials, enhancer }) {
-    this.game = ProcessGameConfig(game);
-    this.playerID = playerID;
-    this.matchID = matchID || "default";
-    this.credentials = credentials;
-    this.multiplayer = multiplayer;
-    this.debugOpt = debug;
-    this.manager = GlobalClientManager;
-    this.gameStateOverride = null;
-    this.subscribers = {};
-    this._running = false;
-    this.reducer = CreateGameReducer({
-      game: this.game,
-      isClient: multiplayer !== void 0
-    });
-    this.initialState = null;
-    if (!multiplayer) {
-      this.initialState = InitializeGame({ game: this.game, numPlayers });
-    }
-    this.reset = () => {
-      this.store.dispatch(reset(this.initialState));
-    };
-    this.undo = () => {
-      const undo$1 = undo(assumedPlayerID(this.playerID, this.store, this.multiplayer), this.credentials);
-      this.store.dispatch(undo$1);
-    };
-    this.redo = () => {
-      const redo$1 = redo(assumedPlayerID(this.playerID, this.store, this.multiplayer), this.credentials);
-      this.store.dispatch(redo$1);
-    };
-    this.log = [];
-    const LogMiddleware = (store) => (next) => (action) => {
-      const result = next(action);
-      const state = store.getState();
-      switch (action.type) {
-        case MAKE_MOVE:
-        case GAME_EVENT:
-        case UNDO:
-        case REDO: {
-          const deltalog = state.deltalog;
-          this.log = [...this.log, ...deltalog];
-          break;
-        }
-        case RESET: {
-          this.log = [];
-          break;
-        }
-        case PATCH:
-        case UPDATE: {
-          let id = -1;
-          if (this.log.length > 0) {
-            id = this.log[this.log.length - 1]._stateID;
-          }
-          let deltalog = action.deltalog || [];
-          deltalog = deltalog.filter((l2) => l2._stateID > id);
-          this.log = [...this.log, ...deltalog];
-          break;
-        }
-        case SYNC: {
-          this.initialState = action.initialState;
-          this.log = action.log || [];
-          break;
-        }
-      }
-      return result;
-    };
-    const TransportMiddleware = (store) => (next) => (action) => {
-      const baseState = store.getState();
-      const result = next(action);
-      if (!("clientOnly" in action) && action.type !== STRIP_TRANSIENTS) {
-        this.transport.sendAction(baseState, action);
-      }
-      return result;
-    };
-    const SubscriptionMiddleware = () => (next) => (action) => {
-      const result = next(action);
-      this.notifySubscribers();
-      return result;
-    };
-    const middleware = applyMiddleware(TransientHandlingMiddleware, SubscriptionMiddleware, TransportMiddleware, LogMiddleware);
-    enhancer = enhancer !== void 0 ? compose(middleware, enhancer) : middleware;
-    this.store = createStore(this.reducer, this.initialState, enhancer);
-    if (!multiplayer)
-      multiplayer = DummyTransport;
-    this.transport = multiplayer({
-      transportDataCallback: (data) => this.receiveTransportData(data),
-      gameKey: game,
-      game: this.game,
-      matchID,
-      playerID,
-      credentials,
-      gameName: this.game.name,
-      numPlayers
-    });
-    this.createDispatchers();
-    this.chatMessages = [];
-    this.sendChatMessage = (payload) => {
-      this.transport.sendChatMessage(this.matchID, {
-        id: nanoid(7),
-        sender: this.playerID,
-        payload
-      });
-    };
-  }
-  /** Handle incoming match data from a multiplayer transport. */
-  receiveMatchData(matchData) {
-    this.matchData = matchData;
-    this.notifySubscribers();
-  }
-  /** Handle an incoming chat message from a multiplayer transport. */
-  receiveChatMessage(message) {
-    this.chatMessages = [...this.chatMessages, message];
-    this.notifySubscribers();
-  }
-  /** Handle all incoming updates from a multiplayer transport. */
-  receiveTransportData(data) {
-    const [matchID] = data.args;
-    if (matchID !== this.matchID)
-      return;
-    switch (data.type) {
-      case "sync": {
-        const [, syncInfo] = data.args;
-        const action = sync(syncInfo);
-        this.receiveMatchData(syncInfo.filteredMetadata);
-        this.store.dispatch(action);
-        break;
-      }
-      case "update": {
-        const [, state, deltalog] = data.args;
-        const currentState = this.store.getState();
-        if (state._stateID >= currentState._stateID) {
-          const action = update(state, deltalog);
-          this.store.dispatch(action);
-        }
-        break;
-      }
-      case "patch": {
-        const [, prevStateID, stateID, patch$1, deltalog] = data.args;
-        const currentStateID = this.store.getState()._stateID;
-        if (prevStateID !== currentStateID)
-          break;
-        const action = patch(prevStateID, stateID, patch$1, deltalog);
-        this.store.dispatch(action);
-        if (this.store.getState()._stateID === currentStateID) {
-          this.transport.requestSync();
-        }
-        break;
-      }
-      case "matchData": {
-        const [, matchData] = data.args;
-        this.receiveMatchData(matchData);
-        break;
-      }
-      case "chat": {
-        const [, chatMessage] = data.args;
-        this.receiveChatMessage(chatMessage);
-        break;
-      }
-    }
-  }
-  notifySubscribers() {
-    Object.values(this.subscribers).forEach((fn2) => fn2(this.getState()));
-  }
-  overrideGameState(state) {
-    this.gameStateOverride = state;
-    this.notifySubscribers();
-  }
-  start() {
-    this.transport.connect();
-    this._running = true;
-    this.manager.register(this);
-  }
-  stop() {
-    this.transport.disconnect();
-    this._running = false;
-    this.manager.unregister(this);
-  }
-  subscribe(fn2) {
-    const id = Object.keys(this.subscribers).length;
-    this.subscribers[id] = fn2;
-    this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
-    if (this._running || !this.multiplayer) {
-      fn2(this.getState());
-    }
-    return () => {
-      delete this.subscribers[id];
-    };
-  }
-  getInitialState() {
-    return this.initialState;
-  }
-  getState() {
-    let state = this.store.getState();
-    if (this.gameStateOverride !== null) {
-      state = this.gameStateOverride;
-    }
-    if (state === null) {
-      return state;
-    }
-    let isActive = true;
-    const isPlayerActive = this.game.flow.isPlayerActive(state.G, state.ctx, this.playerID);
-    if (this.multiplayer && !isPlayerActive) {
-      isActive = false;
-    }
-    if (!this.multiplayer && this.playerID !== null && this.playerID !== void 0 && !isPlayerActive) {
-      isActive = false;
-    }
-    if (state.ctx.gameover !== void 0) {
-      isActive = false;
-    }
-    if (!this.multiplayer) {
-      state = {
-        ...state,
-        G: this.game.playerView({
-          G: state.G,
-          ctx: state.ctx,
-          playerID: this.playerID
-        }),
-        plugins: PlayerView(state, this)
-      };
-    }
-    return {
-      ...state,
-      log: this.log,
-      isActive,
-      isConnected: this.transport.isConnected
-    };
-  }
-  createDispatchers() {
-    this.moves = createMoveDispatchers(this.game.moveNames, this.store, this.playerID, this.credentials, this.multiplayer);
-    this.events = createEventDispatchers(this.game.flow.enabledEventNames, this.store, this.playerID, this.credentials, this.multiplayer);
-    this.plugins = createPluginDispatchers(this.game.pluginNames, this.store, this.playerID, this.credentials, this.multiplayer);
-  }
-  updatePlayerID(playerID) {
-    this.playerID = playerID;
-    this.createDispatchers();
-    this.transport.updatePlayerID(playerID);
-    this.notifySubscribers();
-  }
-  updateMatchID(matchID) {
-    this.matchID = matchID;
-    this.createDispatchers();
-    this.transport.updateMatchID(matchID);
-    this.notifySubscribers();
-  }
-  updateCredentials(credentials) {
-    this.credentials = credentials;
-    this.createDispatchers();
-    this.transport.updateCredentials(credentials);
-    this.notifySubscribers();
-  }
-};
-function Client(opts) {
-  return new _ClientImpl(opts);
-}
-
-// node_modules/@mnbroatch/boardgame.io/dist/esm/client.js
-var import_lodash2 = __toESM(require_lodash());
-var import_rfc69022 = __toESM(require_rfc6902());
-var import_setimmediate2 = __toESM(require_setImmediate());
-
-// node_modules/@mnbroatch/boardgame.io/dist/esm/debug.js
-var import_lodash3 = __toESM(require_lodash());
-var import_rfc69023 = __toESM(require_rfc6902());
-var import_setimmediate3 = __toESM(require_setImmediate());
 
 // node_modules/engine.io-parser/build/esm/commons.js
 var PACKET_TYPES = /* @__PURE__ */ Object.create(null);
@@ -27082,19 +31386,465 @@ function SocketIO({ server, socketOpts } = {}) {
 }
 
 // node_modules/@mnbroatch/boardgame.io/dist/esm/multiplayer.js
+var import_lodash3 = __toESM(require_lodash());
+var import_rfc69023 = __toESM(require_rfc6902());
+
+// node_modules/nanoid/non-secure/index.js
+var urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+var nanoid = (size = 21) => {
+  let id = "";
+  let i2 = size | 0;
+  while (i2--) {
+    id += urlAlphabet[Math.random() * 64 | 0];
+  }
+  return id;
+};
+
+// node_modules/@mnbroatch/boardgame.io/dist/esm/client-2e653027.js
+var DummyImpl = class extends Transport {
+  connect() {
+  }
+  disconnect() {
+  }
+  sendAction() {
+  }
+  sendChatMessage() {
+  }
+  requestSync() {
+  }
+  updateCredentials() {
+  }
+  updateMatchID() {
+  }
+  updatePlayerID() {
+  }
+};
+var DummyTransport = (opts) => new DummyImpl(opts);
+var ClientManager = class {
+  constructor() {
+    this.debugPanel = null;
+    this.currentClient = null;
+    this.clients = /* @__PURE__ */ new Map();
+    this.subscribers = /* @__PURE__ */ new Map();
+  }
+  /**
+   * Register a client with the client manager.
+   */
+  register(client) {
+    this.clients.set(client, client);
+    this.mountDebug(client);
+    this.notifySubscribers();
+  }
+  /**
+   * Unregister a client from the client manager.
+   */
+  unregister(client) {
+    this.clients.delete(client);
+    if (this.currentClient === client) {
+      this.unmountDebug();
+      for (const [client2] of this.clients) {
+        if (this.debugPanel)
+          break;
+        this.mountDebug(client2);
+      }
+    }
+    this.notifySubscribers();
+  }
+  /**
+   * Subscribe to the client manager state.
+   * Calls the passed callback each time the current client changes or a client
+   * registers/unregisters.
+   * Returns a function to unsubscribe from the state updates.
+   */
+  subscribe(callback) {
+    const id = Symbol();
+    this.subscribers.set(id, callback);
+    callback(this.getState());
+    return () => {
+      this.subscribers.delete(id);
+    };
+  }
+  /**
+   * Switch to a client with a matching playerID.
+   */
+  switchPlayerID(playerID) {
+    if (this.currentClient.multiplayer) {
+      for (const [client] of this.clients) {
+        if (client.playerID === playerID && client.debugOpt !== false && client.multiplayer === this.currentClient.multiplayer) {
+          this.switchToClient(client);
+          return;
+        }
+      }
+    }
+    this.currentClient.updatePlayerID(playerID);
+    this.notifySubscribers();
+  }
+  /**
+   * Set the passed client as the active client for debugging.
+   */
+  switchToClient(client) {
+    if (client === this.currentClient)
+      return;
+    this.unmountDebug();
+    this.mountDebug(client);
+    this.notifySubscribers();
+  }
+  /**
+   * Notify all subscribers of changes to the client manager state.
+   */
+  notifySubscribers() {
+    const arg = this.getState();
+    this.subscribers.forEach((cb) => {
+      cb(arg);
+    });
+  }
+  /**
+   * Get the client manager state.
+   */
+  getState() {
+    return {
+      client: this.currentClient,
+      debuggableClients: this.getDebuggableClients()
+    };
+  }
+  /**
+   * Get an array of the registered clients that haven’t disabled the debug panel.
+   */
+  getDebuggableClients() {
+    return [...this.clients.values()].filter((client) => client.debugOpt !== false);
+  }
+  /**
+   * Mount the debug panel using the passed client.
+   */
+  mountDebug(client) {
+    if (client.debugOpt === false || this.debugPanel !== null || typeof document === "undefined") {
+      return;
+    }
+    let DebugImpl;
+    let target = document.body;
+    if (true) {
+      DebugImpl = Debug;
+    }
+    if (client.debugOpt && client.debugOpt !== true) {
+      DebugImpl = client.debugOpt.impl || DebugImpl;
+      target = client.debugOpt.target || target;
+    }
+    if (DebugImpl) {
+      this.currentClient = client;
+      this.debugPanel = new DebugImpl({
+        target,
+        props: { clientManager: this }
+      });
+    }
+  }
+  /**
+   * Unmount the debug panel.
+   */
+  unmountDebug() {
+    this.debugPanel.$destroy();
+    this.debugPanel = null;
+    this.currentClient = null;
+  }
+};
+var GlobalClientManager = new ClientManager();
+function assumedPlayerID(playerID, store, multiplayer) {
+  if (!multiplayer && (playerID === null || playerID === void 0)) {
+    const state = store.getState();
+    playerID = state.ctx.currentPlayer;
+  }
+  return playerID;
+}
+function createDispatchers(storeActionType, innerActionNames, store, playerID, credentials, multiplayer) {
+  const dispatchers = {};
+  for (const name of innerActionNames) {
+    dispatchers[name] = (...args) => {
+      const action = ActionCreators[storeActionType](name, args, assumedPlayerID(playerID, store, multiplayer), credentials);
+      store.dispatch(action);
+    };
+  }
+  return dispatchers;
+}
+var createMoveDispatchers = createDispatchers.bind(null, "makeMove");
+var createEventDispatchers = createDispatchers.bind(null, "gameEvent");
+var createPluginDispatchers = createDispatchers.bind(null, "plugin");
+var _ClientImpl = class {
+  constructor({ game, debug, numPlayers, multiplayer, matchID, playerID, credentials, enhancer }) {
+    this.game = ProcessGameConfig(game);
+    this.playerID = playerID;
+    this.matchID = matchID || "default";
+    this.credentials = credentials;
+    this.multiplayer = multiplayer;
+    this.debugOpt = debug;
+    this.manager = GlobalClientManager;
+    this.gameStateOverride = null;
+    this.subscribers = {};
+    this._running = false;
+    this.reducer = CreateGameReducer({
+      game: this.game,
+      isClient: multiplayer !== void 0
+    });
+    this.initialState = null;
+    if (!multiplayer) {
+      this.initialState = InitializeGame({ game: this.game, numPlayers });
+    }
+    this.reset = () => {
+      this.store.dispatch(reset(this.initialState));
+    };
+    this.undo = () => {
+      const undo$1 = undo(assumedPlayerID(this.playerID, this.store, this.multiplayer), this.credentials);
+      this.store.dispatch(undo$1);
+    };
+    this.redo = () => {
+      const redo$1 = redo(assumedPlayerID(this.playerID, this.store, this.multiplayer), this.credentials);
+      this.store.dispatch(redo$1);
+    };
+    this.log = [];
+    const LogMiddleware = (store) => (next) => (action) => {
+      const result = next(action);
+      const state = store.getState();
+      switch (action.type) {
+        case MAKE_MOVE:
+        case GAME_EVENT:
+        case UNDO:
+        case REDO: {
+          const deltalog = state.deltalog;
+          this.log = [...this.log, ...deltalog];
+          break;
+        }
+        case RESET: {
+          this.log = [];
+          break;
+        }
+        case PATCH:
+        case UPDATE: {
+          let id = -1;
+          if (this.log.length > 0) {
+            id = this.log[this.log.length - 1]._stateID;
+          }
+          let deltalog = action.deltalog || [];
+          deltalog = deltalog.filter((l2) => l2._stateID > id);
+          this.log = [...this.log, ...deltalog];
+          break;
+        }
+        case SYNC: {
+          this.initialState = action.initialState;
+          this.log = action.log || [];
+          break;
+        }
+      }
+      return result;
+    };
+    const TransportMiddleware = (store) => (next) => (action) => {
+      const baseState = store.getState();
+      const result = next(action);
+      if (!("clientOnly" in action) && action.type !== STRIP_TRANSIENTS) {
+        this.transport.sendAction(baseState, action);
+      }
+      return result;
+    };
+    const SubscriptionMiddleware = () => (next) => (action) => {
+      const result = next(action);
+      this.notifySubscribers();
+      return result;
+    };
+    const middleware = applyMiddleware(TransientHandlingMiddleware, SubscriptionMiddleware, TransportMiddleware, LogMiddleware);
+    enhancer = enhancer !== void 0 ? compose(middleware, enhancer) : middleware;
+    this.store = createStore(this.reducer, this.initialState, enhancer);
+    if (!multiplayer)
+      multiplayer = DummyTransport;
+    this.transport = multiplayer({
+      transportDataCallback: (data) => this.receiveTransportData(data),
+      gameKey: game,
+      game: this.game,
+      matchID,
+      playerID,
+      credentials,
+      gameName: this.game.name,
+      numPlayers
+    });
+    this.createDispatchers();
+    this.chatMessages = [];
+    this.sendChatMessage = (payload) => {
+      this.transport.sendChatMessage(this.matchID, {
+        id: nanoid(7),
+        sender: this.playerID,
+        payload
+      });
+    };
+  }
+  /** Handle incoming match data from a multiplayer transport. */
+  receiveMatchData(matchData) {
+    this.matchData = matchData;
+    this.notifySubscribers();
+  }
+  /** Handle an incoming chat message from a multiplayer transport. */
+  receiveChatMessage(message) {
+    this.chatMessages = [...this.chatMessages, message];
+    this.notifySubscribers();
+  }
+  /** Handle all incoming updates from a multiplayer transport. */
+  receiveTransportData(data) {
+    const [matchID] = data.args;
+    if (matchID !== this.matchID)
+      return;
+    switch (data.type) {
+      case "sync": {
+        const [, syncInfo] = data.args;
+        const action = sync(syncInfo);
+        this.receiveMatchData(syncInfo.filteredMetadata);
+        this.store.dispatch(action);
+        break;
+      }
+      case "update": {
+        const [, state, deltalog] = data.args;
+        const currentState = this.store.getState();
+        if (state._stateID >= currentState._stateID) {
+          const action = update(state, deltalog);
+          this.store.dispatch(action);
+        }
+        break;
+      }
+      case "patch": {
+        const [, prevStateID, stateID, patch$1, deltalog] = data.args;
+        const currentStateID = this.store.getState()._stateID;
+        if (prevStateID !== currentStateID)
+          break;
+        const action = patch(prevStateID, stateID, patch$1, deltalog);
+        this.store.dispatch(action);
+        if (this.store.getState()._stateID === currentStateID) {
+          this.transport.requestSync();
+        }
+        break;
+      }
+      case "matchData": {
+        const [, matchData] = data.args;
+        this.receiveMatchData(matchData);
+        break;
+      }
+      case "chat": {
+        const [, chatMessage] = data.args;
+        this.receiveChatMessage(chatMessage);
+        break;
+      }
+    }
+  }
+  notifySubscribers() {
+    Object.values(this.subscribers).forEach((fn2) => fn2(this.getState()));
+  }
+  overrideGameState(state) {
+    this.gameStateOverride = state;
+    this.notifySubscribers();
+  }
+  start() {
+    this.transport.connect();
+    this._running = true;
+    this.manager.register(this);
+  }
+  stop() {
+    this.transport.disconnect();
+    this._running = false;
+    this.manager.unregister(this);
+  }
+  subscribe(fn2) {
+    const id = Object.keys(this.subscribers).length;
+    this.subscribers[id] = fn2;
+    this.transport.subscribeToConnectionStatus(() => this.notifySubscribers());
+    if (this._running || !this.multiplayer) {
+      fn2(this.getState());
+    }
+    return () => {
+      delete this.subscribers[id];
+    };
+  }
+  getInitialState() {
+    return this.initialState;
+  }
+  getState() {
+    let state = this.store.getState();
+    if (this.gameStateOverride !== null) {
+      state = this.gameStateOverride;
+    }
+    if (state === null) {
+      return state;
+    }
+    let isActive = true;
+    const isPlayerActive = this.game.flow.isPlayerActive(state.G, state.ctx, this.playerID);
+    if (this.multiplayer && !isPlayerActive) {
+      isActive = false;
+    }
+    if (!this.multiplayer && this.playerID !== null && this.playerID !== void 0 && !isPlayerActive) {
+      isActive = false;
+    }
+    if (state.ctx.gameover !== void 0) {
+      isActive = false;
+    }
+    if (!this.multiplayer) {
+      state = {
+        ...state,
+        G: this.game.playerView({
+          G: state.G,
+          ctx: state.ctx,
+          playerID: this.playerID
+        }),
+        plugins: PlayerView(state, this)
+      };
+    }
+    return {
+      ...state,
+      log: this.log,
+      isActive,
+      isConnected: this.transport.isConnected
+    };
+  }
+  createDispatchers() {
+    this.moves = createMoveDispatchers(this.game.moveNames, this.store, this.playerID, this.credentials, this.multiplayer);
+    this.events = createEventDispatchers(this.game.flow.enabledEventNames, this.store, this.playerID, this.credentials, this.multiplayer);
+    this.plugins = createPluginDispatchers(this.game.pluginNames, this.store, this.playerID, this.credentials, this.multiplayer);
+  }
+  updatePlayerID(playerID) {
+    this.playerID = playerID;
+    this.createDispatchers();
+    this.transport.updatePlayerID(playerID);
+    this.notifySubscribers();
+  }
+  updateMatchID(matchID) {
+    this.matchID = matchID;
+    this.createDispatchers();
+    this.transport.updateMatchID(matchID);
+    this.notifySubscribers();
+  }
+  updateCredentials(credentials) {
+    this.credentials = credentials;
+    this.createDispatchers();
+    this.transport.updateCredentials(credentials);
+    this.notifySubscribers();
+  }
+};
+function Client(opts) {
+  return new _ClientImpl(opts);
+}
+
+// node_modules/@mnbroatch/boardgame.io/dist/esm/client.js
 var import_lodash4 = __toESM(require_lodash());
 var import_rfc69024 = __toESM(require_rfc6902());
+var import_setimmediate3 = __toESM(require_setImmediate());
 
 // src/utils/prepare-payload.ts
 function preparePayload(payload) {
   const p2 = payload;
   if (p2?.arguments) {
+    assertRecord(p2.arguments, "preparePayload: payload.arguments must be an object");
     const payloadCopy = {
       ...p2,
-      arguments: Object.entries(p2.arguments).reduce((acc, [key, argument]) => ({
-        ...acc,
-        [key]: argument.abstract ? argument : argument.entityId
-      }), {})
+      arguments: Object.entries(p2.arguments).reduce((acc, [key, argument]) => {
+        if (argument === void 0) return acc;
+        const a2 = argument;
+        const prepared = a2.abstract ? argument : (() => {
+          assertNumber(a2.entityId, "preparePayload: expected entityId number for non-abstract pick");
+          return a2.entityId;
+        })();
+        return { ...acc, [key]: prepared };
+      }, {})
     };
     return JSON.parse(serialize(payloadCopy, { deduplicateInstances: false }));
   } else {
@@ -27113,17 +31863,22 @@ var argNamesMap = {
 function getSteps(bgioState, moveRule) {
   const names = argNamesMap[moveRule.moveType];
   if (!names) return [];
-  return names.filter((argName) => moveRule.arguments[argName]?.playerChoice).map((argName) => ({
+  const args = moveRule.arguments ?? {};
+  return names.filter((argName) => args[argName]?.playerChoice).map((argName) => ({
     argName,
-    getClickable: argName === "state" ? () => moveRule.arguments[argName].possibleValues.map((value2) => ({
+    getClickable: argName === "state" ? () => (args[argName]?.possibleValues ?? []).map((value2) => ({
       abstract: true,
-      ...moveRule.arguments[argName],
+      ...args[argName],
       value: value2
-    })) : (context) => bankOf(bgioState).findAll(
-      bgioState,
-      moveRule.arguments[argName],
-      context
-    )
+    })) : (context) => {
+      const binding = args[argName];
+      if (!binding) return [];
+      return bankOf(bgioState).findAll(
+        bgioState,
+        binding,
+        context
+      );
+    }
   }));
 }
 
@@ -27141,15 +31896,28 @@ function createPayload(bgioState, moveRule, targets, _context) {
   };
 }
 
-// src/client/client.ts
-var Client2 = class {
-  constructor(options) {
+// src/client/internal/engine-client.ts
+function toClientResolveStateLike(bgioState, revivedG) {
+  if (!bgioState || typeof bgioState !== "object") {
+    throw new Error("Client.getState(): expected boardgame.io state object");
+  }
+  const s2 = bgioState;
+  if (!s2.ctx || typeof s2.ctx !== "object") {
+    throw new Error("Client.getState(): expected state.ctx object");
+  }
+  return {
+    G: revivedG,
+    ctx: s2.ctx,
+    ...s2.playerID == null ? {} : { playerID: s2.playerID }
+  };
+}
+var EngineClientImpl = class {
+  constructor(options, game, onUpdate) {
     this.options = options;
-    this.game = options.boardgameIOGame || gameFactory(options.gameRules, options.gameName ?? "");
-    if (!options.boardgameIOGame) {
-      this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
-      this.optimisticWinner = null;
-    }
+    this.game = game;
+    this.onUpdate = onUpdate;
+    this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
+    this.optimisticWinner = null;
   }
   connect() {
     const {
@@ -27169,13 +31937,13 @@ var Client2 = class {
         game: this.game,
         multiplayer,
         matchID,
-        playerID: playerID ?? void 0,
+        ...playerID == null ? {} : { playerID },
         credentials,
         numPlayers,
         debug
       };
       this.client = Client(clientOptions);
-      this.client.subscribe(() => this.update());
+      this.client.subscribe(() => this.onUpdate());
       this.client.start();
       return this;
     } catch (error2) {
@@ -27184,43 +31952,40 @@ var Client2 = class {
       if (err?.stack) console.error(err.stack);
     }
   }
-  update() {
-    this.options.onClientUpdate?.();
-  }
   getState() {
-    const bgioState = this.client?.getState();
-    if (!bgioState) return {};
-    const state = this.options.boardgameIOGame ? bgioState : {
-      ...bgioState,
-      G: deserialize(JSON.stringify(bgioState.G), registry)
-    };
+    const client = this.client;
+    const bgioState = client?.getState();
+    if (!bgioState) return { status: "empty" };
+    if (!client) return { status: "empty" };
+    const revivedG = deserialize(JSON.stringify(bgioState.G), registry);
+    const state = toClientResolveStateLike(bgioState, revivedG);
     const gameover = this.optimisticWinner ?? state?.ctx?.gameover;
-    const currentMoves = gameover ? [] : getCurrentMoves(state, this.client);
-    if (this.options.boardgameIOGame) {
-      return {
-        state,
-        gameover,
-        moves: this.client.moves,
-        currentMoves
-      };
-    }
+    const currentMoves = gameover ? [] : getCurrentMoves(state, client);
     const _wrappedMoves = Object.entries(currentMoves).reduce((acc, [moveName, rawMove]) => {
       const move = (payload) => {
-        this.client.moves[moveName](preparePayload(payload));
+        client.moves[moveName](preparePayload(payload));
       };
       move.moveInstance = rawMove.moveInstance;
+      move.moveType = rawMove.moveInstance.rule.moveType;
       return { ...acc, [moveName]: move };
     }, {});
     const { allClickable, _possibleMoveMeta } = getPossibleMoves(state, _wrappedMoves, this.moveBuilder);
-    return { state, gameover, allClickable, _wrappedMoves, _possibleMoveMeta };
+    return { status: "engine", state, gameover, allClickable, _wrappedMoves, _possibleMoveMeta };
   }
   doStep(_target) {
-    if (this.options.boardgameIOGame) return;
-    const { state, _wrappedMoves, _possibleMoveMeta } = this.getState();
-    const target = _target.abstract ? _target : state.G.bank.locate(_target.entityId);
+    const s2 = this.getState();
+    if (s2.status !== "engine") return;
+    const { state, _wrappedMoves, _possibleMoveMeta } = s2;
+    const target = isAbstractStepTarget(_target) ? _target : (() => {
+      const id = _target?.entityId;
+      if (typeof id !== "number") {
+        throw new Error("Client.doStep: expected StepTarget.entityId number");
+      }
+      return state.G.bank.locate(id);
+    })();
     const newEliminated = Object.entries(_possibleMoveMeta).filter(([_2, meta]) => !hasTarget(meta.clickableForMove, target)).map(([name]) => name).concat(this.moveBuilder.eliminatedMoves);
     if (newEliminated.length === Object.keys(_wrappedMoves).length) {
-      console.error("invalid move with target:", target?.rule);
+      console.error("invalid move with target:", getTargetRuleForLog(target));
       return;
     }
     const remainingMoveEntries = Object.entries(_possibleMoveMeta).filter(([name]) => !newEliminated.includes(name));
@@ -27248,16 +32013,14 @@ var Client2 = class {
         targets: [...this.moveBuilder.targets, target]
       };
     }
-    this.update();
+    this.onUpdate();
   }
   reset() {
-    if (this.options.boardgameIOGame) return;
     this.moveBuilder = { targets: [], stepIndex: 0, eliminatedMoves: [] };
     this.optimisticWinner = null;
-    this.update();
+    this.onUpdate();
   }
   undoStep() {
-    if (this.options.boardgameIOGame) return;
     if (this.moveBuilder.targets.length) {
       this.moveBuilder = {
         targets: this.moveBuilder.targets.slice(0, -1),
@@ -27265,12 +32028,23 @@ var Client2 = class {
         eliminatedMoves: []
       };
     }
-    this.update();
+    this.onUpdate();
   }
 };
 function hasTarget(clickableSet, target) {
-  if (!target.abstract) return clickableSet.has(target);
-  return [...clickableSet].some((item) => item.abstract && item.value === target.value);
+  if (!isAbstractStepTarget(target)) return clickableSet.has(target);
+  return [...clickableSet].some(
+    (item) => isAbstractStepTarget(item) && item.value === target.value
+  );
+}
+function isAbstractStepTarget(arg) {
+  return Boolean(arg && typeof arg === "object" && "abstract" in arg && arg.abstract === true);
+}
+function getTargetRuleForLog(target) {
+  if (target && typeof target === "object" && "rule" in target) {
+    return target.rule;
+  }
+  return void 0;
 }
 function getPossibleMoves(bgioState, moves, moveBuilder) {
   const { eliminatedMoves, stepIndex } = moveBuilder;
@@ -27286,7 +32060,7 @@ function getPossibleMoves(bgioState, moves, moveBuilder) {
       moveArguments: moveRule.arguments
     };
     const targets = moveBuilder.targets.map(
-      (t2) => t2.abstract ? t2 : bgioState.G.bank.locate(t2.entityId)
+      (t2) => isAbstractStepTarget(t2) ? t2 : bgioState.G.bank.locate(t2.entityId)
     );
     const payload = createPayload(
       bgioState,
@@ -27305,9 +32079,8 @@ function getPossibleMoves(bgioState, moves, moveBuilder) {
       bgioState,
       moveRule
     );
-    const clickableForMove = new Set(
-      moveIsAllowed && moveSteps?.[stepIndex]?.getClickable(context) || []
-    );
+    const rawClickable = moveIsAllowed && moveSteps?.[stepIndex]?.getClickable(context) || [];
+    const clickableForMove = new Set(rawClickable);
     _possibleMoveMeta[moveName] = { clickableForMove };
     clickableForMove.forEach((entity) => allClickable.add(entity));
   });
@@ -27328,9 +32101,120 @@ function getWinnerAfterMove(state, game, moveInstance, movePayload) {
   const endIf = game.endIf;
   return endIf?.({ ...state, G: JSON.parse(serialize(simulatedG)) });
 }
+
+// src/client/internal/external-client.ts
+function isExternalClientState(value2) {
+  if (!value2 || typeof value2 !== "object") return false;
+  return "G" in value2 && "ctx" in value2;
+}
+var ExternalClientImpl = class {
+  constructor(options, game, onUpdate) {
+    this.options = options;
+    this.game = game;
+    this.onUpdate = onUpdate;
+  }
+  connect() {
+    const {
+      server,
+      numPlayers,
+      debug = {
+        collapseOnLoad: true,
+        impl: Debug
+      },
+      matchID,
+      playerID,
+      credentials,
+      multiplayer = SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } })
+    } = this.options;
+    try {
+      const clientOptions = !credentials ? { game: this.game, numPlayers, debug } : {
+        game: this.game,
+        multiplayer,
+        matchID,
+        ...playerID == null ? {} : { playerID },
+        credentials,
+        numPlayers,
+        debug
+      };
+      this.client = Client(clientOptions);
+      this.client.subscribe(() => this.onUpdate());
+      this.client.start();
+      return this;
+    } catch (error2) {
+      const err = error2;
+      console.error("Failed to join game:", err?.message ?? error2);
+      if (err?.stack) console.error(err.stack);
+    }
+  }
+  getState() {
+    const client = this.client;
+    const bgioState = client?.getState();
+    if (!bgioState) return { status: "empty" };
+    if (!client) return { status: "empty" };
+    if (!isExternalClientState(bgioState)) {
+      throw new Error("Client.getState: unexpected external client state shape");
+    }
+    const state = bgioState;
+    const gameover = this.optimisticWinner ?? state.ctx?.gameover;
+    const currentMoves = gameover ? [] : {};
+    return {
+      status: "external",
+      state,
+      gameover,
+      moves: client.moves,
+      currentMoves
+    };
+  }
+  doStep() {
+  }
+  reset() {
+  }
+  undoStep() {
+  }
+};
+
+// src/client/client.ts
+var Client2 = class {
+  constructor(options) {
+    this.options = options;
+    this.game = options.boardgameIOGame || gameFactory(options.gameRules, options.gameName ?? "");
+    this.impl = options.boardgameIOGame ? new ExternalClientImpl(options, this.game, () => this.update()) : new EngineClientImpl(options, this.game, () => this.update());
+  }
+  connect() {
+    this.impl.connect();
+    return this;
+  }
+  update() {
+    this.options.onClientUpdate?.();
+  }
+  getState() {
+    return this.impl.getState();
+  }
+  doStep(_target) {
+    this.impl.doStep(_target);
+  }
+  reset() {
+    this.impl.reset();
+  }
+  undoStep() {
+    this.impl.undoStep();
+  }
+};
+
+// src/utils/resolve-ref.ts
+function resolveRef(bgioArguments, ref, context = {}) {
+  parseOrThrow(ValueRefSchema, ref, "resolveRef: invalid ValueRef");
+  return resolveProperties(bgioArguments, ref, context);
+}
 export {
   Client2 as Client,
-  gameFactory
+  expectResolvedEngineEntity,
+  expectResolvedEngineEntityContainer,
+  expectResolvedGrid,
+  gameFactory,
+  resolveFieldAsEngineEntity,
+  resolveFieldAsGrid,
+  resolveRef
 };
 /*! Bundled license information:
 

@@ -1,13 +1,12 @@
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ConditionCheckResult, ConditionContext, ConditionPayload } from "../../types/condition-types.js";
+import type { ResolvedConditionRule } from "../../types/resolved-condition-types.js";
+import type { Condition as ConditionRule } from "../../types/expanded-game-types.js";
 export default abstract class Condition {
-    rule: unknown;
-    constructor(rule: unknown);
-    check(bgioArguments: unknown, payload: Record<string, unknown>, context: Record<string, unknown>): {
-        conditionIsMet: boolean;
-    };
-    abstract checkCondition(bgioArguments: unknown, rule: unknown, conditionPayload: Record<string, unknown>, newContext: Record<string, unknown>): {
-        conditionIsMet: boolean;
-        [k: string]: unknown;
-    };
-    isMet(...args: unknown[]): boolean;
+    rule: ConditionRule;
+    constructor(rule: ConditionRule);
+    check(bgioArguments: BgioReadonlyState | BgioResolveState, payload: ConditionPayload, context: ConditionContext): ConditionCheckResult;
+    abstract checkCondition(bgioArguments: BgioReadonlyState | BgioResolveState, rule: ResolvedConditionRule, conditionPayload: ConditionPayload, newContext: ConditionContext): ConditionCheckResult;
+    isMet(bgioArguments: BgioReadonlyState | BgioResolveState, payload?: ConditionPayload, context?: ConditionContext): boolean;
 }
 //# sourceMappingURL=condition.d.ts.map

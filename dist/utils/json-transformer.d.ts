@@ -3,6 +3,6 @@ type TransformRule = {
     replace: (val: unknown) => unknown;
 };
 /** Recurse and replace. Circular references not allowed. */
-export default function transformJSON(data: unknown, rules: TransformRule[]): unknown;
+export default function transformJSON<T>(data: T, rules: TransformRule[]): T;
 export {};
 //# sourceMappingURL=json-transformer.d.ts.map

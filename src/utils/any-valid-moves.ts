@@ -1,7 +1,11 @@
 import isPlainObject from "lodash/isPlainObject.js";
-import type { BgioResolveState } from "./bgio-resolve-types.js";
+import type { BoardgameEngineMove } from "../game-factory/move/move-factory.js";
+import type { MoveArgumentBinding } from "../types/expanded-game-types.js";
+import type { MoveArgumentValue, MoveArgumentsState, ResolutionContext } from "../types/resolution-context.js";
+import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
 import resolveProperties from "./resolve-properties.js";
 import resolveEntity from "./resolve-entity.js";
+import { isRecord } from "./type-asserts.js";
 
 // Recursively find all contextPath references to moveArguments
 function findMoveArgumentReferences (obj: unknown, refs = new Set<string>()): Set<string> {
@@ -16,18 +20,22 @@ function findMoveArgumentReferences (obj: unknown, refs = new Set<string>()): Se
     }
   }
 
-  for (const value of Object.values(obj as object)) {
-    findMoveArgumentReferences(value, refs);
+  if (isRecord(obj)) {
+    for (const value of Object.values(obj)) {
+      findMoveArgumentReferences(value, refs);
+    }
   }
 
   return refs;
 }
 
 // Build a dependency graph and return topologically sorted argument names
-function getArgumentOrder (ruleArguments: Record<string, unknown>) {
+type RuleArgumentsShape = { [argumentName: string]: MoveArgumentBinding | undefined };
+
+function getArgumentOrder (ruleArguments: RuleArgumentsShape) {
   const argNames = Object.keys(ruleArguments);
-  const graph: Record<string, string[]> = {};
-  const inDegree: Record<string, number> = {};
+  const graph: { [name: string]: string[] } = {};
+  const inDegree: { [name: string]: number } = {};
 
   argNames.forEach((name) => {
     graph[name] = [];
@@ -64,19 +72,15 @@ function getArgumentOrder (ruleArguments: Record<string, unknown>) {
   return sorted.length === argNames.length ? sorted : argNames;
 }
 
-type MoveEntry = {
-  moveInstance: { isValid: (a: unknown, p: unknown, c: unknown) => boolean; rule: unknown };
-};
-
 // Recursively try to build a valid argument combination
 function findValidCombination (
-  bgioArguments: BgioResolveState,
-  moveInstance: MoveEntry["moveInstance"],
-  ruleArguments: Record<string, unknown>,
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  moveInstance: BoardgameEngineMove["moveInstance"],
+  ruleArguments: RuleArgumentsShape,
   orderedArgNames: string[],
-  context: Record<string, unknown>,
+  context: ResolutionContext,
   index = 0,
-  currentArgs: Record<string, unknown> = {}
+  currentArgs: MoveArgumentsState = {}
 ): boolean {
   // Base case: all arguments resolved
   if (index === orderedArgNames.length) {
@@ -88,17 +92,17 @@ function findValidCombination (
   const arg = ruleArguments[argName];
   
   // Update context with current arguments for dependency resolution
-  const updatedContext = {
+  const updatedContext: ResolutionContext = {
     ...context,
     moveArguments: currentArgs
   };
   
   // Get all possible values for this argument if not resolved
   // If it is unresolved, it means it was a playerChoice
-  const matches = isPlainObject(arg)
+  const matches = (isPlainObject(arg) && isRecord(arg))
     ? resolveEntity(
       bgioArguments,
-      { ...(arg as Record<string, unknown>), matchMultiple: true },
+      { ...arg, matchMultiple: true },
       updatedContext,
       argName 
     )
@@ -120,31 +124,30 @@ function findValidCombination (
       orderedArgNames,
       context,
       index + 1,
-      { ...currentArgs, [argName]: value }
+      { ...currentArgs, [argName]: value as MoveArgumentValue }
     );
   });
 }
 
 export default function areThereValidMoves (
-  bgioArguments: unknown,
-  moves: Record<string, unknown>
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  moves: { [moveName: string]: unknown }
 ) {
-  const bgio = bgioArguments as BgioResolveState;
   return Object.values(moves).some((move) => {
-    const moveInstance = (move as MoveEntry | undefined)?.moveInstance;
+    const moveInstance = (move as BoardgameEngineMove | undefined)?.moveInstance;
     if (!moveInstance) return false;
-    const context = { moveInstance };
+    const context: ResolutionContext = { moveInstance };
     const rule = resolveProperties(
-      bgio,
+      bgioArguments,
       moveInstance.rule,
       context
-    ) as { arguments?: Record<string, unknown> };
+    ) as { arguments?: RuleArgumentsShape };
 
-    const ruleArguments = rule.arguments ?? {};
+    const ruleArguments: RuleArgumentsShape = rule.arguments ?? {};
     
     // If no arguments required, just check if move is valid
     if (Object.keys(ruleArguments).length === 0) {
-      return moveInstance.isValid(bgio, { arguments: {} }, context);
+      return moveInstance.isValid(bgioArguments, { arguments: {} }, context);
     }
     
     // Get dependency-ordered argument names
@@ -152,7 +155,7 @@ export default function areThereValidMoves (
     
     // Recursively search for any valid combination (short-circuits on first valid)
     return findValidCombination(
-      bgio,
+      bgioArguments,
       moveInstance,
       ruleArguments,
       orderedArgNames,

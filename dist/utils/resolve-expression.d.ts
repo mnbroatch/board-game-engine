@@ -1,6 +1,7 @@
-import type { BgioResolveState } from "./bgio-resolve-types.js";
-export default function resolveExpression(bgioArguments: BgioResolveState, rule: {
+import type { BgioReadonlyState } from "./bgio-resolve-types.js";
+import type { MoveArgumentsState, ResolutionContext } from "../types/resolution-context.js";
+export default function resolveExpression(bgioArguments: BgioReadonlyState, rule: {
     expression: string;
-    arguments?: unknown;
-}, context: Record<string, unknown>): unknown;
+    arguments?: MoveArgumentsState;
+}, context: ResolutionContext): unknown;
 //# sourceMappingURL=resolve-expression.d.ts.map

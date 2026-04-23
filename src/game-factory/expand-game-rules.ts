@@ -1,7 +1,20 @@
 import find from "lodash/find.js";
-import type { Entity, EntityMatcher, EntityAttributes, BagelGame, ExpandedGameRules, MoveDefinition } from "../types/bagel-types.js";
+import type {
+  Entity,
+  EntityAttributes,
+  EntityMatcher,
+  InitialPlacement,
+  PhaseConfig,
+} from "../types/bagel-types.js";
+import type {
+  AuthoredGameRules,
+  GameRules,
+  MoveDefinition,
+  MoveForEach,
+  MovePlaceNew,
+} from "../types/expanded-game-types.js";
 import transformJSON from "../utils/json-transformer.js";
-
+import { AuthoredGameRulesSchema, parseOrThrow } from "../types/schemas/index.js";
 type TransformRule = {
   test: (val: unknown) => boolean;
   replace: (val: unknown) => unknown;
@@ -23,46 +36,69 @@ const invariantEntities = [
   },
 ] as Entity[];
 
-function expandEntities (rules: { entities: Entity[] }) {
-  rules.entities = [
+function expandEntities (entities: Entity[] | undefined): Entity[] {
+  return [
     ...invariantEntities,
-    ...(rules.entities || []),
+    ...(entities || []),
   ];
 }
 
-function expandInitialPlacements (rules: Record<string, unknown>, entities: Entity[]) {
-  if (rules.sharedBoard) {
-    const sharedBoard = rules.sharedBoard as EntityMatcher<EntityAttributes<Entity>>[];
-    const sharedBoardPlacements = sharedBoard.map((matcher) => ({ entity: matcher, destination: { name: "sharedBoard" } }));
-    if (!rules.initialPlacements) rules.initialPlacements = [];
-    (rules.initialPlacements as unknown[]).unshift(...sharedBoardPlacements);
+type RulesWithPlacements = {
+  sharedBoard?: EntityMatcher<EntityAttributes<Entity>>[];
+  personalBoard?: EntityMatcher<EntityAttributes<Entity>>[];
+  initialPlacements?: InitialPlacement[];
+  initialMoves?: MoveDefinition[];
+};
+
+type PhaseRuleWithPlacements = PhaseConfig & RulesWithPlacements;
+
+function expandInitialPlacements (
+  rules: AuthoredGameRules | PhaseRuleWithPlacements,
+  entities: Entity[]
+): Record<string, unknown> {
+  const next: Record<string, unknown> = { ...rules };
+
+  if (next.sharedBoard) {
+    const sharedBoard = next.sharedBoard as NonNullable<RulesWithPlacements["sharedBoard"]>;
+    const sharedBoardPlacements: InitialPlacement[] = sharedBoard.map((matcher) => ({
+      entity: matcher as InitialPlacement["entity"],
+      destination: { name: "sharedBoard" },
+    }));
+    if (!next.initialPlacements) next.initialPlacements = [];
+    next.initialPlacements = [
+      ...sharedBoardPlacements,
+      ...(next.initialPlacements as InitialPlacement[]),
+    ];
   }
 
-  if (rules.personalBoard) {
+  if (next.personalBoard) {
     entities.push({
       entityType: "Board",
       name: "personalBoard",
       perPlayer: true,
     });
-    const personalBoard = rules.personalBoard as EntityMatcher<EntityAttributes<Entity>>[];
-    const personalBoardPlacements = personalBoard.map((matcher) => ({
-      entity: matcher,
+    const personalBoard = next.personalBoard as NonNullable<RulesWithPlacements["personalBoard"]>;
+    const personalBoardPlacements: InitialPlacement[] = personalBoard.map((matcher) => ({
+      entity: matcher as InitialPlacement["entity"],
       destination: {
         name: "personalBoard",
       },
     }));
-    if (!rules.initialPlacements) rules.initialPlacements = [];
-    (rules.initialPlacements as unknown[]).unshift(...personalBoardPlacements);
+    if (!next.initialPlacements) next.initialPlacements = [];
+    next.initialPlacements = [
+      ...personalBoardPlacements,
+      ...(next.initialPlacements as InitialPlacement[]),
+    ];
   }
 
-  if (rules.initialPlacements) {
-    const initialPlacementMoves = (rules.initialPlacements as Array<{ entity: Record<string, unknown>; destination: { index?: number; name?: string } }>).map((placement) => {
+  if (next.initialPlacements) {
+    const initialPlacementMoves = (next.initialPlacements as InitialPlacement[]).map((placement) => {
       const { state, ...matcher } = placement.entity;
       const entityDefinition = find(entities, matcher) as Entity | undefined;
 
       if (placement.destination.name === "personalBoard") {
         return {
-          moveType: "ForEach",
+          moveType: "ForEach" as const,
           arguments: {
             targets: {
               type: "ctxPath",
@@ -70,7 +106,7 @@ function expandInitialPlacements (rules: Record<string, unknown>, entities: Enti
             },
           },
           move: {
-            moveType: "PlaceNew",
+            moveType: "PlaceNew" as const,
             entity: {
               state,
               conditions: [{
@@ -104,32 +140,37 @@ function expandInitialPlacements (rules: Record<string, unknown>, entities: Enti
               },
             },
           },
-        } as MoveDefinition;
+        } satisfies MoveForEach;
       } else {
         return {
-          moveType: "PlaceNew",
+          moveType: "PlaceNew" as const,
           entity: {
             state,
             conditions: [{
               conditionType: "Is",
-              matcher,
+              matcher: matcher as EntityMatcher<EntityAttributes<Entity>>,
             }],
           },
           arguments: {
             destination: {
               conditions: [{
                 conditionType: "Is",
-                matcher: placement.destination,
+                matcher: placement.destination as EntityMatcher<EntityAttributes<Entity>>,
               }],
             },
           },
-        } as MoveDefinition;
+        } satisfies MovePlaceNew;
       }
     });
-    if (!rules.initialMoves) rules.initialMoves = [];
-    (rules.initialMoves as MoveDefinition[]).unshift(...initialPlacementMoves);
-    delete rules.initialPlacements;
+    if (!next.initialMoves) next.initialMoves = [];
+    next.initialMoves = [
+      ...initialPlacementMoves,
+      ...((next.initialMoves ?? []) as MoveDefinition[]),
+    ];
+    delete next.initialPlacements;
   }
+
+  return next;
 }
 
 const keyMappings: [string, string][] = [];
@@ -232,32 +273,49 @@ const transformationRules: TransformRule[] = [
   },
 ];
 
-export default function expandGameRules (gameRules: BagelGame): ExpandedGameRules {
-  const rules = transformJSON(gameRules, transformationRules) as BagelGame;
+export default function expandGameRules (gameRules: AuthoredGameRules): GameRules {
+  // Validate at the earliest authoring boundary so failures are actionable.
+  parseOrThrow(AuthoredGameRulesSchema, gameRules, "expandGameRules: invalid authored game rules");
+  const rules = transformJSON(gameRules, transformationRules);
 
-  if (!rules.sharedBoard) {
-    rules.sharedBoard = rules.entities as unknown as BagelGame["sharedBoard"];
-  }
+  const entities = expandEntities(rules.entities);
 
-  if (!rules.turn) {
-    rules.turn = {
-      minMoves: 1,
-      maxMoves: 1,
-    };
-  }
+  const sharedBoard = (rules.sharedBoard ?? entities) as EntityMatcher<EntityAttributes<Entity>>[];
+  const turn = rules.turn ?? { minMoves: 1, maxMoves: 1 };
 
-  expandEntities(rules);
-  expandInitialPlacements(rules as unknown as Record<string, unknown>, rules.entities);
+  const expandedTopLevel = expandInitialPlacements(
+    {
+      ...rules,
+      entities,
+      sharedBoard,
+      turn,
+    },
+    entities
+  ) as Omit<AuthoredGameRules, "initialPlacements">;
 
-  if (rules.phases) {
-    Object.entries(rules.phases).forEach((phaseRule) => {
-      expandInitialPlacements(phaseRule as unknown as Record<string, unknown>, rules.entities);
-    });
-  }
+  const expandedPhases = expandedTopLevel.phases
+    ? Object.fromEntries(
+        Object.entries(expandedTopLevel.phases).map(([phaseName, phaseRule]) => {
+          const expandedPhase = expandInitialPlacements(
+            phaseRule as PhaseRuleWithPlacements,
+            entities
+          ) as Omit<PhaseConfig, "initialPlacements">;
+          return [phaseName, expandedPhase] as const;
+        })
+      )
+    : undefined;
+
+  const baseExpanded = {
+    ...expandedTopLevel,
+    entities,
+    sharedBoard,
+    turn,
+    phases: expandedPhases,
+  } as GameRules;
 
   if (gameRules.numPlayers) {
-    gameRules.minPlayers = gameRules.maxPlayers = gameRules.numPlayers;
+    baseExpanded.minPlayers = baseExpanded.maxPlayers = gameRules.numPlayers;
   }
 
-  return rules as ExpandedGameRules;
+  return baseExpanded;
 }

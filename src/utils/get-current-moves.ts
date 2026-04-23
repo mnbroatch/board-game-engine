@@ -7,7 +7,7 @@ export interface GetCurrentMovesClient {
     moves?: Record<string, unknown>;
     turn?: { stages?: Record<string, unknown> };
   };
-  playerID?: string;
+  playerID?: string | null;
   stageName?: string;
 }
 
@@ -25,7 +25,17 @@ export interface GetCurrentMovesState {
 export default function getCurrentMoves (
   state: GetCurrentMovesState,
   client: GetCurrentMovesClient
-): Record<string, unknown> {
+): Record<string, unknown>;
+
+export default function getCurrentMoves<M> (
+  state: GetCurrentMovesState,
+  client: GetCurrentMovesClient
+): Record<string, M>;
+
+export default function getCurrentMoves<M> (
+  state: GetCurrentMovesState,
+  client: GetCurrentMovesClient
+): Record<string, M> {
   const { game, playerID, stageName } = client;
   const phaseName = state.ctx.phase;
 
@@ -35,5 +45,5 @@ export default function getCurrentMoves (
   const stageOrPhaseOrRoot =
     (phaseOrRoot as { turn?: { stages?: Record<string, unknown> } }).turn?.stages?.[stageNameToUse as string] ?? phaseOrRoot;
 
-  return (stageOrPhaseOrRoot as { moves?: Record<string, unknown> }).moves ?? {};
+  return ((stageOrPhaseOrRoot as { moves?: Record<string, M> }).moves ?? {}) as Record<string, M>;
 }

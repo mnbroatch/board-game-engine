@@ -1,11 +1,13 @@
+import type { RuntimeEntityRule } from "../types/runtime-entity.js";
+
 export default class Entity {
-  rule: Record<string, unknown>;
+  rule: RuntimeEntityRule;
   entityId: number;
   state: Record<string, unknown>;
 
   constructor (
     options: { fromBank?: boolean; initialStateGroups?: Record<string, string> } | undefined,
-    rule: Record<string, unknown>,
+    rule: RuntimeEntityRule,
     id: number
   ) {
     if (!options?.fromBank) {
@@ -15,7 +17,7 @@ export default class Entity {
     this.entityId = id;
     this.state = {};
     if (this.rule.stateGroups) {
-      Object.entries(this.rule.stateGroups as Record<string, Record<string, Record<string, unknown>>>)
+      Object.entries(this.rule.stateGroups)
         .forEach(([stateGroupName, stateGroupValues]) => {
           const stateGroupValueName = options?.initialStateGroups?.[stateGroupName]
             ?? Object.keys(stateGroupValues)[0];
@@ -23,7 +25,7 @@ export default class Entity {
         });
     }
     if (this.rule.state) {
-      Object.assign(this.state, this.rule.state as Record<string, unknown>);
+      Object.assign(this.state, this.rule.state);
     }
   }
 

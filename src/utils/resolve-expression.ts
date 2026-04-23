@@ -1,16 +1,17 @@
 import { Parser } from "expr-eval";
-import resolveProperties from "./resolve-properties.js";
-import type { BgioResolveState } from "./bgio-resolve-types.js";
+import type { BgioReadonlyState } from "./bgio-resolve-types.js";
+import type { MoveArgumentsState, ResolutionContext } from "../types/resolution-context.js";
 
 const parser = new Parser();
 (parser.functions as Record<string, (...args: unknown[]) => unknown>).sum = (...args: unknown[]) =>
   (args[0] as number[]).reduce((acc, val) => acc + val, 0);
 
 export default function resolveExpression (
-  bgioArguments: BgioResolveState,
-  rule: { expression: string; arguments?: unknown },
-  context: Record<string, unknown>
+  bgioArguments: BgioReadonlyState,
+  rule: { expression: string; arguments?: MoveArgumentsState },
+  context: ResolutionContext
 ): unknown {
-  const args = resolveProperties(bgioArguments, rule.arguments, context) as Record<string, unknown>;
-  return parser.evaluate(rule.expression, args);
+  void bgioArguments;
+  void context;
+  return parser.evaluate(rule.expression, rule.arguments ?? {});
 }

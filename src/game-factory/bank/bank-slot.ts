@@ -1,30 +1,33 @@
 import resolveProperties from "../../utils/resolve-properties.js";
-import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { BgioReadonlyState } from "../../utils/bgio-resolve-types.js";
+import type { EntityDefinition } from "../../types/entity-definition.js";
+import type { EngineEntity, RuntimeEntityRule } from "../../types/runtime-entity.js";
+import type { ResolutionContext } from "../../types/resolution-context.js";
 
 class BankSlot {
-  bank: { createEntity: (rule: Record<string, unknown>) => unknown };
-  rule: Record<string, unknown> & { count?: number | string; name?: string };
-  pool: unknown[];
+  bank: { createEntity: (rule: Partial<RuntimeEntityRule>) => EngineEntity };
+  rule: EntityDefinition & { count?: number | string; name?: string };
+  pool: EngineEntity[];
   remaining: number;
 
-  constructor (rule: Record<string, unknown> & { count?: number | string; name?: string }, bank: BankSlot["bank"]) {
+  constructor (rule: EntityDefinition & { count?: number | string; name?: string }, bank: BankSlot["bank"]) {
     this.bank = bank;
     this.rule = rule;
     this.pool = [];
     this.remaining = +((rule.count as number | string) || 1);
   }
 
-  getOne (bgioArguments: BgioResolveState, options: { state?: unknown }, context: Record<string, unknown>) {
+  getOne (bgioArguments: BgioReadonlyState, options: { state?: unknown }, context: ResolutionContext) {
     return this.getMultiple(bgioArguments, 1, options, context)[0];
   }
 
   getMultiple (
-    bgioArguments: BgioResolveState,
+    bgioArguments: BgioReadonlyState,
     count: number = Infinity,
     options: { state?: unknown } = {},
-    context: Record<string, unknown> = {}
+    context: ResolutionContext = {}
   ) {
-    const toReturn: unknown[] = [];
+    const toReturn: EngineEntity[] = [];
 
     if (this.remaining === Infinity && count === Infinity) {
       throw new Error(`Cannot get infinite pieces from slot with infinite remaining: ${this.rule.name}`);
@@ -55,9 +58,9 @@ class BankSlot {
     if (options.state) {
       const newState = resolveProperties(bgioArguments, options.state, context);
       toReturn.forEach((entity) => {
-        (entity as { state: Record<string, unknown> }).state = {
-          ...(entity as { state: Record<string, unknown> }).state,
-          ...newState as Record<string, unknown>,
+        entity.state = {
+          ...entity.state,
+          ...(newState as NonNullable<EngineEntity["state"]>),
         };
       });
     }
@@ -65,9 +68,9 @@ class BankSlot {
     return toReturn;
   }
 
-  returnToBank (entity: { rule: { state?: unknown }; state?: unknown }) {
+  returnToBank (entity: EngineEntity) {
     if (entity.rule.state) {
-      entity.state = entity.rule.state;
+      entity.state = { ...entity.rule.state };
     } else {
       delete entity.state;
     }

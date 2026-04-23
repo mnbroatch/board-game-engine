@@ -1,42 +1,51 @@
-import type { MovePlaceNew } from "../../types/bagel-types.js";
+import type { MoveDefinition, MovePlaceNew } from "../../types/expanded-game-types.js";
+import type { PlaceNewDoPayload } from "../../types/move-payload.js";
 import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ResolutionContext } from "../../types/resolution-context.js";
 import { bankOf } from "../../utils/bgio-resolve-types.js";
+import type { EngineEntity } from "../../types/runtime-entity.js";
 import Move from "./move.js";
 
 type PlaceNewRule = MovePlaceNew & { count?: number; position?: unknown };
 
-export default class PlaceNew extends Move {
-  do (bgioArguments: unknown, rule: unknown, resolvedPayload: unknown, context: Record<string, unknown>) {
-    const { destination } = (resolvedPayload as { arguments: { destination: unknown } }).arguments;
-    const bgio = bgioArguments as BgioResolveState;
+export default class PlaceNew extends Move<NonNullable<PlaceNewDoPayload["arguments"]>> {
+  do (
+    bgioArguments: BgioResolveState,
+    rule: MoveDefinition,
+    resolvedPayload: PlaceNewDoPayload,
+    context: ResolutionContext
+  ) {
+    const { destination } = resolvedPayload.arguments;
     const r = rule as PlaceNewRule;
-    const bank = bankOf(bgio);
+    const bank = bankOf(bgioArguments);
+    const entityConditions = Array.isArray(r.entity?.conditions) ? r.entity.conditions : (r.entity?.conditions ? [r.entity.conditions] : []);
+    const moveConditions = Array.isArray(r.conditions) ? r.conditions : (r.conditions ? [r.conditions] : []);
     const entities = r.matchMultiple
       ? bank.getMultiple(
-          bgio,
+          bgioArguments,
           {
             ...r.entity,
             conditions: [
-              ...(r.entity?.conditions || []),
-              ...(r.conditions || []),
+              ...entityConditions,
+              ...moveConditions,
             ]
           },
           r.count ?? 1,
           context
         )
       : [bank.getOne(
-          bgio,
+          bgioArguments,
           {
             ...r.entity,
             conditions: [
-              ...(r.entity?.conditions || []),
-              ...(r.conditions || []),
+              ...entityConditions,
+              ...moveConditions,
             ]
           },
           context
         )]
-    entities.forEach((entity: unknown) => {
-      (destination as { placeEntity: (e: unknown, p?: unknown) => void }).placeEntity(entity, r.position as unknown);
+    entities.forEach((entity: EngineEntity) => {
+      destination.placeEntity(entity, r.position);
     });
   }
 }

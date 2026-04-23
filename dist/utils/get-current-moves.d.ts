@@ -9,7 +9,7 @@ export interface GetCurrentMovesClient {
             stages?: Record<string, unknown>;
         };
     };
-    playerID?: string;
+    playerID?: string | null;
     stageName?: string;
 }
 /** `state` shape expected by {@link getCurrentMoves} (boardgame.io match state). */
@@ -21,4 +21,5 @@ export interface GetCurrentMovesState {
     };
 }
 export default function getCurrentMoves(state: GetCurrentMovesState, client: GetCurrentMovesClient): Record<string, unknown>;
+export default function getCurrentMoves<M>(state: GetCurrentMovesState, client: GetCurrentMovesClient): Record<string, M>;
 //# sourceMappingURL=get-current-moves.d.ts.map

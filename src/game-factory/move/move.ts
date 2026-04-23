@@ -1,26 +1,35 @@
 import { INVALID_MOVE } from "@mnbroatch/boardgame.io/dist/cjs/core.js";
-import type { Condition, MoveDefinition } from "../../types/bagel-types.js";
+import type {
+  Condition,
+  MoveArgumentBinding,
+  MoveDefinition,
+} from "../../types/expanded-game-types.js";
+import type { MovePayload } from "../../types/move-payload.js";
+import type { MoveArgumentsMap } from "../../types/move-arguments.js";
+import type { MoveArgumentsState, ResolutionContext } from "../../types/resolution-context.js";
 import checkConditions from "../../utils/check-conditions.js";
 import resolveProperties from "../../utils/resolve-properties.js";
-import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { EngineEntity } from "../../types/runtime-entity.js";
 
-export default class Move {
+export default class Move<TArgs extends MoveArgumentsMap = MoveArgumentsMap> {
   rule: MoveDefinition;
 
   constructor (rule: MoveDefinition) {
     this.rule = this.transformRule(rule as Parameters<Move["transformRule"]>[0]) as MoveDefinition;
   }
 
-  checkValidity (bgioArguments: unknown, payload: { arguments: Record<string, unknown> }, context: Record<string, unknown>) {
+  checkValidity (bgioArguments: BgioReadonlyState | BgioResolveState, payload: MovePayload<TArgs>, context: ResolutionContext) {
     const moveArguments =
       "arguments" in this.rule && this.rule.arguments
         ? this.rule.arguments
         : {};
-    const argRuleEntries = Object.entries(moveArguments) as [string, { conditions?: Condition[] }][];
+    const argRuleEntries = Object.entries(moveArguments) as [string, MoveArgumentBinding][];
 
+    const payloadArgs: Partial<TArgs> & MoveArgumentsState = (payload.arguments ?? {}) as Partial<TArgs> & MoveArgumentsState;
     if (
       !argRuleEntries.every(([argName]) => {
-        const arg = payload.arguments[argName];
+        const arg = payloadArgs[argName];
         return arg !== undefined && (!Array.isArray(arg) || arg.length);
       })
     ) {
@@ -31,7 +40,7 @@ export default class Move {
 
     for (let i = 0, len = argRuleEntries.length; i < len; i++) {
       const [argName, argRule] = argRuleEntries[i];
-      const payloadArg = payload.arguments[argName];
+      const payloadArg = payloadArgs[argName];
       const args = Array.isArray(payloadArg)
         ? payloadArg
         : [payloadArg];
@@ -40,10 +49,10 @@ export default class Move {
       for (let j = 0, lenj = args.length; j < lenj; j++) {
         const arg = args[j];
         const result = checkConditions(
-          bgioArguments as BgioResolveState,
+          bgioArguments,
           argRule.conditions,
-          { target: arg },
-          { ...context, moveArguments: payload.arguments }
+          { target: arg as unknown as EngineEntity | EngineEntity[] | undefined },
+          { ...context, moveArguments: payloadArgs }
         );
         argResults.push(result);
         if (!result.conditionsAreMet) {
@@ -63,10 +72,10 @@ export default class Move {
     }
 
     const moveResults = checkConditions(
-      bgioArguments as BgioResolveState,
+      bgioArguments,
       (this.rule as { conditions?: Condition[] }).conditions,
       {},
-      { ...context, moveArguments: payload.arguments }
+      { ...context, moveArguments: payloadArgs }
     );
 
     return {
@@ -77,7 +86,7 @@ export default class Move {
     };
   }
 
-  isValid (bgioArguments: unknown, payload: { arguments: Record<string, unknown> }, context: Record<string, unknown>) {
+  isValid (bgioArguments: BgioReadonlyState | BgioResolveState, payload: MovePayload<TArgs>, context: ResolutionContext) {
     const conditionResults = this.checkValidity(
       bgioArguments,
       payload,
@@ -88,51 +97,59 @@ export default class Move {
   }
 
   doMove (
-    bgioArguments: unknown,
-    payload: { arguments?: Record<string, unknown> } | undefined,
-    context: Record<string, unknown>,
+    bgioArguments: BgioReadonlyState | BgioResolveState,
+    payload: MovePayload<TArgs> | undefined,
+    context: ResolutionContext,
     { skipCheck = false } = {}
   ) {
     const rule = resolveProperties(
-      bgioArguments as BgioResolveState,
+      bgioArguments,
       this.rule,
       context
-    ) as { name?: string; arguments?: Record<string, unknown> };
-    const resolvedPayload = {
+    ) as MoveDefinition;
+    const ruleArguments =
+      "arguments" in rule && rule.arguments
+        ? rule.arguments
+        : {};
+    const resolvedArguments = Object.entries(ruleArguments as Record<string, MoveArgumentBinding>)
+      .reduce<MoveArgumentsState>((acc, [argName, arg]) => ({
+        ...acc,
+        [argName]: (payload?.arguments as MoveArgumentsState | undefined)?.[argName] ?? arg,
+      }), {});
+    const resolvedPayload: MovePayload<TArgs> = {
       ...payload,
-      arguments: Object.entries(rule.arguments ?? {})
-        .reduce<Record<string, unknown>>((acc, [argName, arg]) => ({
-          ...acc,
-          [argName]: payload?.arguments?.[argName] ?? arg,
-        }), {}),
+      arguments: resolvedArguments as Partial<TArgs>,
     };
 
     if (rule.name) {
-      (bgioArguments as { G: { _meta: { previousPayloads: Record<string, unknown> } } }).G._meta.previousPayloads[rule.name] = resolvedPayload;
+      const { G } = bgioArguments;
+      G._meta.previousPayloads[rule.name] = resolvedPayload;
     }
 
-    let conditionResults: ReturnType<Move["checkValidity"]> | undefined;
+    let conditionResults: ReturnType<Move<TArgs>["checkValidity"]> | undefined;
     if (!skipCheck) {
-      conditionResults = this.checkValidity(bgioArguments, resolvedPayload as { arguments: Record<string, unknown> }, context);
-    }
-
-    if (!skipCheck && conditionResults !== false && !conditionResults!.conditionsAreMet) {
-      return INVALID_MOVE;
-    } else {
-      this.do(bgioArguments, rule, resolvedPayload, context);
-      if (context) {
-        context.previousArguments = resolvedPayload.arguments;
+      conditionResults = this.checkValidity(bgioArguments, resolvedPayload, context);
+      if (conditionResults !== false && !conditionResults.conditionsAreMet) {
+        return INVALID_MOVE;
       }
     }
+
+    this.do(bgioArguments, rule, resolvedPayload, context);
+    context.previousArguments = resolvedPayload.arguments as MoveArgumentsState | undefined;
 
     return { conditionResults };
   }
 
-  do (_bgioArguments: unknown, _rule: unknown, _resolvedPayload: unknown, _context: unknown) {
+  do (
+    _bgioArguments: BgioReadonlyState | BgioResolveState,
+    _rule: MoveDefinition,
+    _resolvedPayload: MovePayload<TArgs>,
+    _context: ResolutionContext
+  ) {
     throw new Error("Move#do must be implemented by subclass");
   }
 
-  transformRule (rule: { arguments?: Record<string, { playerChoice?: boolean; resolveAsEntity?: boolean }> }) {
+  transformRule<R extends { arguments?: Record<string, MoveArgumentBinding> }> (rule: R): R {
     const args = rule.arguments;
     if (args) {
       for (const key in args) {

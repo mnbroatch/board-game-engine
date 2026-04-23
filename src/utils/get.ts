@@ -13,13 +13,16 @@ export default function get (obj: unknown, pathArray: PathStep[]): unknown {
         return undefined;
       }
 
-      let flat = current.flat() as unknown[];
+      let flat: unknown[] = current.flat();
 
       if (step.map) {
         flat = flat.map((item) => get(item, step.map!));
       }
       current = flat;
     } else {
+      if (!current || (typeof current !== "object" && typeof current !== "function")) {
+        return undefined;
+      }
       current = (current as Record<string | number, unknown>)[step as string | number];
     }
   }

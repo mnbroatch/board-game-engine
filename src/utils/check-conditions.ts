@@ -1,18 +1,30 @@
 import conditionFactory from "../game-factory/condition/condition-factory.js";
-import type { Condition as ConditionRule } from "../types/bagel-types.js";
+import type { Condition, ConditionWithoutWould } from "../types/expanded-game-types.js";
+import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
+import type {
+  CheckConditionsResult,
+  ConditionCheckResult,
+  ConditionContext,
+  ConditionPayload,
+} from "../types/condition-types.js";
 
-export default function checkConditions (
-  bgioArguments: unknown,
-  conditions: ConditionRule[] = [],
-  payload: Record<string, unknown> = {},
-  context: Record<string, unknown> = {}
-) {
-  const results: unknown[] = [];
-  let failedAt: unknown;
-  for (const conditionRule of conditions) {
-    const result = conditionFactory(conditionRule as ConditionRule)!
+export type { CheckConditionsResult };
+
+function runCheckConditions (
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  conditions: Condition | Condition[] | undefined,
+  payload: ConditionPayload,
+  context: ConditionContext
+): CheckConditionsResult {
+  const list = Array.isArray(conditions)
+    ? conditions
+    : (conditions ? [conditions] : []);
+  const results: ConditionCheckResult[] = [];
+  let failedAt: Condition | undefined;
+  for (const conditionRule of list) {
+    const result = conditionFactory(conditionRule)!
       .check(bgioArguments, payload, context);
-    if (!(result as { conditionIsMet: boolean }).conditionIsMet) {
+    if (!result.conditionIsMet) {
       failedAt = conditionRule;
       break;
     } else {
@@ -23,6 +35,56 @@ export default function checkConditions (
   return {
     results,
     failedAt,
-    conditionsAreMet: results.length === conditions.length,
+    conditionsAreMet: results.length === list.length,
   };
+}
+
+/**
+ * Readonly/snapshot: `G` + `ctx` + `playerID` only. Conditions must exclude **top-level** `Would`
+ * (nested `Would` inside composites is not enforced by TypeScript).
+ */
+export default function checkConditions (
+  bgioArguments: BgioReadonlyState,
+  conditions: ConditionWithoutWould | ConditionWithoutWould[] | undefined,
+  payload?: ConditionPayload,
+  context?: ConditionContext
+): CheckConditionsResult;
+
+/** Full hook / move context; supports any expanded condition, including `Would`. */
+export default function checkConditions (
+  bgioArguments: BgioResolveState,
+  conditions?: Condition | Condition[] | undefined,
+  payload?: ConditionPayload,
+  context?: ConditionContext
+): CheckConditionsResult;
+
+/** Internal callers may hold bgio args as a union; still supports any expanded condition. */
+export default function checkConditions (
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  conditions?: Condition | Condition[] | undefined,
+  payload?: ConditionPayload,
+  context?: ConditionContext
+): CheckConditionsResult;
+
+export default function checkConditions (
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  conditions:
+    | Condition
+    | Condition[]
+    | ConditionWithoutWould
+    | ConditionWithoutWould[]
+    | undefined = [],
+  payload: ConditionPayload = {},
+  context: ConditionContext = {}
+): CheckConditionsResult {
+  // Note: `ConditionWithoutWould` is a subtype of `Condition`, so this narrowing is safe.
+  const typedConditions: Condition | Condition[] | undefined = Array.isArray(conditions)
+    ? (conditions as Condition[])
+    : (conditions as Condition | undefined);
+  return runCheckConditions(
+    bgioArguments,
+    typedConditions,
+    payload,
+    context
+  );
 }

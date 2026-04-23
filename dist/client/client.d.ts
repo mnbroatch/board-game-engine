@@ -1,8 +1,9 @@
-import { Client as BoardgameIOClient } from "@mnbroatch/boardgame.io/client";
 import { Debug } from "@mnbroatch/boardgame.io/debug";
 import { SocketIO } from "@mnbroatch/boardgame.io/multiplayer";
 import type { BoardgameIoGame } from "../game-factory/game-factory.js";
 import type { BagelGame } from "../types/bagel-types.js";
+import { type EngineGetStateResult } from "./internal/engine-client.js";
+import { type ExternalGetStateResult } from "./internal/external-client.js";
 export interface ClientOptions {
     boardgameIOGame?: BoardgameIoGame;
     gameRules?: BagelGame;
@@ -19,58 +20,19 @@ export interface ClientOptions {
     multiplayer?: ReturnType<typeof SocketIO>;
     onClientUpdate?: () => void;
 }
-interface MoveBuilder {
-    targets: unknown[];
-    stepIndex: number;
-    eliminatedMoves: string[];
-}
+export type ClientGetStateResult = {
+    status: "empty";
+} | ExternalGetStateResult | EngineGetStateResult;
 export declare class Client {
-    options: ClientOptions;
-    game: BoardgameIoGame;
-    client?: ReturnType<typeof BoardgameIOClient>;
-    moveBuilder?: MoveBuilder;
-    optimisticWinner?: unknown | null;
+    private readonly options;
+    private readonly game;
+    private readonly impl;
     constructor(options: ClientOptions);
-    connect(): this | undefined;
+    connect(): this;
     update(): void;
-    getState(): {
-        state?: undefined;
-        gameover?: undefined;
-        moves?: undefined;
-        currentMoves?: undefined;
-        allClickable?: undefined;
-        _wrappedMoves?: undefined;
-        _possibleMoveMeta?: undefined;
-    } | {
-        state: import("@mnbroatch/boardgame.io").State<unknown> & {
-            isActive: boolean;
-            isConnected: boolean;
-            log: import("@mnbroatch/boardgame.io").LogEntry[];
-        };
-        gameover: any;
-        moves: Record<string, (...args: any[]) => void>;
-        currentMoves: Record<string, unknown> | never[];
-        allClickable?: undefined;
-        _wrappedMoves?: undefined;
-        _possibleMoveMeta?: undefined;
-    } | {
-        state: import("@mnbroatch/boardgame.io").State<unknown> & {
-            isActive: boolean;
-            isConnected: boolean;
-            log: import("@mnbroatch/boardgame.io").LogEntry[];
-        };
-        gameover: any;
-        allClickable: Set<unknown>;
-        _wrappedMoves: Record<string, unknown>;
-        _possibleMoveMeta: Record<string, {
-            clickableForMove: Set<unknown>;
-        }>;
-        moves?: undefined;
-        currentMoves?: undefined;
-    };
+    getState(): ClientGetStateResult;
     doStep(_target: unknown): void;
     reset(): void;
     undoStep(): void;
 }
-export {};
 //# sourceMappingURL=client.d.ts.map

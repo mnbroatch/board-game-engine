@@ -8,90 +8,113 @@
  * - EntityMatcher is matched against EntityAttributes (lodash-style) at runtime.
  */
 
+import type { EngineEntity } from "./runtime-entity.js";
+import type { Condition as ExpandedCondition } from "./expanded-game-types.js";
+import type { JsonValue } from "./json.js";
+
 // ---------------------------------------------------------------------------
 // Value references (resolved at runtime from context, game state, or expressions)
 // ---------------------------------------------------------------------------
 
 export type PathSegment = string | number | { flatten: boolean; map?: string[] };
 
-export type ValueRef =
-  | CtxPathRef
-  | ContextPathRef
-  | GamePathRef
-  | ExpressionRef
-  | RelativeCoordinatesRef
-  | CoordinatesRef
-  | RelativePathRef
-  | ParentRef
-  | MapRef
-  | MapMaxRef
-  | PickRef
-  | CountRef;
+/**
+ * Typed value reference resolved at runtime.
+ *
+ * `T` is the *expected* runtime result type (authoring-time intent). Some refs
+ * (e.g. ctxPath/expression) are inherently polymorphic; callers should pick an
+ * appropriate `T` when using them in typed positions.
+ */
+export type ValueRef<T = unknown> =
+  | CtxPathRef<T>
+  | ContextPathRef<T>
+  | GamePathRef<T>
+  | ExpressionRef<T>
+  | RelativeCoordinatesRef<T>
+  | CoordinatesRef<T>
+  | RelativePathRef<T>
+  | ParentRef<T>
+  | MapRef<T>
+  | MapMaxRef<T>
+  | PickRef<T>
+  | CountRef<T>;
 
-export interface CtxPathRef {
+/**
+ * Phantom-typed base for BAGEL refs. The `__valueType` field is optional and
+ * exists only to carry the generic type parameter through TypeScript.
+ */
+export interface TypedValueRef<T> {
+  __valueType?: T;
+}
+
+export interface CtxPathRef<T = unknown> extends TypedValueRef<T> {
   type: "ctxPath";
   path: (string | number)[];
 }
 
-export interface ContextPathRef {
+export interface ContextPathRef<T = unknown> extends TypedValueRef<T> {
   type: "contextPath";
   path: PathSegment[];
 }
 
-export interface GamePathRef {
+export interface GamePathRef<T = unknown> extends TypedValueRef<T> {
   type: "gamePath";
   path: (string | number)[];
 }
 
-export interface ExpressionRef {
+export interface ExpressionRef<T = unknown> extends TypedValueRef<T> {
   type: "expression";
   expression: string;
-  arguments: Record<string, ValueRef>;
+  /**
+   * Expression argument values may be other refs (resolved at runtime) or raw JSON
+   * literals (numbers, strings, arrays, objects) embedded directly in game rules.
+   */
+  arguments: Record<string, ValueRef<unknown> | JsonValue>;
 }
 
-export interface RelativeCoordinatesRef {
+export interface RelativeCoordinatesRef<T = unknown> extends TypedValueRef<T> {
   type: "relativeCoordinates";
-  target?: ValueRef;
-  location: [number, number] | ValueRef;
+  target?: ValueRef<unknown>;
+  location: [number, number] | ValueRef<unknown>;
 }
 
-export interface CoordinatesRef {
-  type: "coordinates";
-  target?: ValueRef;
+export interface CoordinatesRef<T = unknown> extends TypedValueRef<T> {
+  type: "coordinates" | "Coordinates";
+  target?: ValueRef<unknown>;
 }
 
-export interface RelativePathRef {
-  type: "relativePath";
-  target: ValueRef | TargetSelector;
+export interface RelativePathRef<T = unknown> extends TypedValueRef<T> {
+  type: "relativePath" | "RelativePath";
+  target: ValueRef<unknown> | TargetSelector;
   path: (string | number)[];
 }
 
-export interface ParentRef {
-  type: "parent";
-  target?: ValueRef;
+export interface ParentRef<T = unknown> extends TypedValueRef<T> {
+  type: "parent" | "Parent";
+  target?: ValueRef<unknown>;
 }
 
-export interface MapRef {
+export interface MapRef<T = unknown> extends TypedValueRef<T> {
   type: "map";
-  targets: ValueRef | TargetSelector;
-  mapping: ValueRef | CountRef;
+  targets: ValueRef<unknown> | TargetSelector;
+  mapping: ValueRef<unknown> | CountRef<unknown>;
 }
 
-export interface MapMaxRef {
+export interface MapMaxRef<T = unknown> extends TypedValueRef<T> {
   type: "mapMax";
-  targets: ValueRef;
-  mapping: ValueRef | CountRef;
+  targets: ValueRef<unknown>;
+  mapping: ValueRef<unknown> | CountRef<unknown>;
 }
 
-export interface PickRef {
-  type: "pick";
-  target: ValueRef | TargetSelector;
+export interface PickRef<T = unknown> extends TypedValueRef<T> {
+  type: "pick" | "Pick";
+  target: ValueRef<unknown> | TargetSelector;
   properties: string[];
 }
 
-export interface CountRef {
+export interface CountRef<T = unknown> extends TypedValueRef<T> {
   type: "count";
-  conditions: Condition[];
+  conditions: ExpandedCondition[];
 }
 
 // ---------------------------------------------------------------------------
@@ -122,27 +145,50 @@ export type ConditionTyped =
   | ConditionSome
   | ConditionEvery
   | ConditionInLine
-  | ConditionEvaluate;
+  | ConditionEvaluate
+  | ConditionWould;
+
+/** Hypothetical move outcome: nested conditions evaluated against simulated state after the move. */
+export interface ConditionWould {
+  conditionType: "Would";
+  conditions?: Condition[];
+}
+
+/** Top-level conditions allowed for the readonly overload of `checkConditions`. */
+export type ConditionWithoutWould = Exclude<Condition, ConditionWould>;
 
 export interface TargetSelector {
   matchMultiple?: boolean;
-  conditions: Condition[];
+  conditions: Condition | Condition[];
 }
+
+/**
+ * Authoring-time reference for entity-scoped condition `target` fields (`Is`, `Contains`, `Not`):
+ * entity `name` (string), a {@link ValueRef}, or a {@link TargetSelector}.
+ */
+export type EntityLineTargetRef = string | ValueRef<unknown> | TargetSelector;
+
+/**
+ * Authoring-time reference to a grid entity: entity `name` (string), a {@link ValueRef}, or a {@link TargetSelector}.
+ */
+export type GridValueRef = string | ValueRef<unknown> | TargetSelector;
 
 export interface LineSequenceStep {
   minCount?: number;
   conditions: Condition[];
 }
 
+/** Authoring shape; after `expandGameRules` see `ConditionHasLine` (post-expand). */
 export interface ConditionHasLine {
   conditionType: "HasLine";
-  target: string;
+  target: GridValueRef;
   sequence: LineSequenceStep[];
 }
 
+/** Authoring shape; after `expandGameRules` see `ConditionIsFull` (post-expand). */
 export interface ConditionIsFull {
   conditionType: "IsFull";
-  target: string;
+  target: GridValueRef;
 }
 
 export interface ConditionNoPossibleMoves {
@@ -161,20 +207,21 @@ export interface ConditionContainsSame {
 
 export interface ConditionIs {
   conditionType: "Is";
-  target?: ValueRef | TargetSelector | string;
-  matcher?: Record<string, unknown>;
-  entity?: ValueRef;
+  target?: EntityLineTargetRef;
+  /** Compared against merged rule+state attributes; see {@link EntityMatcher}. */
+  matcher?: EntityMatcher;
+  entity?: ValueRef<unknown>;
 }
 
 export interface ConditionContains {
   conditionType: "Contains";
-  target?: ValueRef | TargetSelector | string;
+  target?: EntityLineTargetRef;
   conditions?: Condition[];
 }
 
 export interface ConditionNot {
   conditionType: "Not";
-  target?: ValueRef | TargetSelector | string;
+  target?: EntityLineTargetRef;
   conditions: Condition[];
 }
 
@@ -197,14 +244,14 @@ export interface ConditionEvery {
 
 export interface ConditionInLine {
   conditionType: "InLine";
-  target?: ValueRef;
+  target?: ValueRef<unknown>;
   sequence: LineSequenceStep[];
 }
 
 export interface ConditionEvaluate {
   conditionType: "Evaluate";
   expression: string;
-  arguments: Record<string, ValueRef>;
+  arguments: Record<string, ValueRef<unknown>>;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,26 +271,41 @@ export type EntityAttributeKey =
 
 /** Matcher compared against EntityAttributes at runtime. Keys are attribute keys; values may be refs. */
 export type EntityMatcher<A extends object = Record<EntityAttributeKey, unknown>> = Partial<
-  { [K in keyof A]: A[K] | ValueRef }
+  { [K in keyof A]: A[K] | ValueRef<unknown> }
 > & { name?: string };
 
-export interface EntityBoard extends EntityCommon {
+/** Default state bag on an entity rule; merged into runtime entity state. */
+export type EntityState = Record<string, unknown>;
+
+/**
+ * Base shape for all entity rules. `variants` is a list of patches merged onto the base rule.
+ *
+ * The `player` field is used by per-player expansions and matching.
+ */
+export interface EntityBase<TSelf extends object> {
+  name: string;
+  perPlayer?: boolean;
+  count?: number | "Infinity";
+  /** Per-player discriminator used by matchers and per-player entity expansion. */
+  player?: string;
+  state?: EntityState;
+  contentsHiddenFrom?: "All" | "Others";
+  /** Expanded into separate entity definitions at setup (see game-factory). */
+  variants?: Array<Partial<Omit<TSelf, "variants">>>;
+  /** Allow game-specific attributes on entity rules (e.g. cards with `value`/`suit`). */
+  [k: string]: unknown;
+}
+
+/** Variant patch for a specific entity rule type. */
+export type EntityVariantPatch<T extends object> = Partial<Omit<T, "variants">>;
+
+export interface EntityBoard extends EntityBase<EntityBoard> {
   entityType: "Board";
 }
 
 export type Entity = EntityGrid | EntitySpace | EntityGeneric | EntityBoard;
 
-export interface EntityCommon {
-  name: string;
-  perPlayer?: boolean;
-  count?: number | "Infinity";
-  state?: Record<string, unknown>;
-  contentsHiddenFrom?: "All" | "Others";
-  /** Expanded into separate entity definitions at setup (see game-factory). */
-  variants?: Array<Record<string, unknown>>;
-}
-
-export interface EntityGrid extends EntityCommon {
+export interface EntityGrid extends EntityBase<EntityGrid> {
   entityType: "Grid";
   width: number;
   height: number;
@@ -251,13 +313,13 @@ export interface EntityGrid extends EntityCommon {
   displayProperties?: (keyof EntityAttributes<EntityGrid>)[];
 }
 
-export interface EntitySpace extends EntityCommon {
+export interface EntitySpace extends EntityBase<EntitySpace> {
   entityType: "Space";
   /** Property names to show in UI; values read from EntityAttributes<EntitySpace>. */
   displayProperties?: (keyof EntityAttributes<EntitySpace>)[];
 }
 
-export interface EntityGeneric extends EntityCommon {
+export interface EntityGeneric extends EntityBase<EntityGeneric> {
   entityType?: undefined;
   /** Property names to show in UI; values read from EntityAttributes<EntityGeneric> (rule merged with state). */
   displayProperties?: (keyof EntityAttributes<EntityGeneric>)[];
@@ -268,6 +330,27 @@ export type EntityRule = EntityGrid | EntitySpace | EntityGeneric | EntityBoard;
 // ---------------------------------------------------------------------------
 // Moves
 // ---------------------------------------------------------------------------
+
+/**
+ * One keyed slot under `move.arguments` (or the like): match entities via `conditions`,
+ * or expose a player choice with `playerChoice` / `possibleValues` (see {@link getSteps}).
+ * Extra keys are allowed for engine / authoring extensions.
+ */
+export type MoveArgumentBinding<TResolved = unknown> = {
+  conditions?: Condition | Condition[];
+  playerChoice?: boolean;
+  possibleValues?: TResolved[];
+  resolveAsEntity?: boolean;
+} & Record<string, unknown>;
+
+/** boardgame.io-style fragment passed to `events.setActivePlayers` from bagel rules. */
+export type SetActivePlayersOptions = Record<string, {
+  stage?: string;
+  minMoves?: number;
+  maxMoves?: number;
+  /** @deprecated Prefer minMoves/maxMoves */
+  moveLimit?: number;
+} & Record<string, unknown>>;
 
 export type MoveDefinition =
   | MovePlaceNew
@@ -282,22 +365,19 @@ export type MoveDefinition =
   | MoveShuffle
   | MovePass;
 
-export type MoveRule = MoveDefinition;
-
 export interface MoveCommon {
   /** Set when a move is registered under a key (e.g. from `createMoves`). */
   name?: string;
-  conditions?: Condition[];
+  conditions?: Condition | Condition[];
   then?: MoveDefinition[];
 }
 
 export interface MovePlaceNew extends MoveCommon {
   moveType: "PlaceNew";
   matchMultiple?: boolean;
-  entity: { conditions?: Condition[]; [k: string]: unknown };
+  entity: MoveArgumentBinding<EngineEntity>;
   arguments: {
-    destination: Record<string, unknown>;
-    [k: string]: unknown;
+    destination: MoveArgumentBinding<EngineEntity>;
   };
 }
 
@@ -305,23 +385,23 @@ export interface MoveMoveEntity extends MoveCommon {
   moveType: "MoveEntity";
   position?: "First";
   arguments: {
-    entity: Record<string, unknown>;
-    destination: Record<string, unknown>;
-    [k: string]: unknown;
+    entity: MoveArgumentBinding<EngineEntity>;
+    destination: MoveArgumentBinding<EngineEntity>;
   };
 }
 
 export interface MoveRemoveEntity extends MoveCommon {
   moveType: "RemoveEntity";
-  arguments: { entity: ValueRef | Record<string, unknown>; [k: string]: unknown };
+  arguments: {
+    entity: ValueRef<EngineEntity> | MoveArgumentBinding<EngineEntity>;
+  };
 }
 
 export interface MoveTakeFrom extends MoveCommon {
   moveType: "TakeFrom";
   arguments: {
-    source: Record<string, unknown>;
-    destination: Record<string, unknown>;
-    [k: string]: unknown;
+    source: MoveArgumentBinding<EngineEntity>;
+    destination: MoveArgumentBinding<EngineEntity>;
   };
 }
 
@@ -335,15 +415,14 @@ export interface StateUpdate {
 export interface MoveSetState extends MoveCommon {
   moveType: "SetState";
   arguments: {
-    entity: ValueRef | Record<string, unknown>;
+    entity: ValueRef<EngineEntity> | MoveArgumentBinding<EngineEntity>;
     state: StateUpdate;
-    [k: string]: unknown;
   };
 }
 
 export interface MoveSetActivePlayers extends MoveCommon {
   moveType: "SetActivePlayers";
-  options: Record<string, { stage?: string; [k: string]: unknown }>;
+  options: SetActivePlayersOptions;
 }
 
 export interface MoveEndTurn extends MoveCommon {
@@ -360,13 +439,17 @@ export interface MovePass extends MoveCommon {
 
 export interface MoveForEach extends MoveCommon {
   moveType: "ForEach";
-  arguments: { targets: ValueRef | Record<string, unknown>; [k: string]: unknown };
+  arguments: {
+    targets: ValueRef<EngineEntity[]> | MoveArgumentBinding<EngineEntity[]> | ReadonlyArray<string | number>;
+  };
   move: MoveDefinition;
 }
 
 export interface MoveShuffle extends MoveCommon {
   moveType: "Shuffle";
-  arguments: { target: Record<string, unknown>; [k: string]: unknown };
+  arguments: {
+    target: MoveArgumentBinding<EngineEntity>;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -399,8 +482,8 @@ export interface PhaseConfig {
 export interface EndRule {
   conditions: Condition[];
   result?: {
-    winner?: string | ValueRef;
-    winners?: ValueRef;
+    winner?: string | ValueRef<unknown>;
+    winners?: ValueRef<unknown>;
     draw?: boolean;
     [k: string]: unknown;
   };
@@ -411,7 +494,8 @@ export interface EndRule {
 // ---------------------------------------------------------------------------
 
 export interface InitialPlacement {
-  entity: Record<string, unknown>;
+  /** Matcher to locate the entity definition, plus optional `state` applied when placing. */
+  entity: EntityMatcher<EntityAttributes<Entity>> & { state?: EntityState };
   destination: { index?: number; name?: string };
 }
 
@@ -419,6 +503,10 @@ export interface InitialPlacement {
 // Game config (top level)
 // ---------------------------------------------------------------------------
 
+/**
+ * Authoring-time game JSON (before `expandGameRules`).
+ * For an explicit alias at API boundaries, see `AuthoredGameRules` in `expanded-game-types.ts`.
+ */
 export interface BagelGame {
   entities: Entity[];
   sharedBoard?: EntityMatcher<EntityAttributes<Entity>>[];
@@ -436,11 +524,3 @@ export interface BagelGame {
   DEBUG_DISABLE_SECRET_STATE?: boolean;
 }
 
-/**
- * Rules after {@link expandGameRules}: invariant entities merged, default turn/sharedBoard,
- * initial placements expanded into moves; `initialPlacements` is removed.
- */
-export type ExpandedGameRules = Omit<BagelGame, "entities" | "turn" | "initialPlacements"> & {
-  entities: Entity[];
-  turn: TurnConfig;
-};

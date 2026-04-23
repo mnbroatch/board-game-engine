@@ -1,27 +1,50 @@
-import type { RuleWithConditions } from "../types/rule-with-conditions.js";
+import type { Ctx, DefaultPluginAPIs, PlayerID } from "@mnbroatch/boardgame.io";
+import type Bank from "../game-factory/bank/bank.js";
+import type { MovePayload } from "../types/move-payload.js";
+import type { MoveArgumentsMap } from "../types/move-arguments.js";
+import type { EngineEntity } from "../types/runtime-entity.js";
 
-/** boardgame.io match args + engine `G` after setup (deserialized, many fields). */
-export type BgioResolveState = {
-  ctx: Record<string, unknown>;
-  G: Record<string, unknown>;
-  playerID?: string;
-} & Record<string, unknown>;
+/** Engine-owned `_meta` bag on `G` (survives logical serialize/deserialize boundaries). */
+export interface BoardgameEngineMeta {
+  passedPlayers: string[];
+  previousPayloads: { [moveName: string]: MovePayload<MoveArgumentsMap> | undefined };
+  currentPhaseHasBeenSetUp?: boolean;
+  nextPhase?: string;
+  isAfterFirstPhase?: boolean;
+}
 
-/** Bank API on `G` used by resolution and moves (subset of {@link Bank} methods). */
-export type BankApi = {
-  find: (a: unknown, t: unknown, c: unknown) => unknown;
-  findAll: (a: unknown, t: unknown, c: unknown) => unknown[];
-  findParent: (t: unknown) => unknown;
-  getOne: (a: BgioResolveState, rule: RuleWithConditions & { state?: unknown }, c: Record<string, unknown>) => unknown;
-  getMultiple: (
-    a: BgioResolveState,
-    rule: RuleWithConditions & { state?: unknown },
-    count: number,
-    c: Record<string, unknown>
-  ) => unknown[];
-  returnToBank: (a: BgioResolveState, entity: { entityId: number; rule: Record<string, unknown> }) => void;
+/**
+ * boardgame.io `G` for engine-built games: `bank`, `_meta`, and optional board roots only.
+ * Custom values live on entities (via `bank`) or in `_meta`, not as extra top-level keys on `G`.
+ */
+export interface BoardgameEngineG {
+  bank: Bank;
+  _meta: BoardgameEngineMeta;
+  sharedBoard?: EngineEntity;
+  personalBoards?: (EngineEntity | undefined)[];
+}
+
+/**
+ * Minimal hook-shaped state for readonly checks and resolution (G + ctx + playerID).
+ * Every {@link BgioResolveState} is assignable here; callers may use this to avoid implying full plugin APIs.
+ */
+export type BgioReadonlyState = {
+  G: BoardgameEngineG;
+  ctx: Ctx;
+  playerID?: PlayerID | null;
 };
 
-export function bankOf (bg: BgioResolveState): BankApi {
-  return (bg.G as { bank: BankApi }).bank;
+/** boardgame.io hook / move context (no extra PluginAPIs index signature). */
+export type BgioFnContext<G extends BoardgameEngineG = BoardgameEngineG> = DefaultPluginAPIs & {
+  G: G;
+  ctx: Ctx;
+};
+
+/** boardgame.io match args + engine `G` after setup (deserialized, many fields). */
+export type BgioResolveState = BgioFnContext<BoardgameEngineG> & {
+  playerID?: PlayerID | null;
+};
+
+export function bankOf (bg: BgioReadonlyState): Bank {
+  return bg.G.bank;
 }

@@ -1,6 +1,9 @@
 import Condition from "./condition.js";
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ConditionContext, ConditionPayload } from "../../types/condition-types.js";
+import type { ResolvedConditionRule } from "../../types/resolved-condition-types.js";
 export default class HasLineCondition extends Condition {
-    checkCondition(bgioArguments: unknown, rule: unknown, payload: Record<string, unknown>, context: Record<string, unknown>): {
+    checkCondition(bgioArguments: BgioReadonlyState | BgioResolveState, rule: ResolvedConditionRule, _payload: ConditionPayload, context: ConditionContext): {
         matches: unknown[];
         conditionIsMet: boolean;
     };

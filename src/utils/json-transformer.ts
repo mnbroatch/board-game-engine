@@ -4,7 +4,7 @@ type TransformRule = {
 };
 
 /** Recurse and replace. Circular references not allowed. */
-export default function transformJSON (data: unknown, rules: TransformRule[]): unknown {
+export default function transformJSON<T> (data: T, rules: TransformRule[]): T {
   return JSON.parse(JSON.stringify(data), (_key, value: unknown) => {
     let result = value;
     for (const rule of rules) {
@@ -13,5 +13,5 @@ export default function transformJSON (data: unknown, rules: TransformRule[]): u
       }
     }
     return result;
-  });
+  }) as T;
 }

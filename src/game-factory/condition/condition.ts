@@ -1,50 +1,40 @@
-import resolveProperties from "../../utils/resolve-properties.js";
-import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ConditionCheckResult, ConditionContext, ConditionPayload } from "../../types/condition-types.js";
+import { resolveCondition } from "../../utils/resolve-condition.js";
+import type { ResolvedConditionRule } from "../../types/resolved-condition-types.js";
+import type { Condition as ConditionRule } from "../../types/expanded-game-types.js";
 
 export default abstract class Condition {
-  rule: unknown;
+  rule: ConditionRule;
 
-  constructor (rule: unknown) {
+  constructor (rule: ConditionRule) {
     this.rule = rule;
   }
 
-  check (bgioArguments: unknown, payload: Record<string, unknown>, context: Record<string, unknown>) {
-    const conditionPayload = { ...payload };
-    const newContext = { ...context };
+  check (bgioArguments: BgioReadonlyState | BgioResolveState, payload: ConditionPayload, context: ConditionContext) {
+    const conditionPayload: ConditionPayload = { ...payload };
+    const newContext: ConditionContext = { ...context };
 
     if (conditionPayload.target) {
       newContext.originalTarget = conditionPayload.target;
     }
 
-    const rule = resolveProperties(
-      bgioArguments as BgioResolveState,
-      this.rule,
-      newContext
-    );
-
-    if ((rule as { target?: unknown }).target !== undefined) {
-      conditionPayload.target = (rule as { target: unknown }).target;
-    }
-
-    if ((this.rule as { target?: unknown }).target !== undefined && !conditionPayload.target) {
-      return { conditionIsMet: false };
-    }
-
+    const rule = resolveCondition(bgioArguments, this.rule, newContext, conditionPayload);
     return this.checkCondition(bgioArguments, rule, conditionPayload, newContext);
   }
 
   abstract checkCondition (
-    bgioArguments: unknown,
-    rule: unknown,
-    conditionPayload: Record<string, unknown>,
-    newContext: Record<string, unknown>
-  ): { conditionIsMet: boolean; [k: string]: unknown };
+    bgioArguments: BgioReadonlyState | BgioResolveState,
+    rule: ResolvedConditionRule,
+    conditionPayload: ConditionPayload,
+    newContext: ConditionContext
+  ): ConditionCheckResult;
 
-  isMet (...args: unknown[]) {
-    return (this.check as (a: unknown, b: Record<string, unknown>, c: Record<string, unknown>) => { conditionIsMet: boolean })(
-      args[0],
-      (args[1] as Record<string, unknown>) ?? {},
-      (args[2] as Record<string, unknown>) ?? {}
-    ).conditionIsMet;
+  isMet (
+    bgioArguments: BgioReadonlyState | BgioResolveState,
+    payload: ConditionPayload = {},
+    context: ConditionContext = {}
+  ) {
+    return this.check(bgioArguments, payload, context).conditionIsMet;
   }
 }

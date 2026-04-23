@@ -1,12 +1,20 @@
+import type { MoveDefinition, MoveTakeFrom } from "../../types/expanded-game-types.js";
+import type { TakeFromDoPayload } from "../../types/move-payload.js";
+import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ResolutionContext } from "../../types/resolution-context.js";
 import Move from "./move.js";
 
-export default class TakeFrom extends Move {
-  do (_bgioArguments: unknown, rule: { arguments: { source: { position?: unknown } } }, resolvedPayload: unknown) {
-    const { source, destination } = (resolvedPayload as { arguments: { source: unknown; destination: unknown } }).arguments;
-    (destination as { placeEntity: (e: unknown) => void }).placeEntity(
-      (source as { takeOne: (p: unknown) => unknown }).takeOne(
-        (rule as { arguments: { source: { position?: unknown } } }).arguments.source.position
-      )
+export default class TakeFrom extends Move<NonNullable<TakeFromDoPayload["arguments"]>> {
+  do (
+    _bgioArguments: BgioResolveState,
+    rule: MoveDefinition,
+    resolvedPayload: TakeFromDoPayload,
+    _context: ResolutionContext
+  ) {
+    const r = rule as MoveTakeFrom;
+    const { source, destination } = resolvedPayload.arguments;
+    destination.placeEntity(
+      source.takeOne(r.arguments.source.position)
     );
   }
 }

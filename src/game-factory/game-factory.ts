@@ -1,44 +1,76 @@
-import type { Game } from "@mnbroatch/boardgame.io";
-import { serialize } from "wackson";
-import type { BagelGame, MoveDefinition, TurnConfig } from "../types/bagel-types.js";
-import moveFactory from "./move/move-factory.js";
+import type { Game, MoveMap, PhaseMap } from "@mnbroatch/boardgame.io";
+import type { Entity } from "../types/bagel-types.js";
+import type {
+  AuthoredGameRules,
+  GameRules,
+  MoveDefinition,
+  PhaseConfig,
+  StageConfig,
+  TurnConfig,
+} from "../types/expanded-game-types.js";
+import type { EntityDefinition } from "../types/entity-definition.js";
+import moveFactory, { type BoardgameEngineMove } from "./move/move-factory.js";
 import Bank from "./bank/bank.js";
 import expandGameRules from "./expand-game-rules.js";
 import getScenarioResults from "../utils/get-scenario-results.js";
 import doMoves from "../utils/do-moves.js";
 import deserializeBgioArguments from "../utils/deserialize-bgio-arguments.js";
-import type { BgioResolveState } from "../utils/bgio-resolve-types.js";
+import { cloneBoardgameEngineGJsonRoundtrip } from "../utils/engine-serde-boundary.js";
+import type { BoardgameEngineG, BgioResolveState } from "../utils/bgio-resolve-types.js";
 
-/** boardgame.io-style arguments (minimal typing; engine passes full objects). */
-export type BgioArguments = BgioResolveState;
+export type { BoardgameEngineG, BoardgameEngineMeta } from "../utils/bgio-resolve-types.js";
 
 /** boardgame.io `Game` definition produced by {@link gameFactory}. */
-export type BoardgameIoGame = Game;
+export type BoardgameIoGame = Game<BoardgameEngineG>;
 
-/** Internal shape while building; asserted to {@link BoardgameIoGame} at return. */
-type GameBuild = Record<string, unknown> & { name: string };
+type GameSetup = NonNullable<BoardgameIoGame["setup"]>;
+type GameEndIf = NonNullable<BoardgameIoGame["endIf"]>;
+type GamePlayerView = NonNullable<BoardgameIoGame["playerView"]>;
+type TurnConfigBgio = NonNullable<BoardgameIoGame["turn"]>;
+type TurnOnBegin = NonNullable<TurnConfigBgio["onBegin"]>;
+type TurnOrderConfigBgio = NonNullable<TurnConfigBgio["order"]>;
+type PhaseConfigBgio = NonNullable<NonNullable<BoardgameIoGame["phases"]>[string]>;
+type PhaseOnBegin = NonNullable<PhaseConfigBgio["onBegin"]>;
+type PhaseOnEnd = NonNullable<PhaseConfigBgio["onEnd"]>;
+type PhaseEndIf = NonNullable<PhaseConfigBgio["endIf"]>;
+type GameMoveMap = MoveMap<BoardgameEngineG>;
+type GamePhaseMap = PhaseMap<BoardgameEngineG>;
+type EntityVariant = Partial<EntityDefinition>;
+type ExpandableEntity = Entity & {
+  perPlayer?: boolean;
+  variants?: EntityVariant[];
+};
+
+function setupResolveState (
+  setupContext: Parameters<GameSetup>[0],
+  G: BoardgameEngineG
+): BgioResolveState {
+  return { ...setupContext, G };
+}
 
 export default function gameFactory (
-  gameRules: BagelGame,
+  gameRules: AuthoredGameRules,
   gameName: string
 ): BoardgameIoGame {
-  const game: GameBuild = { name: gameName };
-  const rules = expandGameRules(gameRules);
+  const game: BoardgameIoGame = { name: gameName };
+  const rules: GameRules = expandGameRules(gameRules);
 
-  game.setup = (bgioArguments: BgioArguments) => {
-    const { ctx } = bgioArguments;
-    const initialState: Record<string, unknown> = {
+  game.setup = ((setupContext, _setupData) => {
+    const { ctx } = setupContext;
+    const entityDefinitions = expandEntityDefinitions(rules.entities, ctx);
+    const bank = new Bank(entityDefinitions);
+    const initialState: BoardgameEngineG = {
       _meta: {
         passedPlayers: [],
         previousPayloads: {},
       },
+      bank,
     };
 
-    const entityDefinitions = expandEntityDefinitions(rules.entities, ctx as { numPlayers: number }) as Record<string, unknown>[];
-    const bank = new Bank(entityDefinitions);
-    initialState.bank = bank;
+    const resolveDuringSetup = () => setupResolveState(setupContext, initialState);
+
     initialState.sharedBoard = bank.getOne(
-      bgioArguments,
+      resolveDuringSetup(),
       {
         conditions: [{
           conditionType: "Is",
@@ -49,9 +81,9 @@ export default function gameFactory (
     );
 
     if (rules.personalBoard) {
-      initialState.personalBoards = (bgioArguments.ctx as { playOrder: string[] }).playOrder.map((playerID: string) =>
+      initialState.personalBoards = ctx.playOrder.map((playerID) =>
         bank.getOne(
-          bgioArguments,
+          resolveDuringSetup(),
           {
             conditions: [{
               conditionType: "Is",
@@ -67,14 +99,14 @@ export default function gameFactory (
     }
 
     rules.initialMoves?.forEach((moveRule) => {
-      moveFactory(moveRule, game).moveInstance!.doMove(
-        { ...bgioArguments, G: initialState },
+      moveFactory(moveRule, game).moveInstance.doMove(
+        resolveDuringSetup(),
         undefined,
         {}
       );
     });
-    return JSON.parse(serialize(initialState));
-  };
+    return cloneBoardgameEngineGJsonRoundtrip(initialState);
+  }) satisfies GameSetup;
 
   if (rules.moves) {
     game.moves = createMoves(rules.moves, game);
@@ -85,28 +117,24 @@ export default function gameFactory (
   }
 
   if (rules.phases) {
-    game.phases = Object.entries(rules.phases).reduce<Record<string, unknown>>((acc, [name, phaseRule]) => ({
+    game.phases = Object.entries(rules.phases).reduce<GamePhaseMap>((acc, [name, phaseRule]) => ({
       ...acc,
-      [name]: createPhase(phaseRule as Record<string, unknown>, game),
+      [name]: createPhase(phaseRule, game),
     }), {});
   }
 
   if (rules.endIf) {
     const endIfRules = rules.endIf;
-    game.endIf = (bgioArguments: BgioArguments) => {
-      const newBgioArguments = deserializeBgioArguments(bgioArguments);
+    game.endIf = ((context) => {
+      const newBgioArguments: BgioResolveState = deserializeBgioArguments(context);
       return getScenarioResults(newBgioArguments, endIfRules);
-    };
+    }) satisfies GameEndIf;
   }
 
   if (!gameRules.DEBUG_DISABLE_SECRET_STATE) {
-    game.playerView = (bgioArguments: BgioArguments) => {
-      const { G, playerID } = deserializeBgioArguments(bgioArguments);
-      const tracker = (G as { bank: { tracker: Record<string, {
-        rule: { contentsHiddenFrom?: string; player?: string; hideLength?: boolean };
-        spaces?: unknown[];
-        entities?: unknown[];
-      }> } }).bank.tracker;
+    game.playerView = ((context) => {
+      const { G, playerID } = deserializeBgioArguments(context);
+      const tracker = G.bank.tracker;
       Object.values(tracker).forEach((entity) => {
         if (
           entity.rule.contentsHiddenFrom === "All" ||
@@ -114,104 +142,97 @@ export default function gameFactory (
             entity.rule.contentsHiddenFrom === "Others" &&
             (
               playerID !== entity.rule.player ||
-              playerID === undefined
+              playerID === null
             )
           )
         ) {
-          if (entity.spaces) {
+          if ("spaces" in entity && entity.spaces) {
             entity.spaces = entity.rule.hideLength
               ? []
-              : entity.spaces.map(() => (G as { bank: { createEntity: () => unknown } }).bank.createEntity());
+              : entity.spaces.map(() => G.bank.createEntity());
           }
-          if (entity.entities) {
+          if ("entities" in entity && entity.entities) {
             entity.entities = entity.rule.hideLength
               ? []
-              : entity.entities.map(() => (G as { bank: { createEntity: () => unknown } }).bank.createEntity());
+              : entity.entities.map(() => G.bank.createEntity());
           }
         }
       });
-      return JSON.parse(serialize(G));
-    };
+      return cloneBoardgameEngineGJsonRoundtrip(G);
+    }) satisfies GamePlayerView;
   }
 
-  return game as BoardgameIoGame;
+  return game;
 }
 
-function expandEntityDefinitions (entities: unknown[], ctx: { numPlayers: number }) {
-  return entities.reduce<unknown[]>((acc, entity) => {
-    const entityCopy = { ...(entity as Record<string, unknown>) };
+function expandEntityDefinitions (entities: Entity[], ctx: { numPlayers: number }): EntityDefinition[] {
+  return entities.reduce<EntityDefinition[]>((acc, entity) => {
+    const source = entity as ExpandableEntity;
+    const { perPlayer, variants } = source;
+    const base = { ...source };
+    delete base.perPlayer;
+    delete base.variants;
+    const expandedBase = base as EntityDefinition;
 
-    if (entityCopy.perPlayer) {
-      delete entityCopy.perPlayer;
-      if (entityCopy.variants) {
-        entityCopy.variants =
-          (new Array(ctx.numPlayers)).fill(undefined).reduce<unknown[]>((accu, _, i) => [
-            ...accu,
-            ...(entityCopy.variants as unknown[]).map((variant: unknown) => ({ ...(variant as object), player: `${i}` })),
-          ], []);
-      } else {
-        entityCopy.variants =
-          (new Array(ctx.numPlayers)).fill(undefined).map((_, i) => ({ player: `${i}` }));
-      }
-    }
+    const expandedVariants: EntityVariant[] | undefined = perPlayer
+      ? (variants
+          ? Array.from({ length: ctx.numPlayers }).flatMap((_, i) =>
+              variants.map((variant) => ({ ...variant, player: `${i}` }))
+            )
+          : Array.from({ length: ctx.numPlayers }, (_, i) => ({ player: `${i}` })))
+      : variants;
 
-    if (entityCopy.variants) {
-      const variants = entityCopy.variants as unknown[];
-      delete entityCopy.variants;
-
+    if (expandedVariants && expandedVariants.length) {
       return [
         ...acc,
-        ...variants.map((variant) => ({
-          ...entityCopy,
-          ...(variant as object),
-        })),
-      ];
-    } else {
-      return [
-        ...acc,
-        entityCopy,
+        ...expandedVariants.map((variant) => ({
+          ...expandedBase,
+          ...variant,
+        }) as EntityDefinition),
       ];
     }
+
+    return [...acc, expandedBase];
   }, []);
 }
 
-function createTurn (turnRule: TurnConfig | Record<string, unknown>, game: GameBuild) {
-  const turn = { ...turnRule } as Record<string, unknown>;
+function createTurn (turnRule: TurnConfig, game: BoardgameIoGame): TurnConfigBgio {
+  const turn = { ...turnRule } as TurnConfigBgio;
 
-  turn.onBegin = (bgioArguments: BgioArguments) => {
-    const newBgioArguments = deserializeBgioArguments(bgioArguments);
-    const stageRule = (turnRule.stages as Record<string, { initialMoves?: MoveDefinition[] }> | undefined)?.[
-      (newBgioArguments.ctx as { activePlayers?: Record<string, string>; currentPlayer: string }).activePlayers?.[
-        (newBgioArguments.ctx as { currentPlayer: string }).currentPlayer
-      ] as string
-    ];
+  turn.onBegin = ((context) => {
+    const newBgioArguments: BgioResolveState = deserializeBgioArguments(context);
+    const stageName = newBgioArguments.ctx.activePlayers?.[newBgioArguments.ctx.currentPlayer];
+    const stageRule = stageName != null
+      ? turnRule.stages?.[stageName]
+      : undefined;
 
-    (newBgioArguments.G as { _meta: { passedPlayers: string[] } })._meta.passedPlayers = (newBgioArguments.G as { _meta: { passedPlayers: string[] } })._meta.passedPlayers
-      .filter((p) => p !== (newBgioArguments.ctx as { currentPlayer: string }).currentPlayer);
+    newBgioArguments.G._meta.passedPlayers = newBgioArguments.G._meta.passedPlayers
+      .filter((p) => p !== newBgioArguments.ctx.currentPlayer);
 
-    doMoves(newBgioArguments, turnRule.initialMoves as MoveDefinition[] | undefined, { game });
+    doMoves(newBgioArguments, turnRule.initialMoves, { game });
     doMoves(newBgioArguments, stageRule?.initialMoves, { game });
 
-    return JSON.parse(serialize(newBgioArguments.G));
-  };
+    return cloneBoardgameEngineGJsonRoundtrip(newBgioArguments.G);
+  }) satisfies TurnOnBegin;
 
   if (turnRule.stages) {
-    Object.entries(turnRule.stages as Record<string, { moves?: Record<string, MoveDefinition> }>).forEach(([stageName, stageRule]) => {
+    Object.entries<StageConfig>(turnRule.stages).forEach(([stageName, stageRule]) => {
       if (stageRule.moves) {
-        ((turn.stages as Record<string, { moves?: Record<string, unknown> }>)[stageName]).moves = createMoves(stageRule.moves, game);
+        (turn.stages![stageName] as { moves?: GameMoveMap }).moves = createMoves(stageRule.moves, game);
       }
     });
   }
 
   const order = turnRule.order as {
-    playOrder?: string | ((args: { ctx: { playOrder: string[] }; G: { _meta: { isAfterFirstPhase?: boolean } } }) => string[]);
+    playOrder?: string | ((args: { ctx: { playOrder: string[] }; G: BoardgameEngineG }) => string[]);
     first?: () => number;
     next?: (args: { ctx: { playOrderPos: number; numPlayers: number } }) => number;
   } | undefined;
   if (order?.playOrder === "RotateFirst") {
     order.first = () => 0;
-    order.next = ({ ctx }) => (ctx.playOrderPos + 1) % ctx.numPlayers;
-    (turn.order as typeof order).playOrder = ({ ctx, G }) => {
+    order.next = (fnCtx) => (fnCtx.ctx.playOrderPos + 1) % fnCtx.ctx.numPlayers;
+    (turn.order as TurnOrderConfigBgio).playOrder = (fnCtx) => {
+      const { ctx, G } = fnCtx;
       return G._meta.isAfterFirstPhase
         ? [...ctx.playOrder.slice(1), ctx.playOrder[0]]
         : ctx.playOrder;
@@ -221,46 +242,47 @@ function createTurn (turnRule: TurnConfig | Record<string, unknown>, game: GameB
   return turn;
 }
 
-function createPhase (phaseRule: Record<string, unknown>, game: GameBuild) {
-  const phase = { ...phaseRule };
+function createPhase (phaseRule: PhaseConfig, game: BoardgameIoGame): PhaseConfigBgio {
+  const phase = { ...phaseRule } as PhaseConfigBgio;
   if (phaseRule.turn) {
-    phase.turn = createTurn(phaseRule.turn as Record<string, unknown>, game);
+    phase.turn = createTurn(phaseRule.turn, game);
   }
   if (phaseRule.moves) {
-    phase.moves = createMoves(phaseRule.moves as Record<string, MoveDefinition>, game);
+    phase.moves = createMoves(phaseRule.moves, game);
   }
 
-  phase.onBegin = (bgioArguments: BgioArguments) => {
-    const newBgioArguments = deserializeBgioArguments(bgioArguments);
-    doMoves(newBgioArguments, phaseRule.initialMoves as MoveDefinition[] | undefined, { game });
-    (newBgioArguments.G as { _meta: Record<string, unknown> })._meta.currentPhaseHasBeenSetUp = true;
-    (newBgioArguments.G as { _meta: Record<string, unknown> })._meta.nextPhase = phaseRule.next;
-    return JSON.parse(serialize(newBgioArguments.G));
-  };
+  phase.onBegin = ((context) => {
+    const newBgioArguments: BgioResolveState = deserializeBgioArguments(context);
+    doMoves(newBgioArguments, phaseRule.initialMoves, { game });
+    newBgioArguments.G._meta.currentPhaseHasBeenSetUp = true;
+    newBgioArguments.G._meta.nextPhase = phaseRule.next;
+    return cloneBoardgameEngineGJsonRoundtrip(newBgioArguments.G);
+  }) satisfies PhaseOnBegin;
 
   if (phaseRule.endIf) {
-    const phaseEndIf = phaseRule.endIf as unknown[];
-    phase.endIf = (bgioArguments: BgioArguments) => {
-      const newBgioArguments = deserializeBgioArguments(bgioArguments);
-      if ((newBgioArguments.G as { _meta: { currentPhaseHasBeenSetUp?: boolean } })._meta.currentPhaseHasBeenSetUp) {
+    const phaseEndIf = phaseRule.endIf;
+    phase.endIf = ((context) => {
+      const newBgioArguments: BgioResolveState = deserializeBgioArguments(context);
+      if (newBgioArguments.G._meta.currentPhaseHasBeenSetUp) {
         const result = getScenarioResults(newBgioArguments, phaseEndIf);
         if (result) {
-          return result;
+          return result as boolean | { next: string };
         }
       }
-    };
+    }) satisfies PhaseEndIf;
   }
 
-  phase.onEnd = ({ G }: { G: { _meta: Record<string, unknown> } }) => {
+  phase.onEnd = ((context) => {
+    const { G } = context;
     G._meta.currentPhaseHasBeenSetUp = false;
     G._meta.isAfterFirstPhase = true;
-  };
+  }) satisfies PhaseOnEnd;
 
   return phase;
 }
 
-function createMoves (moves: Record<string, MoveDefinition>, game: GameBuild) {
-  return Object.entries(moves).reduce<Record<string, unknown>>((acc, [name, moveDefinition]) => ({
+function createMoves (moves: Record<string, MoveDefinition>, game: BoardgameIoGame): GameMoveMap {
+  return Object.entries(moves).reduce<Record<string, BoardgameEngineMove>>((acc, [name, moveDefinition]) => ({
     ...acc,
     [name]: moveFactory({ ...moveDefinition, name }, game),
   }), {});

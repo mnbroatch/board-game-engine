@@ -1,30 +1,28 @@
-import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { BgioReadonlyState } from "../../utils/bgio-resolve-types.js";
+import type { EntityDefinition } from "../../types/entity-definition.js";
+import type { EngineEntity, RuntimeEntityRule } from "../../types/runtime-entity.js";
+import type { ResolutionContext } from "../../types/resolution-context.js";
 declare class BankSlot {
     bank: {
-        createEntity: (rule: Record<string, unknown>) => unknown;
+        createEntity: (rule: Partial<RuntimeEntityRule>) => EngineEntity;
     };
-    rule: Record<string, unknown> & {
+    rule: EntityDefinition & {
         count?: number | string;
         name?: string;
     };
-    pool: unknown[];
+    pool: EngineEntity[];
     remaining: number;
-    constructor(rule: Record<string, unknown> & {
+    constructor(rule: EntityDefinition & {
         count?: number | string;
         name?: string;
     }, bank: BankSlot["bank"]);
-    getOne(bgioArguments: BgioResolveState, options: {
+    getOne(bgioArguments: BgioReadonlyState, options: {
         state?: unknown;
-    }, context: Record<string, unknown>): unknown;
-    getMultiple(bgioArguments: BgioResolveState, count?: number, options?: {
+    }, context: ResolutionContext): EngineEntity;
+    getMultiple(bgioArguments: BgioReadonlyState, count?: number, options?: {
         state?: unknown;
-    }, context?: Record<string, unknown>): unknown[];
-    returnToBank(entity: {
-        rule: {
-            state?: unknown;
-        };
-        state?: unknown;
-    }): void;
+    }, context?: ResolutionContext): EngineEntity[];
+    returnToBank(entity: EngineEntity): void;
 }
 export default BankSlot;
 //# sourceMappingURL=bank-slot.d.ts.map

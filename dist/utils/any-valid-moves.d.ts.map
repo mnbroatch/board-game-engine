@@ -1,1 +1,1 @@
-{"version":3,"file":"any-valid-moves.d.ts","sourceRoot":"","sources":["../../src/utils/any-valid-moves.ts"],"names":[],"mappings":"AA+HA,MAAM,CAAC,OAAO,UAAU,kBAAkB,CACxC,aAAa,EAAE,OAAO,EACtB,KAAK,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,WAgC/B"}
+{"version":3,"file":"any-valid-moves.d.ts","sourceRoot":"","sources":["../../src/utils/any-valid-moves.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,iBAAiB,EAAE,gBAAgB,EAAE,MAAM,yBAAyB,CAAC;AA+HnF,MAAM,CAAC,OAAO,UAAU,kBAAkB,CACxC,aAAa,EAAE,iBAAiB,GAAG,gBAAgB,EACnD,KAAK,EAAE;IAAE,CAAC,QAAQ,EAAE,MAAM,GAAG,OAAO,CAAA;CAAE,WA+BvC"}

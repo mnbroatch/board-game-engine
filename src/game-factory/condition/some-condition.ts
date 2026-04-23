@@ -1,11 +1,19 @@
-import type { Condition as ConditionRule } from "../../types/bagel-types.js";
+import type { Condition as ConditionRule } from "../../types/expanded-game-types.js";
 import Condition from "./condition.js";
 import checkConditions from "../../utils/check-conditions.js";
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ConditionContext, ConditionPayload } from "../../types/condition-types.js";
+import type { EngineEntity } from "../../types/runtime-entity.js";
+import type { ResolvedConditionRule } from "../../types/resolved-condition-types.js";
 
 export default class SomeCondition extends Condition {
-  checkCondition (bgioArguments: unknown, rule: unknown, conditionPayload: Record<string, unknown>, context: Record<string, unknown>) {
-    const targets = conditionPayload.target as unknown[];
-    const result = targets.find((target: unknown) => {
+  checkCondition (bgioArguments: BgioReadonlyState | BgioResolveState, rule: ResolvedConditionRule, conditionPayload: ConditionPayload, context: ConditionContext) {
+    const raw = conditionPayload.target;
+    if (raw === undefined) {
+      return { conditionIsMet: false, result: undefined };
+    }
+    const targets = Array.isArray(raw) ? raw : [raw];
+    const result = targets.find((target: EngineEntity) => {
       const loopContext = {
         ...context,
         loopTarget: target

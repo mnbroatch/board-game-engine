@@ -1,17 +1,18 @@
 import Condition from "./condition.js";
 import gridContainsSequence from "../../utils/grid-contains-sequence.js";
-import type { GridLike, SequenceChunk } from "../../utils/grid-contains-sequence.js";
+import type { SequenceChunk } from "../../utils/grid-contains-sequence.js";
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ConditionContext, ConditionPayload } from "../../types/condition-types.js";
+import type { ResolvedConditionInLine, ResolvedConditionRule } from "../../types/resolved-condition-types.js";
 
 
 export default class InLineCondition extends Condition {
-  checkCondition (bgioArguments: unknown, rule: unknown, payload: Record<string, unknown>, context: Record<string, unknown>) {
-    const { G } = bgioArguments as { G: { bank: { findParent: (t: unknown) => unknown } } };
-    const { target } = payload;
-    const parent = G.bank.findParent(payload.target);
+  checkCondition (bgioArguments: BgioReadonlyState | BgioResolveState, rule: ResolvedConditionRule, _payload: ConditionPayload, context: ConditionContext) {
+    const { target, grid } = rule as ResolvedConditionInLine;
     
     const { matches: allMatches } = gridContainsSequence(
       bgioArguments,
-      parent as GridLike,
+      grid,
       (rule as { sequence: SequenceChunk[] }).sequence,
       context
     ) as { matches: unknown[][] };

@@ -1,12 +1,15 @@
 import checkConditions from "./check-conditions.js";
 import resolveProperties from "./resolve-properties.js";
 import type { BgioResolveState } from "./bgio-resolve-types.js";
-import type { Condition } from "../types/bagel-types.js";
+import type { Condition } from "../types/expanded-game-types.js";
+import type { CheckConditionsResult } from "../types/condition-types.js";
 export default function getScenarioResults (
   bgioArguments: BgioResolveState,
   scenarios: unknown[]
 ) {
-  let match: { scenario: { result?: unknown; [k: string]: unknown }; conditionResults: { results: unknown[] } } | undefined;
+  let match:
+    | { scenario: { result?: unknown; [k: string]: unknown }; conditionResults: CheckConditionsResult }
+    | undefined;
   for (const scenario of scenarios) {
     const conditionResults = checkConditions(
       bgioArguments,

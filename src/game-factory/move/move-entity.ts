@@ -1,18 +1,34 @@
+import type { MoveDefinition, MoveMoveEntity } from "../../types/expanded-game-types.js";
+import type { MoveEntityDoPayload } from "../../types/move-payload.js";
+import type { BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ResolutionContext } from "../../types/resolution-context.js";
+import { bankOf } from "../../utils/bgio-resolve-types.js";
+import type { EngineEntity } from "../../types/runtime-entity.js";
 import Move from "./move.js";
 
-export default class MoveEntity extends Move {
-  do (bgioArguments: unknown, rule: { position?: unknown }, resolvedPayload: unknown) {
-    const { entity, destination } = (resolvedPayload as { arguments: { entity: unknown; destination: unknown } }).arguments;
-    // todo: move all such things to always be multiple
-    const g = bgioArguments as { G: { bank: { findParent: (e: unknown) => { remove: (x: unknown) => void } | undefined } } };
+type ParentEntity = { remove: (entity: EngineEntity) => void };
+
+export default class MoveEntity extends Move<NonNullable<MoveEntityDoPayload["arguments"]>> {
+  do (
+    bgioArguments: BgioResolveState,
+    rule: MoveDefinition,
+    resolvedPayload: MoveEntityDoPayload,
+    _context: ResolutionContext
+  ) {
+    const { position } = rule as MoveMoveEntity;
+    const { entity, destination } = resolvedPayload.arguments;
+    const bank = bankOf(bgioArguments);
+    const removeFromParent = (e: EngineEntity) => {
+      (bank.findParent(e) as ParentEntity | undefined)?.remove(e);
+    };
     if (Array.isArray(entity)) {
-      entity.forEach((e: unknown) => {
-        g.G.bank.findParent(e)?.remove(e);
-        (destination as { placeEntity: (e: unknown, p?: unknown) => void }).placeEntity(e, rule.position);
+      entity.forEach((e: EngineEntity) => {
+        removeFromParent(e);
+        destination.placeEntity(e, position);
       });
     } else {
-      g.G.bank.findParent(entity)?.remove(entity);
-      (destination as { placeEntity: (e: unknown, p?: unknown) => void }).placeEntity(entity, rule.position);
+      removeFromParent(entity);
+      destination.placeEntity(entity, position);
     }
   }
 }

@@ -1,27 +1,13 @@
-import type { Condition } from "../types/bagel-types.js";
+import type { Condition } from "../types/expanded-game-types.js";
+import type { ResolutionContext } from "../types/resolution-context.js";
+import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
+import type Grid from "../game-factory/space-group/grid.js";
 export type SequenceChunk = {
     count?: number;
     minCount?: number;
     maxCount?: number;
     conditions?: Condition[];
 };
-type GridEntity = {
-    entities?: unknown[];
-    [k: string]: unknown;
-};
-type GridSpace = {
-    entities?: GridEntity[];
-    [k: string]: unknown;
-};
-export type GridLike = {
-    attributes: {
-        width: number;
-        height: number;
-    };
-    entities?: GridSpace[];
-    areCoordinatesValid: (c: number[]) => boolean;
-    getSpace: (c: number[]) => unknown;
-};
-export default function gridContainsSequence(bgioArguments: unknown, grid: GridLike, sequencePattern: SequenceChunk[], context: Record<string, unknown>): unknown;
-export {};
+export type GridLike = Grid;
+export default function gridContainsSequence(bgioArguments: BgioReadonlyState | BgioResolveState, grid: GridLike, sequencePattern: SequenceChunk[], context: ResolutionContext): unknown;
 //# sourceMappingURL=grid-contains-sequence.d.ts.map

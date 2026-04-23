@@ -1,6 +1,9 @@
 import Condition from "../condition/condition.js";
+import type { BgioReadonlyState, BgioResolveState } from "../../utils/bgio-resolve-types.js";
+import type { ConditionContext, ConditionPayload } from "../../types/condition-types.js";
+import type { ResolvedConditionRule } from "../../types/resolved-condition-types.js";
 export default class Evaluate extends Condition {
-    checkCondition(bgioArguments: unknown, rule: unknown, payload: Record<string, unknown>, context: Record<string, unknown>): {
+    checkCondition(bgioArguments: BgioReadonlyState | BgioResolveState, rule: ResolvedConditionRule, payload: ConditionPayload, context: ConditionContext): {
         result: unknown;
         conditionIsMet: boolean;
     };

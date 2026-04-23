@@ -1,10 +1,11 @@
-import { deserialize } from "wackson";
-import { registry } from "../registry.js";
-import type { BgioResolveState } from "./bgio-resolve-types.js";
+import type { BoardgameEngineG } from "./bgio-resolve-types.js";
+import { reviveBoardgameEngineGFromUnknownRawG } from "./engine-serde-boundary.js";
 
-export default function deserializeBgioArguments (bgioArguments: BgioResolveState): BgioResolveState {
+export default function deserializeBgioArguments<T extends { G: unknown }>(
+  bgioArguments: T
+): T & { G: BoardgameEngineG } {
   return {
     ...bgioArguments,
-    G: deserialize(JSON.stringify(bgioArguments.G), registry) as Record<string, unknown>,
+    G: reviveBoardgameEngineGFromUnknownRawG(bgioArguments.G),
   };
 }

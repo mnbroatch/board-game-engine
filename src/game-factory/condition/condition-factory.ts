@@ -1,4 +1,4 @@
-import type { Condition as ConditionRule } from "../../types/bagel-types.js";
+import type { Condition as ConditionRule } from "../../types/expanded-game-types.js";
 import type ConditionBase from "./condition.js";
 import Is from "./is-condition.js";
 import Not from "./not-condition.js";
@@ -21,39 +21,38 @@ export default function conditionFactory (rule: ConditionRule): ConditionBase | 
   if (typeof rule !== "object" || rule === null || !("conditionType" in rule)) {
     return undefined;
   }
-  const r = rule as { conditionType: string; [k: string]: unknown };
-  if (r.conditionType === "Is") {
-    return new Is(r);
-  } else if (r.conditionType === "Not") {
-    return new Not(r);
-  } else if (r.conditionType === "Or") {
-    return new Or(r);
-  } else if (r.conditionType === "Some") {
-    return new Some(r);
-  } else if (r.conditionType === "Contains") {
-    return new ContainsCondition(r);
-  } else if (r.conditionType === "ContainsSame") {
-    return new ContainsSameCondition(r);
-  } else if (r.conditionType === "Every") {
-    return new Every(r);
-  } else if (r.conditionType === "InLine") {
-    return new InLine(r);
-  } else if (r.conditionType === "HasLine") {
-    return new HasLine(r);
-  } else if (r.conditionType === "IsFull") {
-    return new IsFull(r);
-  } else if (r.conditionType === "Would") {
-    return new Would(r);
-  } else if (r.conditionType === "NoPossibleMoves") {
-    return new NoPossibleMoves(r);
-  } else if (r.conditionType === "Evaluate") {
-    return new Evaluate(r);
-  } else if (r.conditionType === "Position") {
-    return new Position(r);
+  if (rule.conditionType === "Is") {
+    return new Is(rule);
+  } else if (rule.conditionType === "Not") {
+    return new Not(rule);
+  } else if (rule.conditionType === "Or") {
+    return new Or(rule);
+  } else if (rule.conditionType === "Some") {
+    return new Some(rule);
+  } else if (rule.conditionType === "Contains") {
+    return new ContainsCondition(rule);
+  } else if (rule.conditionType === "ContainsSame") {
+    return new ContainsSameCondition(rule);
+  } else if (rule.conditionType === "Every") {
+    return new Every(rule);
+  } else if (rule.conditionType === "InLine") {
+    return new InLine(rule);
+  } else if (rule.conditionType === "HasLine") {
+    return new HasLine(rule);
+  } else if (rule.conditionType === "IsFull") {
+    return new IsFull(rule);
+  } else if (rule.conditionType === "Would") {
+    return new Would(rule);
+  } else if (rule.conditionType === "NoPossibleMoves") {
+    return new NoPossibleMoves(rule);
+  } else if (rule.conditionType === "Evaluate") {
+    return new Evaluate(rule);
+  } else if (rule.conditionType === "Position") {
+    return new Position(rule);
   // } else if (rule.conditionType === "bingo") {
     // return new BingoCondition(rule);
   // } else if (rule.conditionType === "relativeMove") {
-  //   return new RelativeMoveCondition(rule);
+    // return new RelativeMoveCondition(rule);
   }
   return undefined;
 }

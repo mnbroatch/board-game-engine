@@ -1,7 +1,13 @@
 // claude ai did most of this
 import _matches from "lodash/matches.js";
-import type { Condition } from "../types/bagel-types.js";
+import type { Condition } from "../types/expanded-game-types.js";
+import type { ConditionContext } from "../types/condition-types.js";
+import type { ResolutionContext } from "../types/resolution-context.js";
+import type { EngineEntity } from "../types/runtime-entity.js";
 import checkConditions from "./check-conditions.js";
+import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
+import type Grid from "../game-factory/space-group/grid.js";
+import { assertRecord } from "./type-asserts.js";
 
 export type SequenceChunk = {
   count?: number;
@@ -10,14 +16,8 @@ export type SequenceChunk = {
   conditions?: Condition[];
 };
 
-type GridEntity = { entities?: unknown[]; [k: string]: unknown };
-type GridSpace = { entities?: GridEntity[]; [k: string]: unknown };
-export type GridLike = {
-  attributes: { width: number; height: number };
-  entities?: GridSpace[];
-  areCoordinatesValid: (c: number[]) => boolean;
-  getSpace: (c: number[]) => unknown;
-};
+type GridEntity = EngineEntity;
+export type GridLike = Grid;
 
 // We'll check reverse directions along each line
 const directions: [number, number][] = [
@@ -29,7 +29,7 @@ const directions: [number, number][] = [
 
 const sequenceCache = new WeakMap<object, Map<string, { stateKey: string; result: unknown }>>();
 
-function getSequenceKey (sequencePattern: unknown, context: Record<string, unknown>) {
+function getSequenceKey (sequencePattern: unknown, context: ResolutionContext) {
   const contextKey = {
     moveInstance: (context.moveInstance as { id?: unknown } | undefined)?.id,
     moveArguments: context.moveArguments,
@@ -40,17 +40,20 @@ function getSequenceKey (sequencePattern: unknown, context: Record<string, unkno
 
 // todo: use stable hash library that we're using for game rules hash
 function getGridStateKey (grid: GridLike) {
-  const spaces = grid.entities || [];
+  const spaces = grid.spaces || [];
 
   return spaces.map((space) => {
-    const entities = space.entities || [];
+    const entities = (space as { entities?: GridEntity[] } | undefined)?.entities || [];
     if (entities.length === 0) return "empty";
 
-    return entities.map((entity) => {
+    return entities.map((entity: GridEntity) => {
+      const unknownEntity: unknown = entity;
+      assertRecord(unknownEntity, "Grid state hashing expects entity to be a plain object");
+      const entityRecord = unknownEntity;
       const sortedKeys = Object.keys(entity).sort();
       const stateObj: Record<string, unknown> = {};
       sortedKeys.forEach((key) => {
-        stateObj[key] = entity[key];
+        stateObj[key] = (entityRecord as Record<string, unknown>)[key];
       });
       return JSON.stringify(stateObj);
     }).sort().join('|');
@@ -58,11 +61,11 @@ function getGridStateKey (grid: GridLike) {
 }
 
 function findSequencesInLine (
-  bgioArguments: unknown,
+  bgioArguments: BgioReadonlyState | BgioResolveState,
   lineSpaces: unknown[],
   sequencePattern: SequenceChunk[],
   minSequenceLength: number,
-  context: Record<string, unknown>,
+  context: ResolutionContext,
   reverse = false
 ) {
   const matches: unknown[][] = [];
@@ -93,7 +96,7 @@ function findSequencesInLine (
 }
 
 function getLineStartingPoints (grid: GridLike, dx: number, dy: number) {
-  const { width, height } = grid.attributes;
+  const { width, height } = grid.rule;
   const starts: [number, number][] = [];
   
   if (dx === 1 && dy === 0) {
@@ -128,11 +131,11 @@ function getLineSpaces (grid: GridLike, startX: number, startY: number, dx: numb
 }
 
 function tryMatchSequence (
-  bgioArguments: unknown,
+  bgioArguments: BgioReadonlyState | BgioResolveState,
   lineSpaces: unknown[],
   startIndex: number,
   sequencePattern: SequenceChunk[],
-  context: Record<string, unknown>,
+  context: ResolutionContext,
   reverse = false
 ) {
   let spaceIndex = startIndex;
@@ -163,8 +166,8 @@ function tryMatchSequence (
         : lineSpaces[spaceIndex];
       
       // Pass all previously matched spaces in this chunk
-      if (checkSpaceConditions(bgioArguments, space, conditions, chunkMatches, context)) {
-        chunkMatches.push(space);
+      if (checkSpaceConditions(bgioArguments, space as EngineEntity, conditions, chunkMatches as EngineEntity[], context)) {
+        chunkMatches.push(space as EngineEntity);
         matchedCount++;
         spaceIndex++;
       } else {
@@ -184,28 +187,28 @@ function tryMatchSequence (
 }
 
 function checkSpaceConditions (
-  bgioArguments: unknown,
-  space: unknown,
+  bgioArguments: BgioReadonlyState | BgioResolveState,
+  space: EngineEntity,
   conditions: Condition[] | undefined,
-  chunkMatches: unknown[] = [],
-  context?: Record<string, unknown>
+  chunkMatches: EngineEntity[] = [],
+  context?: ConditionContext
 ) {
   return checkConditions(
     bgioArguments,
     conditions,
     {
       target: space,
-      targets: [space, ...chunkMatches] // for ContainsSame, other group conditions
+      targets: [space, ...chunkMatches],
     },
     context
   ).conditionsAreMet
 }
 
 export default function gridContainsSequence (
-  bgioArguments: unknown,
+  bgioArguments: BgioReadonlyState | BgioResolveState,
   grid: GridLike,
   sequencePattern: SequenceChunk[],
-  context: Record<string, unknown>
+  context: ResolutionContext
 ) {
   const cacheKey = getSequenceKey(sequencePattern, context);
   let gridCache = sequenceCache.get(grid);
