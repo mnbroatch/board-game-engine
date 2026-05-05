@@ -2,6 +2,7 @@ import find from "lodash/find.js";
 import filter from "lodash/filter.js";
 import checkConditions from "../../utils/check-conditions.js";
 import resolveProperties from "../../utils/resolve-properties.js";
+import entityMatches from "../../utils/entity-matches.js";
 import type { RuleWithConditions } from "../../types/rule-with-conditions.js";
 import type { EntityDefinition } from "../../types/entity-definition.js";
 import type { EngineEntity, RuntimeEntityRule } from "../../types/runtime-entity.js";
@@ -21,6 +22,86 @@ function isRemovableParent (value: EngineEntity | undefined): value is Removable
   return Boolean(value && typeof (value as { remove?: unknown }).remove === "function");
 }
 
+function slotHasInventory (slot: InstanceType<typeof BankSlot>) {
+  // `remaining` is always a number today, but keep this tolerant if internals change.
+  const remaining = (slot as { remaining?: unknown }).remaining;
+  return remaining === Infinity || (typeof remaining === "number" && remaining > 0);
+}
+
+function isBankDebugEnabled () {
+  // Node tests / CI
+  if (typeof process !== "undefined" && process.env && process.env.BGE_DEBUG_BANK === "1") return true;
+  // Browser/manual debugging
+  try {
+    return Boolean((globalThis as { __BGE_DEBUG_BANK__?: unknown }).__BGE_DEBUG_BANK__);
+  } catch {
+    return false;
+  }
+}
+
+function bankDebug (...args: unknown[]) {
+  if (!isBankDebugEnabled()) return;
+  console.debug("[BGE][bank]", ...args);
+}
+
+function buildSlotSelectionMatcher (
+  slot: InstanceType<typeof BankSlot>,
+  rule: RuleWithConditions
+): MoveArgumentsState | undefined {
+  const request = rule as Record<string, unknown>;
+  const slotRule = slot.rule as unknown as Record<string, unknown>;
+
+  // Start from the request "shape" but drop fields that are never entity identity fields.
+  const base: Record<string, unknown> = { ...request };
+  delete base.conditions;
+  delete base.state;
+  delete base.stateGroups;
+
+  // Only compare keys that actually exist on the slot's authored entity rule.
+  // This avoids false negatives when callers include extra metadata (e.g. `count`) that is not
+  // part of the runtime entity attribute bag used by `entityMatches`.
+  const intersection: Record<string, unknown> = {};
+  for (const key of Object.keys(base)) {
+    if (Object.prototype.hasOwnProperty.call(slotRule, key)) {
+      intersection[key] = base[key];
+    }
+  }
+
+  if (!Object.keys(intersection).length) return undefined;
+  return intersection as unknown as MoveArgumentsState;
+}
+
+function slotSelectionIntersectionKeyCount (
+  slot: InstanceType<typeof BankSlot>,
+  rule: RuleWithConditions
+) {
+  const matcher = buildSlotSelectionMatcher(slot, rule);
+  return matcher ? Object.keys(matcher).length : 0;
+}
+
+function tryEvaluateSlot (
+  bank: Bank,
+  bgioArguments: BgioReadonlyState,
+  slot: InstanceType<typeof BankSlot>,
+  rule: RuleWithConditions,
+  context: ResolutionContext
+) {
+  if (!slotHasInventory(slot)) return { ok: false as const, reason: "no_inventory" as const };
+  const example = bank.createSlotExampleEntity(bgioArguments, slot, context);
+  const matcher = buildSlotSelectionMatcher(slot, rule);
+  if (matcher && !entityMatches(bgioArguments as BgioResolveState, matcher, example, context)) {
+    return { ok: false as const, reason: "matcher" as const, example };
+  }
+  const conditionsOk = checkConditions(
+    bgioArguments as BgioResolveState,
+    rule.conditions,
+    { target: example },
+    context
+  ).conditionsAreMet;
+  if (!conditionsOk) return { ok: false as const, reason: "conditions" as const, example };
+  return { ok: true as const, example };
+}
+
 class Bank {
   currentEntityId: number;
   tracker: Record<number, EngineEntity>;
@@ -30,6 +111,17 @@ class Bank {
     this.currentEntityId = 0;
     this.tracker = {};
     this.slots = entityRules.map((rule) => new BankSlot(rule, this));
+    if (isBankDebugEnabled()) {
+      bankDebug(
+        "new Bank slots",
+        this.slots.map((s) => ({
+          name: (s.rule as { name?: unknown }).name,
+          entityType: (s.rule as { entityType?: unknown }).entityType,
+          count: (s.rule as { count?: unknown }).count,
+          remaining: (s as { remaining?: unknown }).remaining,
+        }))
+      );
+    }
   }
 
   createEntity (definition: Partial<RuntimeEntityRule> = {}, options?: MoveArgumentsState): EngineEntity {
@@ -148,11 +240,19 @@ class Bank {
   findParent (entity: unknown): EngineEntity | undefined {
     if (!entity || typeof entity !== "object") return undefined;
     const child = entity as EngineEntity;
+    const childId = (entity as { entityId?: unknown }).entityId;
     return find(this.tracker, (ent) => {
       const ewc = ent as EngineEntityWithChildren;
+      const byId = childId !== undefined
+        ? Boolean(
+            ewc.entities?.some((e) => (e as { entityId?: unknown }).entityId === childId) ||
+            ewc.spaces?.some((e) => (e as { entityId?: unknown }).entityId === childId)
+          )
+        : false;
       return Boolean(
-        ewc.entities?.includes(child)
-          || ewc.spaces?.includes(child)
+        byId
+        || ewc.entities?.includes(child)
+        || ewc.spaces?.includes(child)
       );
     });
   }
@@ -178,27 +278,62 @@ class Bank {
   }
 
   getSlot (bgioArguments: BgioReadonlyState, rule: RuleWithConditions, context: ResolutionContext) {
-    return this.slots.find((slot) => {
-      const example = this.createSlotExampleEntity(bgioArguments, slot, context);
-      return checkConditions(
-        bgioArguments as BgioResolveState,
-        rule.conditions,
-        { target: example },
-        context
-      ).conditionsAreMet;
+    const ranked = this.slots
+      .map((slot) => ({
+        slot,
+        intersectionKeys: slotSelectionIntersectionKeyCount(slot, rule),
+        evald: tryEvaluateSlot(this, bgioArguments, slot, rule, context),
+      }))
+      .filter((x) => x.evald.ok);
+
+    if (!ranked.length) {
+      const candidates = this.slots.map((s) => ({
+        name: (s.rule as { name?: unknown }).name,
+        entityType: (s.rule as { entityType?: unknown }).entityType,
+        count: (s.rule as { count?: unknown }).count,
+        remaining: (s as { remaining?: unknown }).remaining,
+        intersectionKeys: slotSelectionIntersectionKeyCount(s, rule),
+        eval: tryEvaluateSlot(this, bgioArguments, s, rule, context),
+      }));
+      console.error("[BGE][bank] getSlot: no match", { rule, candidates });
+      bankDebug("getSlot: no match (verbose)", {
+        rule,
+        candidates: candidates.map((c, idx) => ({
+          ...c,
+          slotRuleKeys: Object.keys(this.slots[idx].rule as unknown as Record<string, unknown>),
+        })),
+      });
+      return undefined;
+    }
+
+    const bestKeys = Math.max(...ranked.map((r) => r.intersectionKeys));
+    const best = ranked.filter((r) => r.intersectionKeys === bestKeys);
+    // Deterministic tie-break: prefer more specific slot names, then stable slot order.
+    best.sort((a, b) => {
+      const an = String((a.slot.rule as { name?: unknown }).name ?? "");
+      const bn = String((b.slot.rule as { name?: unknown }).name ?? "");
+      if (an !== bn) return bn.length - an.length;
+      return this.slots.indexOf(a.slot) - this.slots.indexOf(b.slot);
     });
+    return best[0].slot;
   }
 
   getSlots (bgioArguments: BgioReadonlyState, rule: RuleWithConditions, context: ResolutionContext) {
-    return this.slots.filter((slot) => {
-      const example = this.createSlotExampleEntity(bgioArguments, slot, context);
-      return checkConditions(
-        bgioArguments as BgioResolveState,
-        rule.conditions,
-        { target: example },
-        context
-      ).conditionsAreMet;
-    });
+    const ranked = this.slots
+      .map((slot) => ({
+        slot,
+        intersectionKeys: slotSelectionIntersectionKeyCount(slot, rule),
+        evald: tryEvaluateSlot(this, bgioArguments, slot, rule, context),
+      }))
+      .filter((x) => x.evald.ok);
+
+    if (!ranked.length) return [];
+
+    const bestKeys = Math.max(...ranked.map((r) => r.intersectionKeys));
+    return ranked
+      .filter((r) => r.intersectionKeys === bestKeys)
+      .sort((a, b) => this.slots.indexOf(a.slot) - this.slots.indexOf(b.slot))
+      .map((r) => r.slot);
   }
 
   returnToBank (bgioArguments: BgioReadonlyState, entity: EngineEntity) {

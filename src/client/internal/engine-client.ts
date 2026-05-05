@@ -103,15 +103,22 @@ export class EngineClientImpl {
       matchID,
       playerID,
       credentials,
-      multiplayer = SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
+      multiplayer,
     } = this.options;
 
     try {
+      // In-process clients (`!credentials`): if the caller omitted `playerID`, do not pin a seat.
+      // boardgame.io then dispatches moves as `ctx.currentPlayer` (`assumedPlayerID`); pinning `"0"`
+      // breaks alternating turns in two-player games.
+      //
+      // Online clients (`credentials`): default omitted `playerID` to `"0"` (first seat), but never
+      // override an explicit `null` spectator.
+      const effectivePlayerID = credentials && playerID === undefined ? "0" : playerID;
       const clientOptions = !credentials
-        ? { game: this.game, numPlayers, debug }
+        ? { game: this.game, numPlayers, debug, ...(effectivePlayerID == null ? {} : { playerID: effectivePlayerID }) }
         : {
             game: this.game,
-            multiplayer,
+            multiplayer: multiplayer ?? SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
             matchID,
             ...(playerID == null ? {} : { playerID }),
             credentials,

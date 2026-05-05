@@ -74,7 +74,18 @@ export default class Move<TArgs extends MoveArgumentsMap = MoveArgumentsMap> {
     const moveResults = checkConditions(
       bgioArguments,
       (this.rule as { conditions?: Condition[] }).conditions,
-      {},
+      // Move-level conditions often omit explicit `target` refs and instead rely on ambient targets
+      // (e.g. `InLine` sequences authored against `moveArguments.*`). When validating a concrete payload,
+      // provide a reasonable default ambient target from the resolved arguments.
+      (() => {
+        const dest = (payloadArgs as { destination?: unknown }).destination;
+        if (dest !== undefined) return { target: dest as EngineEntity | EngineEntity[] | undefined };
+        const entity = (payloadArgs as { entity?: unknown }).entity;
+        if (entity !== undefined) return { target: entity as EngineEntity | EngineEntity[] | undefined };
+        const source = (payloadArgs as { source?: unknown }).source;
+        if (source !== undefined) return { target: source as EngineEntity | EngineEntity[] | undefined };
+        return {};
+      })(),
       { ...context, moveArguments: payloadArgs }
     );
 

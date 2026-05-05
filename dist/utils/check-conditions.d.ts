@@ -1,11 +1,7 @@
 import type { Condition, ConditionWithoutWould } from "../types/expanded-game-types.js";
 import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
-import type { ConditionCheckResult, ConditionContext, ConditionPayload } from "../types/condition-types.js";
-export type CheckConditionsResult = {
-    results: ConditionCheckResult[];
-    failedAt: Condition | undefined;
-    conditionsAreMet: boolean;
-};
+import type { CheckConditionsResult, ConditionContext, ConditionPayload } from "../types/condition-types.js";
+export type { CheckConditionsResult };
 /**
  * Readonly/snapshot: `G` + `ctx` + `playerID` only. Conditions must exclude **top-level** `Would`
  * (nested `Would` inside composites is not enforced by TypeScript).

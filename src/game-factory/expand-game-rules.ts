@@ -28,6 +28,8 @@ const invariantEntities = [
   {
     entityType: "Board",
     name: "sharedBoard",
+    // Always ensure a single shared board is available for setup-time allocation.
+    count: 1,
   },
   {
     name: "playerMarker",
@@ -35,6 +37,22 @@ const invariantEntities = [
     count: "Infinity",
   },
 ] as Entity[];
+
+function isInvariantEntity (entity: Entity): boolean {
+  // Keep this intentionally small + stable: these are engine-injected definitions used to bootstrap
+  // bank slots / markers. They must not participate in default `sharedBoard` auto-placement, or
+  // we'll try to "place sharedBoard onto sharedBoard" and exhaust the bank slot during setup.
+  if ((entity as { entityType?: unknown }).entityType === "Space" && (entity as { name?: unknown }).name == null) {
+    return true;
+  }
+  if ((entity as { entityType?: unknown }).entityType === "Board" && (entity as { name?: unknown }).name === "sharedBoard") {
+    return true;
+  }
+  if ((entity as { name?: unknown }).name === "playerMarker") {
+    return true;
+  }
+  return false;
+}
 
 function expandEntities (entities: Entity[] | undefined): Entity[] {
   return [
@@ -280,7 +298,12 @@ export default function expandGameRules (gameRules: AuthoredGameRules): GameRule
 
   const entities = expandEntities(rules.entities);
 
-  const sharedBoard = (rules.sharedBoard ?? entities) as EntityMatcher<EntityAttributes<Entity>>[];
+  const sharedBoard = (rules.sharedBoard ??
+    // Default: place authored entities onto the shared board at setup.
+    // Do not include invariant engine entities (bank slot templates), or setup will try to
+    // allocate/placement-drive engine scaffolding incorrectly.
+    entities.filter((e) => !isInvariantEntity(e))
+  ) as EntityMatcher<EntityAttributes<Entity>>[];
   const turn = rules.turn ?? { minMoves: 1, maxMoves: 1 };
 
   const expandedTopLevel = expandInitialPlacements(

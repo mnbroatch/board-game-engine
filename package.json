@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "test": "npm run typecheck:examples && playwright test",
+    "test": "npm run build && npm run typecheck:examples && playwright test",
     "test:coverage": "npm run build:coverage && cross-env COVERAGE=1 playwright test && nyc merge .nyc_output/run .nyc_output/out.json && nyc report --reporter=html --reporter=text",
     "build:coverage": "cross-env COVERAGE=1 node scripts/build.mjs",
     "test:e2e": "playwright test",
@@ -47,7 +47,7 @@
     "zod": "^3.24.2"
   },
   "dependencies": {
-    "@mnbroatch/boardgame.io": "0.0.1",
+    "@mnbroatch/boardgame.io": "0.0.2",
     "expr-eval": "^2.0.2",
     "wackson": "^1.1.0"
   },

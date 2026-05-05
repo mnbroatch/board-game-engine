@@ -22,7 +22,7 @@ export default class EveryCondition extends Condition {
       return checkConditions(
         bgioArguments,
         (rule as { conditions?: ConditionRule[] }).conditions,
-        undefined,
+        { target },
         loopContext
       )
     })

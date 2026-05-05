@@ -28,9 +28,16 @@ function safeStringify (value, seen = new WeakSet()) {
 
 export const test = base.extend({
   page: async ({ page }, use, testInfo) => {
-    if (process.env.DEBUG_CONSOLE && page) {
+    if (page) {
+      // Always surface browser-side errors; they’re otherwise very hard to debug from CI logs.
+      page.on('pageerror', (err) => {
+        console.log('[browser pageerror]', err?.message ?? String(err))
+        if (err?.stack) console.log(err.stack)
+      })
       page.on('console', async (msg) => {
         const type = msg.type()
+        // By default, only print errors/warnings to keep logs readable.
+        if (!process.env.DEBUG_CONSOLE && type !== 'error' && type !== 'warning') return
         const args = msg.args()
         const values = await Promise.all(
           args.map((arg) => arg.jsonValue().catch(() => '[Unserializable]'))

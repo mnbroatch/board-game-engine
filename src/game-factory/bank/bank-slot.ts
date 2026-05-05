@@ -14,7 +14,20 @@ class BankSlot {
     this.bank = bank;
     this.rule = rule;
     this.pool = [];
-    this.remaining = +((rule.count as number | string) || 1);
+    const rawCount = rule.count as unknown;
+    // NOTE: `expandGameRules` runs `transformJSON`, which round-trips through `JSON.stringify`.
+    // JSON cannot represent `Infinity`, so numeric `Infinity` becomes `null` on the rule object.
+    // Treat that as infinite inventory for bank slots.
+    if (rawCount === "Infinity" || rawCount === null) {
+      this.remaining = Infinity;
+    } else if (rawCount === undefined) {
+      this.remaining = 1;
+    } else {
+      const n = typeof rawCount === "number" ? rawCount : Number(rawCount);
+      // Guard against bad authoring input (e.g. "0" or non-numeric strings) creating a slot
+      // that can never produce an entity (which breaks setup in surprising ways).
+      this.remaining = Number.isFinite(n) && n > 0 ? n : 1;
+    }
   }
 
   getOne (bgioArguments: BgioReadonlyState, options: { state?: unknown }, context: ResolutionContext) {

@@ -9,11 +9,11 @@ export declare const AuthoredGameRulesSchema: z.ZodObject<{
     minPlayers: z.ZodOptional<z.ZodNumber>;
     maxPlayers: z.ZodOptional<z.ZodNumber>;
     entities: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">>, "many">>;
     sharedBoard: z.ZodOptional<z.ZodArray<z.ZodUnknown, "many">>;
     personalBoard: z.ZodOptional<z.ZodArray<z.ZodUnknown, "many">>;
@@ -176,11 +176,11 @@ export declare const AuthoredGameRulesSchema: z.ZodObject<{
     minPlayers: z.ZodOptional<z.ZodNumber>;
     maxPlayers: z.ZodOptional<z.ZodNumber>;
     entities: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">>, "many">>;
     sharedBoard: z.ZodOptional<z.ZodArray<z.ZodUnknown, "many">>;
     personalBoard: z.ZodOptional<z.ZodArray<z.ZodUnknown, "many">>;
@@ -343,11 +343,11 @@ export declare const AuthoredGameRulesSchema: z.ZodObject<{
     minPlayers: z.ZodOptional<z.ZodNumber>;
     maxPlayers: z.ZodOptional<z.ZodNumber>;
     entities: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{
-        entityType: z.ZodString;
+        entityType: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">>, "many">>;
     sharedBoard: z.ZodOptional<z.ZodArray<z.ZodUnknown, "many">>;
     personalBoard: z.ZodOptional<z.ZodArray<z.ZodUnknown, "many">>;

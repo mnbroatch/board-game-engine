@@ -5,8 +5,8 @@
  */
 import { test, expect } from './coverage.js'
 
-const BGIO_MINIMAL_URL = '/e2e/fixtures/bgio-minimal.html'
-const BGIO_MINIMAL_DEBUG_URL = '/e2e/fixtures/bgio-minimal-debug.html'
+const BGIO_MINIMAL_URL = '/tests/e2e/fixtures/bgio-minimal.html'
+const BGIO_MINIMAL_DEBUG_URL = '/tests/e2e/fixtures/bgio-minimal-debug.html'
 
 test.describe('boardgame.io minimal (no BoardGameEngine)', () => {
   test('bgio client loads and getState() returns state in headless Firefox', async ({ page }) => {

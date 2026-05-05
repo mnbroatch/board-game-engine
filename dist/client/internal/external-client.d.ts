@@ -1,10 +1,8 @@
 import { Client as BoardgameIOClient } from "@mnbroatch/boardgame.io/client";
+import type { State } from "@mnbroatch/boardgame.io";
 import type { ClientOptions } from "../client.js";
-import type { BoardgameIoGame } from "../../game-factory/game-factory.js";
-type ExternalClientState = {
-    G: unknown;
-    ctx: unknown;
-};
+import type { BoardgameEngineG, BoardgameIoGame } from "../../game-factory/game-factory.js";
+type ExternalClientState = State<BoardgameEngineG>;
 type ExternalClientMoves = ReturnType<typeof BoardgameIOClient>["moves"];
 export type ExternalGetStateResult = {
     status: "empty";

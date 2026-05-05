@@ -1,10 +1,11 @@
 import { Client as BoardgameIOClient } from "@mnbroatch/boardgame.io/client";
+import type { State } from "@mnbroatch/boardgame.io";
 import { Debug } from "@mnbroatch/boardgame.io/debug";
 import { SocketIO } from "@mnbroatch/boardgame.io/multiplayer";
 import type { ClientOptions } from "../client.js";
-import type { BoardgameIoGame } from "../../game-factory/game-factory.js";
+import type { BoardgameEngineG, BoardgameIoGame } from "../../game-factory/game-factory.js";
 
-type ExternalClientState = { G: unknown; ctx: unknown };
+type ExternalClientState = State<BoardgameEngineG>;
 type ExternalClientMoves = ReturnType<typeof BoardgameIOClient>["moves"];
 export type ExternalGetStateResult =
   | { status: "empty" }
@@ -42,15 +43,16 @@ export class ExternalClientImpl {
       matchID,
       playerID,
       credentials,
-      multiplayer = SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
+      multiplayer,
     } = this.options;
 
     try {
+      const effectivePlayerID = playerID === undefined ? "0" : playerID;
       const clientOptions = !credentials
-        ? { game: this.game, numPlayers, debug }
+        ? { game: this.game, numPlayers, debug, ...(effectivePlayerID == null ? {} : { playerID: effectivePlayerID }) }
         : {
             game: this.game,
-            multiplayer,
+            multiplayer: multiplayer ?? SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
             matchID,
             ...(playerID == null ? {} : { playerID }),
             credentials,

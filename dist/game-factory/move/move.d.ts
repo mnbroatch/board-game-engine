@@ -12,7 +12,7 @@ export default class Move<TArgs extends MoveArgumentsMap = MoveArgumentsMap> {
             results: unknown[];
             conditionsAreMet: boolean;
         }>;
-        moveResults: import("../../utils/check-conditions.js").CheckConditionsResult;
+        moveResults: import("../../index.js").CheckConditionsResult;
         conditionsAreMet: boolean;
     };
     isValid(bgioArguments: BgioReadonlyState | BgioResolveState, payload: MovePayload<TArgs>, context: ResolutionContext): boolean;
@@ -24,7 +24,7 @@ export default class Move<TArgs extends MoveArgumentsMap = MoveArgumentsMap> {
                 results: unknown[];
                 conditionsAreMet: boolean;
             }>;
-            moveResults: import("../../utils/check-conditions.js").CheckConditionsResult;
+            moveResults: import("../../index.js").CheckConditionsResult;
             conditionsAreMet: boolean;
         } | undefined;
     };

@@ -2,8 +2,10 @@ import { z } from "zod";
 import { ConditionSchema } from "./condition.schema.js";
 import { ValueRefSchema } from "./value-ref.schema.js";
 
+// `entityType` is optional for `EntityGeneric` (discriminated by `entityType?: undefined`),
+// so we should not require it at the authored JSON boundary.
 const EntitySchema = z.object({
-  entityType: z.string(),
+  entityType: z.string().optional(),
 }).passthrough();
 
 const TurnConfigSchema = z.object({

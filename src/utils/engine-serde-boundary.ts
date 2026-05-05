@@ -8,7 +8,17 @@ import type { BoardgameEngineG } from "./bgio-resolve-types.js";
 
 /** Revive `G` from boardgame.io (plain object) into engine graph via wackson + registry. */
 export function reviveBoardgameEngineGFromUnknownRawG (rawG: unknown): BoardgameEngineG {
-  return deserialize(JSON.stringify(rawG), registry) as BoardgameEngineG;
+  // `G` can be either:
+  // - a plain JSON object (no cycles) when coming over the wire, OR
+  // - a live engine object graph (with circular refs like entity -> bank -> tracker -> entity)
+  //   depending on the runtime / transport.
+  //
+  // `JSON.stringify` will throw on circular structures, so we route through wackson `serialize`,
+  // which is designed to handle graphs and preserve class identity using the registry.
+  if (typeof rawG === "string") {
+    return deserialize(rawG, registry) as BoardgameEngineG;
+  }
+  return deserialize(serialize(rawG, { deduplicateInstances: true }) as string, registry) as BoardgameEngineG;
 }
 
 /** Deep clone `G` through wackson serialize + JSON.parse (boardgame.io move return shape). */
@@ -23,7 +33,8 @@ export function cloneBoardgameEngineGWacksonRoundtrip (G: BoardgameEngineG): Boa
 
 /** Deserialize an arbitrary serializable value with the entity registry (e.g. move payload). */
 export function deserializeWithRegistry<T> (serializable: unknown): T {
-  return deserialize(JSON.stringify(serializable), registry) as T;
+  if (typeof serializable === "string") return deserialize(serializable, registry) as T;
+  return deserialize(serialize(serializable, { deduplicateInstances: true }) as string, registry) as T;
 }
 
 /** Deep clone arbitrary serializable data through wackson serialize + JSON.parse (transport clone). */

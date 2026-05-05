@@ -21,7 +21,7 @@ export default class SomeCondition extends Condition {
       return checkConditions(
         bgioArguments,
         (rule as { conditions?: ConditionRule[] }).conditions,
-        undefined,
+        { target },
         loopContext
       ).conditionsAreMet
     })

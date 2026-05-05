@@ -1,5 +1,5 @@
 import type { EngineEntity } from "./runtime-entity.js";
-export type { ConditionCheckResult, ConditionContext, MoveArgumentValue, MoveArgumentsState, ResolutionContext, } from "./resolution-context.js";
+export type { CheckConditionsResult, ConditionCheckResult, ConditionContext, MoveArgumentValue, MoveArgumentsState, ResolutionContext, } from "./resolution-context.js";
 /**
  * Shared condition payload shape passed into condition evaluation.
  *

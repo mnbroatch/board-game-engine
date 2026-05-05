@@ -27,8 +27,10 @@ export type ResolvedConditionOr = ConditionOr;
 export type ResolvedConditionSome = Omit<ConditionSome, "target">;
 export type ResolvedConditionEvery = Omit<ConditionEvery, "target">;
 export type ResolvedConditionInLine = Omit<ConditionInLine, "target"> & {
-    target: EngineEntity;
-    grid: Grid;
+    /** May be omitted in authoring; resolved from `rule.target` or ambient `context.target`. */
+    target?: EngineEntity;
+    /** Present when a concrete space/grid anchor was resolved; otherwise `InLine` cannot evaluate. */
+    grid?: Grid;
 };
 export type ResolvedConditionEvaluate = ConditionEvaluate;
 export type ResolvedConditionWould = ConditionWould;

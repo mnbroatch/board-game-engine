@@ -1,4 +1,5 @@
 import type Move from "../game-factory/move/move.js";
+import type { Condition } from "./expanded-game-types.js";
 import type { EngineEntity } from "./runtime-entity.js";
 import type { GetCurrentMovesClient } from "../utils/get-current-moves.js";
 import type { MoveArgumentBinding } from "./expanded-game-types.js";
@@ -44,14 +45,25 @@ export interface ResolutionContext {
 /** Alias used by condition implementations. */
 export type ConditionContext = ResolutionContext;
 /**
+ * Aggregate from {@link ../utils/check-conditions.checkConditions} (composite / Every / nested runs).
+ */
+export type CheckConditionsResult = {
+    results: ConditionCheckResult[];
+    failedAt?: Condition;
+    conditionsAreMet: boolean;
+};
+/**
  * Result from a single condition implementation (before aggregation in checkConditions).
  */
 export type ConditionCheckResult = {
     conditionIsMet: boolean;
     matches?: unknown;
     result?: unknown;
-    target?: unknown;
-    /** Nested aggregate results (e.g. Every). */
-    results?: unknown;
+    target?: EngineEntity | EngineEntity[];
+    /**
+     * Nested aggregates: `Every` yields {@link CheckConditionsResult} per target; `Would` yields a
+     * flat list of {@link ConditionCheckResult} from the inner check pass.
+     */
+    results?: CheckConditionsResult[] | ConditionCheckResult[];
 };
 //# sourceMappingURL=resolution-context.d.ts.map

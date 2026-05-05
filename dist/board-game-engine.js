@@ -6489,6 +6489,9 @@ ${message}`);
     resolveRef: () => resolveRef
   });
 
+  // src/game-factory/move/move-factory.ts
+  var import_core2 = __toESM(require_core());
+
   // node_modules/wackson/wackson.js
   function serialize(state, options) {
     const { duplicates, circular } = walkCyclical(state);
@@ -6603,9 +6606,6 @@ ${message}`);
     path.delete(value2);
     return { duplicates, circular };
   }
-
-  // src/game-factory/move/move-factory.ts
-  var import_core2 = __toESM(require_core());
 
   // src/game-factory/entity.ts
   var Entity = class {
@@ -8715,14 +8715,26 @@ ${message}`);
         return resolved;
       }
       case "InLine": {
-        const resolvedTarget = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
-        expectResolvedEngineEntity(resolvedTarget, "InLine: resolved target must be an EngineEntity");
-        const grid = bankOf(bgioArguments).findParent(resolvedTarget);
-        expectResolvedGrid(grid, "InLine: target must have Grid parent");
-        payload.target = resolvedTarget;
         const sequence = resolveProperties(bgioArguments, rule.sequence, context, "sequence");
+        const resolvedTargetFromRule = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
+        const resolvedTargetRaw = resolvedTargetFromRule ?? payload.target ?? context.target ?? context.originalTarget;
+        if (resolvedTargetRaw === void 0) {
+          return {
+            conditionType: "InLine",
+            sequence
+          };
+        }
+        expectResolvedEngineEntity(resolvedTargetRaw, "InLine: resolved target must be an EngineEntity");
+        const resolvedTarget = resolvedTargetRaw;
+        const maybeGrid = resolvedTarget;
+        let gridCandidate = maybeGrid.spaces ? maybeGrid : bankOf(bgioArguments).findParent(resolvedTarget);
+        expectResolvedGrid(gridCandidate, "InLine: resolved target must be a Grid (or a Space with a Grid parent)");
+        const grid = gridCandidate;
+        payload.target = resolvedTarget;
         const resolved = {
           ...rule,
+          // Always attach the resolved concrete target for downstream checks, even when authoring omits `target`
+          // and we inferred it from ambient `context.target`.
           target: resolvedTarget,
           grid,
           sequence
@@ -8738,8 +8750,11 @@ ${message}`);
         }
         const resolvedTargetRaw = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
         let resolvedTargetEntity;
-        if (resolvedTargetRaw !== void 0) {
-          expectResolvedEngineEntityOrArray(resolvedTargetRaw, "Is: resolved target must be an EngineEntity (or array)");
+        if (resolvedTargetRaw != null) {
+          expectResolvedEngineEntityOrArray(
+            resolvedTargetRaw,
+            "Is: resolved target must be an EngineEntity (or array)"
+          );
           resolvedTargetEntity = resolvedTargetRaw;
           payload.target = resolvedTargetEntity;
         }
@@ -8759,7 +8774,7 @@ ${message}`);
       case "Contains": {
         const resolvedTargetRaw = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
         let resolvedTargetEntity;
-        if (resolvedTargetRaw !== void 0) {
+        if (resolvedTargetRaw != null) {
           expectResolvedEngineEntityOrArray(resolvedTargetRaw, "Contains: resolved target must be an EngineEntity (or array)");
           resolvedTargetEntity = resolvedTargetRaw;
           payload.target = resolvedTargetEntity;
@@ -8774,7 +8789,7 @@ ${message}`);
       case "Not": {
         const resolvedTargetRaw = rule.target === void 0 ? void 0 : resolveProperties(bgioArguments, rule.target, context, "target");
         let resolvedTargetEntity;
-        if (resolvedTargetRaw !== void 0) {
+        if (resolvedTargetRaw != null) {
           expectResolvedEngineEntityOrArray(resolvedTargetRaw, "Not: resolved target must be an EngineEntity (or array)");
           resolvedTargetEntity = resolvedTargetRaw;
           payload.target = resolvedTargetEntity;
@@ -8789,8 +8804,10 @@ ${message}`);
       case "Some":
       case "Every": {
         const resolvedTarget = resolveProperties(bgioArguments, rule.target, context, "target");
-        expectResolvedEngineEntityOrArray(resolvedTarget, `${rule.conditionType}: resolved target must be an EngineEntity (or array)`);
-        payload.target = resolvedTarget;
+        if (resolvedTarget != null) {
+          expectResolvedEngineEntityOrArray(resolvedTarget, `${rule.conditionType}: resolved target must be an EngineEntity (or array)`);
+          payload.target = resolvedTarget;
+        }
         return {
           conditionType: rule.conditionType,
           conditions: rule.conditions
@@ -8950,7 +8967,7 @@ ${message}`);
         return checkConditions(
           bgioArguments,
           rule.conditions,
-          void 0,
+          { target },
           loopContext
         ).conditionsAreMet;
       });
@@ -8977,7 +8994,7 @@ ${message}`);
         return checkConditions(
           bgioArguments,
           rule.conditions,
-          void 0,
+          { target },
           loopContext
         );
       });
@@ -9067,9 +9084,7 @@ ${message}`);
       const entities = space2?.entities || [];
       if (entities.length === 0) return "empty";
       return entities.map((entity) => {
-        const unknownEntity = entity;
-        assertRecord(unknownEntity, "Grid state hashing expects entity to be a plain object");
-        const entityRecord = unknownEntity;
+        const entityRecord = entity;
         const sortedKeys = Object.keys(entity).sort();
         const stateObj = {};
         sortedKeys.forEach((key) => {
@@ -9216,6 +9231,9 @@ ${message}`);
   var InLineCondition = class extends Condition {
     checkCondition(bgioArguments, rule, _payload, context) {
       const { target, grid } = rule;
+      if (grid == null) {
+        return { matches: [], conditionIsMet: false };
+      }
       const { matches: allMatches } = gridContainsSequence(
         bgioArguments,
         grid,
@@ -9223,7 +9241,18 @@ ${message}`);
         context
       );
       const matches2 = allMatches.filter(
-        (sequence) => sequence.some((space2) => space2 === target)
+        (sequence) => sequence.some((space2) => {
+          if (target == null) {
+            return true;
+          }
+          if (space2 === target) return true;
+          if (space2 && typeof space2 === "object" && target && typeof target === "object") {
+            const s2 = space2;
+            const t2 = target;
+            if (t2.entityType === "Grid" && s2.entityType === "Space") return true;
+          }
+          return false;
+        })
       );
       return { matches: matches2, conditionIsMet: !!matches2.length };
     }
@@ -9268,7 +9297,7 @@ ${message}`);
     if (arg && typeof arg === "object") return arg.entityId;
   }
   function simulateMove(bgioArguments, payload, context) {
-    const simulatedG = deserialize(serialize(bgioArguments.G), registry);
+    const simulatedG = cloneBoardgameEngineGWacksonRoundtrip(bgioArguments.G);
     const newBgioArguments = {
       ...bgioArguments,
       G: simulatedG
@@ -9639,7 +9668,15 @@ ${message}`);
       this.bank = bank;
       this.rule = rule;
       this.pool = [];
-      this.remaining = +(rule.count || 1);
+      const rawCount = rule.count;
+      if (rawCount === "Infinity" || rawCount === null) {
+        this.remaining = Infinity;
+      } else if (rawCount === void 0) {
+        this.remaining = 1;
+      } else {
+        const n2 = typeof rawCount === "number" ? rawCount : Number(rawCount);
+        this.remaining = Number.isFinite(n2) && n2 > 0 ? n2 : 1;
+      }
     }
     getOne(bgioArguments, options, context) {
       return this.getMultiple(bgioArguments, 1, options, context)[0];
@@ -9695,11 +9732,74 @@ ${message}`);
   function isRemovableParent(value2) {
     return Boolean(value2 && typeof value2.remove === "function");
   }
+  function slotHasInventory(slot) {
+    const remaining = slot.remaining;
+    return remaining === Infinity || typeof remaining === "number" && remaining > 0;
+  }
+  function isBankDebugEnabled() {
+    if (typeof process !== "undefined" && process.env && process.env.BGE_DEBUG_BANK === "1") return true;
+    try {
+      return Boolean(globalThis.__BGE_DEBUG_BANK__);
+    } catch {
+      return false;
+    }
+  }
+  function bankDebug(...args) {
+    if (!isBankDebugEnabled()) return;
+    console.debug("[BGE][bank]", ...args);
+  }
+  function buildSlotSelectionMatcher(slot, rule) {
+    const request = rule;
+    const slotRule = slot.rule;
+    const base = { ...request };
+    delete base.conditions;
+    delete base.state;
+    delete base.stateGroups;
+    const intersection = {};
+    for (const key of Object.keys(base)) {
+      if (Object.prototype.hasOwnProperty.call(slotRule, key)) {
+        intersection[key] = base[key];
+      }
+    }
+    if (!Object.keys(intersection).length) return void 0;
+    return intersection;
+  }
+  function slotSelectionIntersectionKeyCount(slot, rule) {
+    const matcher = buildSlotSelectionMatcher(slot, rule);
+    return matcher ? Object.keys(matcher).length : 0;
+  }
+  function tryEvaluateSlot(bank, bgioArguments, slot, rule, context) {
+    if (!slotHasInventory(slot)) return { ok: false, reason: "no_inventory" };
+    const example = bank.createSlotExampleEntity(bgioArguments, slot, context);
+    const matcher = buildSlotSelectionMatcher(slot, rule);
+    if (matcher && !entityMatches(bgioArguments, matcher, example, context)) {
+      return { ok: false, reason: "matcher", example };
+    }
+    const conditionsOk = checkConditions(
+      bgioArguments,
+      rule.conditions,
+      { target: example },
+      context
+    ).conditionsAreMet;
+    if (!conditionsOk) return { ok: false, reason: "conditions", example };
+    return { ok: true, example };
+  }
   var Bank = class {
     constructor(entityRules) {
       this.currentEntityId = 0;
       this.tracker = {};
       this.slots = entityRules.map((rule) => new bank_slot_default(rule, this));
+      if (isBankDebugEnabled()) {
+        bankDebug(
+          "new Bank slots",
+          this.slots.map((s2) => ({
+            name: s2.rule.name,
+            entityType: s2.rule.entityType,
+            count: s2.rule.count,
+            remaining: s2.remaining
+          }))
+        );
+      }
     }
     createEntity(definition = {}, options) {
       const Ctor = registry[definition.entityType || "Entity"];
@@ -9780,10 +9880,14 @@ ${message}`);
     findParent(entity) {
       if (!entity || typeof entity !== "object") return void 0;
       const child = entity;
+      const childId = entity.entityId;
       return (0, import_find.default)(this.tracker, (ent) => {
         const ewc = ent;
+        const byId = childId !== void 0 ? Boolean(
+          ewc.entities?.some((e) => e.entityId === childId) || ewc.spaces?.some((e) => e.entityId === childId)
+        ) : false;
         return Boolean(
-          ewc.entities?.includes(child) || ewc.spaces?.includes(child)
+          byId || ewc.entities?.includes(child) || ewc.spaces?.includes(child)
         );
       });
     }
@@ -9806,26 +9910,49 @@ ${message}`);
       ], []);
     }
     getSlot(bgioArguments, rule, context) {
-      return this.slots.find((slot) => {
-        const example = this.createSlotExampleEntity(bgioArguments, slot, context);
-        return checkConditions(
-          bgioArguments,
-          rule.conditions,
-          { target: example },
-          context
-        ).conditionsAreMet;
+      const ranked = this.slots.map((slot) => ({
+        slot,
+        intersectionKeys: slotSelectionIntersectionKeyCount(slot, rule),
+        evald: tryEvaluateSlot(this, bgioArguments, slot, rule, context)
+      })).filter((x2) => x2.evald.ok);
+      if (!ranked.length) {
+        const candidates = this.slots.map((s2) => ({
+          name: s2.rule.name,
+          entityType: s2.rule.entityType,
+          count: s2.rule.count,
+          remaining: s2.remaining,
+          intersectionKeys: slotSelectionIntersectionKeyCount(s2, rule),
+          eval: tryEvaluateSlot(this, bgioArguments, s2, rule, context)
+        }));
+        console.error("[BGE][bank] getSlot: no match", { rule, candidates });
+        bankDebug("getSlot: no match (verbose)", {
+          rule,
+          candidates: candidates.map((c2, idx) => ({
+            ...c2,
+            slotRuleKeys: Object.keys(this.slots[idx].rule)
+          }))
+        });
+        return void 0;
+      }
+      const bestKeys = Math.max(...ranked.map((r2) => r2.intersectionKeys));
+      const best = ranked.filter((r2) => r2.intersectionKeys === bestKeys);
+      best.sort((a2, b2) => {
+        const an2 = String(a2.slot.rule.name ?? "");
+        const bn = String(b2.slot.rule.name ?? "");
+        if (an2 !== bn) return bn.length - an2.length;
+        return this.slots.indexOf(a2.slot) - this.slots.indexOf(b2.slot);
       });
+      return best[0].slot;
     }
     getSlots(bgioArguments, rule, context) {
-      return this.slots.filter((slot) => {
-        const example = this.createSlotExampleEntity(bgioArguments, slot, context);
-        return checkConditions(
-          bgioArguments,
-          rule.conditions,
-          { target: example },
-          context
-        ).conditionsAreMet;
-      });
+      const ranked = this.slots.map((slot) => ({
+        slot,
+        intersectionKeys: slotSelectionIntersectionKeyCount(slot, rule),
+        evald: tryEvaluateSlot(this, bgioArguments, slot, rule, context)
+      })).filter((x2) => x2.evald.ok);
+      if (!ranked.length) return [];
+      const bestKeys = Math.max(...ranked.map((r2) => r2.intersectionKeys));
+      return ranked.filter((r2) => r2.intersectionKeys === bestKeys).sort((a2, b2) => this.slots.indexOf(a2.slot) - this.slots.indexOf(b2.slot)).map((r2) => r2.slot);
     }
     returnToBank(bgioArguments, entity) {
       const parent = this.findParent(entity);
@@ -9854,11 +9981,32 @@ ${message}`);
     Entity
   };
 
+  // src/utils/engine-serde-boundary.ts
+  function reviveBoardgameEngineGFromUnknownRawG(rawG) {
+    if (typeof rawG === "string") {
+      return deserialize(rawG, registry);
+    }
+    return deserialize(serialize(rawG, { deduplicateInstances: true }), registry);
+  }
+  function cloneBoardgameEngineGJsonRoundtrip(G2) {
+    return JSON.parse(serialize(G2));
+  }
+  function cloneBoardgameEngineGWacksonRoundtrip(G2) {
+    return deserialize(serialize(G2), registry);
+  }
+  function deserializeWithRegistry(serializable) {
+    if (typeof serializable === "string") return deserialize(serializable, registry);
+    return deserialize(serialize(serializable, { deduplicateInstances: true }), registry);
+  }
+  function wacksonJsonClone(value2, serializeOptions = { deduplicateInstances: false }) {
+    return JSON.parse(serialize(value2, serializeOptions));
+  }
+
   // src/utils/deserialize-bgio-arguments.ts
   function deserializeBgioArguments(bgioArguments) {
     return {
       ...bgioArguments,
-      G: deserialize(JSON.stringify(bgioArguments.G), registry)
+      G: reviveBoardgameEngineGFromUnknownRawG(bgioArguments.G)
     };
   }
 
@@ -9910,7 +10058,18 @@ ${message}`);
       const moveResults = checkConditions(
         bgioArguments,
         this.rule.conditions,
-        {},
+        // Move-level conditions often omit explicit `target` refs and instead rely on ambient targets
+        // (e.g. `InLine` sequences authored against `moveArguments.*`). When validating a concrete payload,
+        // provide a reasonable default ambient target from the resolved arguments.
+        (() => {
+          const dest = payloadArgs.destination;
+          if (dest !== void 0) return { target: dest };
+          const entity = payloadArgs.entity;
+          if (entity !== void 0) return { target: entity };
+          const source = payloadArgs.source;
+          if (source !== void 0) return { target: source };
+          return {};
+        })(),
         { ...context, moveArguments: payloadArgs }
       );
       return {
@@ -10173,7 +10332,7 @@ ${message}`);
           factoryContext.moveConditionResults.push(result);
         }
       }
-      return JSON.parse(serialize(G2));
+      return cloneBoardgameEngineGJsonRoundtrip(G2);
     };
     compatibleMove.moveInstance = moveInstance;
     return compatibleMove;
@@ -10182,7 +10341,9 @@ ${message}`);
     if (!serializablePayload) {
       return void 0;
     }
-    const payload = deserialize(JSON.stringify(serializablePayload), registry);
+    const payload = deserializeWithRegistry(
+      serializablePayload
+    );
     const rawArgs = payload.arguments ?? {};
     payload.arguments = Object.entries(rawArgs).reduce((acc, [key, argOrEntityId]) => {
       const hydrated = typeof argOrEntityId === "number" ? G2.bank.locate(argOrEntityId) : argOrEntityId;
@@ -14470,7 +14631,7 @@ ${message}`);
 
   // src/types/schemas/authored-rules.schema.ts
   var EntitySchema = z.object({
-    entityType: z.string()
+    entityType: z.string().optional()
   }).passthrough();
   var TurnConfigSchema = z.object({
     minMoves: z.number().optional(),
@@ -14514,7 +14675,9 @@ ${message}`);
     },
     {
       entityType: "Board",
-      name: "sharedBoard"
+      name: "sharedBoard",
+      // Always ensure a single shared board is available for setup-time allocation.
+      count: 1
     },
     {
       name: "playerMarker",
@@ -14522,6 +14685,18 @@ ${message}`);
       count: "Infinity"
     }
   ];
+  function isInvariantEntity(entity) {
+    if (entity.entityType === "Space" && entity.name == null) {
+      return true;
+    }
+    if (entity.entityType === "Board" && entity.name === "sharedBoard") {
+      return true;
+    }
+    if (entity.name === "playerMarker") {
+      return true;
+    }
+    return false;
+  }
   function expandEntities(entities) {
     return [
       ...invariantEntities,
@@ -14738,7 +14913,10 @@ ${message}`);
     parseOrThrow(AuthoredGameRulesSchema, gameRules, "expandGameRules: invalid authored game rules");
     const rules = transformJSON(gameRules, transformationRules);
     const entities = expandEntities(rules.entities);
-    const sharedBoard = rules.sharedBoard ?? entities;
+    const sharedBoard = rules.sharedBoard ?? // Default: place authored entities onto the shared board at setup.
+    // Do not include invariant engine entities (bank slot templates), or setup will try to
+    // allocate/placement-drive engine scaffolding incorrectly.
+    entities.filter((e) => !isInvariantEntity(e));
     const turn = rules.turn ?? { minMoves: 1, maxMoves: 1 };
     const expandedTopLevel = expandInitialPlacements(
       {
@@ -14848,7 +15026,7 @@ ${message}`);
           {}
         );
       });
-      return JSON.parse(serialize(initialState));
+      return cloneBoardgameEngineGJsonRoundtrip(initialState);
     };
     if (rules.moves) {
       game.moves = createMoves(rules.moves, game);
@@ -14883,7 +15061,7 @@ ${message}`);
             }
           }
         });
-        return JSON.parse(serialize(G2));
+        return cloneBoardgameEngineGJsonRoundtrip(G2);
       };
     }
     return game;
@@ -14920,7 +15098,7 @@ ${message}`);
       newBgioArguments.G._meta.passedPlayers = newBgioArguments.G._meta.passedPlayers.filter((p2) => p2 !== newBgioArguments.ctx.currentPlayer);
       doMoves(newBgioArguments, turnRule.initialMoves, { game });
       doMoves(newBgioArguments, stageRule?.initialMoves, { game });
-      return JSON.parse(serialize(newBgioArguments.G));
+      return cloneBoardgameEngineGJsonRoundtrip(newBgioArguments.G);
     };
     if (turnRule.stages) {
       Object.entries(turnRule.stages).forEach(([stageName, stageRule]) => {
@@ -14953,7 +15131,7 @@ ${message}`);
       doMoves(newBgioArguments, phaseRule.initialMoves, { game });
       newBgioArguments.G._meta.currentPhaseHasBeenSetUp = true;
       newBgioArguments.G._meta.nextPhase = phaseRule.next;
-      return JSON.parse(serialize(newBgioArguments.G));
+      return cloneBoardgameEngineGJsonRoundtrip(newBgioArguments.G);
     };
     if (phaseRule.endIf) {
       const phaseEndIf = phaseRule.endIf;
@@ -31416,7 +31594,7 @@ ${message}`);
     return id;
   };
 
-  // node_modules/@mnbroatch/boardgame.io/dist/esm/client-2e653027.js
+  // node_modules/@mnbroatch/boardgame.io/dist/esm/client-4a844c26.js
   var DummyImpl = class extends Transport {
     connect() {
     }
@@ -31862,7 +32040,7 @@ ${message}`);
           return { ...acc, [key]: prepared };
         }, {})
       };
-      return JSON.parse(serialize(payloadCopy, { deduplicateInstances: false }));
+      return wacksonJsonClone(payloadCopy, { deduplicateInstances: false });
     } else {
       return payload;
     }
@@ -31946,12 +32124,13 @@ ${message}`);
         matchID,
         playerID,
         credentials,
-        multiplayer = SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } })
+        multiplayer
       } = this.options;
       try {
-        const clientOptions = !credentials ? { game: this.game, numPlayers, debug } : {
+        const effectivePlayerID = credentials && playerID === void 0 ? "0" : playerID;
+        const clientOptions = !credentials ? { game: this.game, numPlayers, debug, ...effectivePlayerID == null ? {} : { playerID: effectivePlayerID } } : {
           game: this.game,
-          multiplayer,
+          multiplayer: multiplayer ?? SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
           matchID,
           ...playerID == null ? {} : { playerID },
           credentials,
@@ -31973,7 +32152,7 @@ ${message}`);
       const bgioState = client?.getState();
       if (!bgioState) return { status: "empty" };
       if (!client) return { status: "empty" };
-      const revivedG = deserialize(JSON.stringify(bgioState.G), registry);
+      const revivedG = reviveBoardgameEngineGFromUnknownRawG(bgioState.G);
       const state = toClientResolveStateLike(bgioState, revivedG);
       const gameover = this.optimisticWinner ?? state?.ctx?.gameover;
       const currentMoves = gameover ? [] : getCurrentMoves(state, client);
@@ -32115,7 +32294,10 @@ ${message}`);
       { moveInstance }
     );
     const endIf = game.endIf;
-    return endIf?.({ ...state, G: JSON.parse(serialize(simulatedG)) });
+    return endIf?.({
+      ...state,
+      G: cloneBoardgameEngineGJsonRoundtrip(simulatedG)
+    });
   }
 
   // src/client/internal/external-client.ts
@@ -32140,12 +32322,13 @@ ${message}`);
         matchID,
         playerID,
         credentials,
-        multiplayer = SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } })
+        multiplayer
       } = this.options;
       try {
-        const clientOptions = !credentials ? { game: this.game, numPlayers, debug } : {
+        const effectivePlayerID = playerID === void 0 ? "0" : playerID;
+        const clientOptions = !credentials ? { game: this.game, numPlayers, debug, ...effectivePlayerID == null ? {} : { playerID: effectivePlayerID } } : {
           game: this.game,
-          multiplayer,
+          multiplayer: multiplayer ?? SocketIO({ server, socketOpts: { transports: ["websocket", "polling"] } }),
           matchID,
           ...playerID == null ? {} : { playerID },
           credentials,

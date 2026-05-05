@@ -6,11 +6,11 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 
 const FIXTURES = {
-  minimal: '/e2e/fixtures/bge-minimal.html',
-  ttt: '/e2e/fixtures/bge-ttt.html',
-  checkers: '/e2e/fixtures/bge-checkers.html',
+  minimal: '/tests/e2e/fixtures/bge-minimal.html',
+  ttt: '/tests/e2e/fixtures/bge-ttt.html',
+  checkers: '/tests/e2e/fixtures/bge-checkers.html',
 }
-const MINIMAL_GAME_PATH = join(process.cwd(), 'e2e', 'fixtures', 'minimal-game.json')
+const MINIMAL_GAME_PATH = join(process.cwd(), 'tests', 'e2e', 'fixtures', 'minimal-game.json')
 const TTT_JSON_PATH = join(process.cwd(), 'examples', 'tic-tac-toe.json')
 const CHECKERS_JSON_PATH = join(process.cwd(), 'examples', 'checkers.json')
 

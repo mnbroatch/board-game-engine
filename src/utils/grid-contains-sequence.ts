@@ -7,7 +7,6 @@ import type { EngineEntity } from "../types/runtime-entity.js";
 import checkConditions from "./check-conditions.js";
 import type { BgioReadonlyState, BgioResolveState } from "./bgio-resolve-types.js";
 import type Grid from "../game-factory/space-group/grid.js";
-import { assertRecord } from "./type-asserts.js";
 
 export type SequenceChunk = {
   count?: number;
@@ -47,9 +46,9 @@ function getGridStateKey (grid: GridLike) {
     if (entities.length === 0) return "empty";
 
     return entities.map((entity: GridEntity) => {
-      const unknownEntity: unknown = entity;
-      assertRecord(unknownEntity, "Grid state hashing expects entity to be a plain object");
-      const entityRecord = unknownEntity;
+      // Entities may be EngineEntity class instances rather than plain records.
+      // We only need stable JSON hashing, so treat them as records via key projection.
+      const entityRecord = entity as unknown as Record<string, unknown>;
       const sortedKeys = Object.keys(entity).sort();
       const stateObj: Record<string, unknown> = {};
       sortedKeys.forEach((key) => {

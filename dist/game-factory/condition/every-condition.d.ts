@@ -5,7 +5,7 @@ import type { ResolvedConditionRule } from "../../types/resolved-condition-types
 export default class EveryCondition extends Condition {
     checkCondition(bgioArguments: BgioReadonlyState | BgioResolveState, rule: ResolvedConditionRule, conditionPayload: ConditionPayload, context: ConditionContext): {
         conditionIsMet: boolean;
-        results: import("../../utils/check-conditions.js").CheckConditionsResult[];
+        results: import("../../index.js").CheckConditionsResult[];
     };
 }
 //# sourceMappingURL=every-condition.d.ts.map
