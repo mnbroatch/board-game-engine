@@ -41,7 +41,7 @@ export default function moveFactory(moveRule, game) {
       }
     }
 
-    return JSON.parse(serialize(G))
+    return JSON.parse(serialize(G, {registry}))
   }
   compatibleMove.moveInstance = moveInstance
   return compatibleMove

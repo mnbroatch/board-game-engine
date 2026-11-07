@@ -28,2534 +28,6 @@ var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__
   mod2
 ));
 
-// node_modules/immer/dist/immer.cjs.development.js
-var require_immer_cjs_development = __commonJS({
-  "node_modules/immer/dist/immer.cjs.development.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var _ref;
-    var hasSymbol = typeof Symbol !== "undefined" && typeof /* @__PURE__ */ Symbol("x") === "symbol";
-    var hasMap = typeof Map !== "undefined";
-    var hasSet = typeof Set !== "undefined";
-    var hasProxies = typeof Proxy !== "undefined" && typeof Proxy.revocable !== "undefined" && typeof Reflect !== "undefined";
-    var NOTHING = hasSymbol ? /* @__PURE__ */ Symbol.for("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
-    var DRAFTABLE = hasSymbol ? /* @__PURE__ */ Symbol.for("immer-draftable") : "__$immer_draftable";
-    var DRAFT_STATE = hasSymbol ? /* @__PURE__ */ Symbol.for("immer-state") : "__$immer_state";
-    var iteratorSymbol = typeof Symbol != "undefined" && Symbol.iterator || "@@iterator";
-    var errors = {
-      0: "Illegal state",
-      1: "Immer drafts cannot have computed properties",
-      2: "This object has been frozen and should not be mutated",
-      3: function _2(data) {
-        return "Cannot use a proxy that has been revoked. Did you pass an object from inside an immer function to an async process? " + data;
-      },
-      4: "An immer producer returned a new value *and* modified its draft. Either return a new value *or* modify the draft.",
-      5: "Immer forbids circular references",
-      6: "The first or second argument to `produce` must be a function",
-      7: "The third argument to `produce` must be a function or undefined",
-      8: "First argument to `createDraft` must be a plain object, an array, or an immerable object",
-      9: "First argument to `finishDraft` must be a draft returned by `createDraft`",
-      10: "The given draft is already finalized",
-      11: "Object.defineProperty() cannot be used on an Immer draft",
-      12: "Object.setPrototypeOf() cannot be used on an Immer draft",
-      13: "Immer only supports deleting array indices",
-      14: "Immer only supports setting array indices and the 'length' property",
-      15: function _2(path) {
-        return "Cannot apply patch, path doesn't resolve: " + path;
-      },
-      16: 'Sets cannot have "replace" patches.',
-      17: function _2(op) {
-        return "Unsupported patch operation: " + op;
-      },
-      18: function _2(plugin2) {
-        return "The plugin for '" + plugin2 + "' has not been loaded into Immer. To enable the plugin, import and call `enable" + plugin2 + "()` when initializing your application.";
-      },
-      20: "Cannot use proxies if Proxy, Proxy.revocable or Reflect are not available",
-      21: function _2(thing) {
-        return "produce can only be called on things that are draftable: plain objects, arrays, Map, Set or classes that are marked with '[immerable]: true'. Got '" + thing + "'";
-      },
-      22: function _2(thing) {
-        return "'current' expects a draft, got: " + thing;
-      },
-      23: function _2(thing) {
-        return "'original' expects a draft, got: " + thing;
-      },
-      24: "Patching reserved attributes like __proto__, prototype and constructor is not allowed"
-    };
-    function die(error2) {
-      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
-      }
-      {
-        var e = errors[error2];
-        var msg = !e ? "unknown error nr: " + error2 : typeof e === "function" ? e.apply(null, args) : e;
-        throw new Error("[Immer] " + msg);
-      }
-    }
-    function isDraft(value2) {
-      return !!value2 && !!value2[DRAFT_STATE];
-    }
-    function isDraftable(value2) {
-      var _value$constructor;
-      if (!value2) return false;
-      return isPlainObject6(value2) || Array.isArray(value2) || !!value2[DRAFTABLE] || !!((_value$constructor = value2.constructor) === null || _value$constructor === void 0 ? void 0 : _value$constructor[DRAFTABLE]) || isMap(value2) || isSet(value2);
-    }
-    var objectCtorString = /* @__PURE__ */ Object.prototype.constructor.toString();
-    function isPlainObject6(value2) {
-      if (!value2 || typeof value2 !== "object") return false;
-      var proto = Object.getPrototypeOf(value2);
-      if (proto === null) {
-        return true;
-      }
-      var Ctor = Object.hasOwnProperty.call(proto, "constructor") && proto.constructor;
-      if (Ctor === Object) return true;
-      return typeof Ctor == "function" && Function.toString.call(Ctor) === objectCtorString;
-    }
-    function original(value2) {
-      if (!isDraft(value2)) die(23, value2);
-      return value2[DRAFT_STATE].base_;
-    }
-    var ownKeys2 = typeof Reflect !== "undefined" && Reflect.ownKeys ? Reflect.ownKeys : typeof Object.getOwnPropertySymbols !== "undefined" ? function(obj) {
-      return Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertySymbols(obj));
-    } : (
-      /* istanbul ignore next */
-      Object.getOwnPropertyNames
-    );
-    var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors || function getOwnPropertyDescriptors2(target) {
-      var res = {};
-      ownKeys2(target).forEach(function(key) {
-        res[key] = Object.getOwnPropertyDescriptor(target, key);
-      });
-      return res;
-    };
-    function each(obj, iter, enumerableOnly) {
-      if (enumerableOnly === void 0) {
-        enumerableOnly = false;
-      }
-      if (getArchtype(obj) === 0) {
-        (enumerableOnly ? Object.keys : ownKeys2)(obj).forEach(function(key) {
-          if (!enumerableOnly || typeof key !== "symbol") iter(key, obj[key], obj);
-        });
-      } else {
-        obj.forEach(function(entry, index) {
-          return iter(index, entry, obj);
-        });
-      }
-    }
-    function getArchtype(thing) {
-      var state = thing[DRAFT_STATE];
-      return state ? state.type_ > 3 ? state.type_ - 4 : state.type_ : Array.isArray(thing) ? 1 : isMap(thing) ? 2 : isSet(thing) ? 3 : 0;
-    }
-    function has(thing, prop) {
-      return getArchtype(thing) === 2 ? thing.has(prop) : Object.prototype.hasOwnProperty.call(thing, prop);
-    }
-    function get2(thing, prop) {
-      return getArchtype(thing) === 2 ? thing.get(prop) : thing[prop];
-    }
-    function set2(thing, propOrOldValue, value2) {
-      var t2 = getArchtype(thing);
-      if (t2 === 2) thing.set(propOrOldValue, value2);
-      else if (t2 === 3) {
-        thing.add(value2);
-      } else thing[propOrOldValue] = value2;
-    }
-    function is(x2, y2) {
-      if (x2 === y2) {
-        return x2 !== 0 || 1 / x2 === 1 / y2;
-      } else {
-        return x2 !== x2 && y2 !== y2;
-      }
-    }
-    function isMap(target) {
-      return hasMap && target instanceof Map;
-    }
-    function isSet(target) {
-      return hasSet && target instanceof Set;
-    }
-    function latest(state) {
-      return state.copy_ || state.base_;
-    }
-    function shallowCopy(base) {
-      if (Array.isArray(base)) return Array.prototype.slice.call(base);
-      var descriptors = getOwnPropertyDescriptors(base);
-      delete descriptors[DRAFT_STATE];
-      var keys2 = ownKeys2(descriptors);
-      for (var i2 = 0; i2 < keys2.length; i2++) {
-        var key = keys2[i2];
-        var desc = descriptors[key];
-        if (desc.writable === false) {
-          desc.writable = true;
-          desc.configurable = true;
-        }
-        if (desc.get || desc.set) descriptors[key] = {
-          configurable: true,
-          writable: true,
-          enumerable: desc.enumerable,
-          value: base[key]
-        };
-      }
-      return Object.create(Object.getPrototypeOf(base), descriptors);
-    }
-    function freeze(obj, deep) {
-      if (deep === void 0) {
-        deep = false;
-      }
-      if (isFrozen(obj) || isDraft(obj) || !isDraftable(obj)) return obj;
-      if (getArchtype(obj) > 1) {
-        obj.set = obj.add = obj.clear = obj.delete = dontMutateFrozenCollections;
-      }
-      Object.freeze(obj);
-      if (deep) each(obj, function(key, value2) {
-        return freeze(value2, true);
-      }, true);
-      return obj;
-    }
-    function dontMutateFrozenCollections() {
-      die(2);
-    }
-    function isFrozen(obj) {
-      if (obj == null || typeof obj !== "object") return true;
-      return Object.isFrozen(obj);
-    }
-    var plugins = {};
-    function getPlugin(pluginKey) {
-      var plugin2 = plugins[pluginKey];
-      if (!plugin2) {
-        die(18, pluginKey);
-      }
-      return plugin2;
-    }
-    function loadPlugin(pluginKey, implementation) {
-      if (!plugins[pluginKey]) plugins[pluginKey] = implementation;
-    }
-    var currentScope;
-    function getCurrentScope() {
-      if (!currentScope) die(0);
-      return currentScope;
-    }
-    function createScope(parent_, immer_) {
-      return {
-        drafts_: [],
-        parent_,
-        immer_,
-        // Whenever the modified draft contains a draft from another scope, we
-        // need to prevent auto-freezing so the unowned draft can be finalized.
-        canAutoFreeze_: true,
-        unfinalizedDrafts_: 0
-      };
-    }
-    function usePatchesInScope(scope, patchListener) {
-      if (patchListener) {
-        getPlugin("Patches");
-        scope.patches_ = [];
-        scope.inversePatches_ = [];
-        scope.patchListener_ = patchListener;
-      }
-    }
-    function revokeScope(scope) {
-      leaveScope(scope);
-      scope.drafts_.forEach(revokeDraft);
-      scope.drafts_ = null;
-    }
-    function leaveScope(scope) {
-      if (scope === currentScope) {
-        currentScope = scope.parent_;
-      }
-    }
-    function enterScope(immer2) {
-      return currentScope = createScope(currentScope, immer2);
-    }
-    function revokeDraft(draft) {
-      var state = draft[DRAFT_STATE];
-      if (state.type_ === 0 || state.type_ === 1) state.revoke_();
-      else state.revoked_ = true;
-    }
-    function processResult(result, scope) {
-      scope.unfinalizedDrafts_ = scope.drafts_.length;
-      var baseDraft = scope.drafts_[0];
-      var isReplaced = result !== void 0 && result !== baseDraft;
-      if (!scope.immer_.useProxies_) getPlugin("ES5").willFinalizeES5_(scope, result, isReplaced);
-      if (isReplaced) {
-        if (baseDraft[DRAFT_STATE].modified_) {
-          revokeScope(scope);
-          die(4);
-        }
-        if (isDraftable(result)) {
-          result = finalize(scope, result);
-          if (!scope.parent_) maybeFreeze(scope, result);
-        }
-        if (scope.patches_) {
-          getPlugin("Patches").generateReplacementPatches_(baseDraft[DRAFT_STATE].base_, result, scope.patches_, scope.inversePatches_);
-        }
-      } else {
-        result = finalize(scope, baseDraft, []);
-      }
-      revokeScope(scope);
-      if (scope.patches_) {
-        scope.patchListener_(scope.patches_, scope.inversePatches_);
-      }
-      return result !== NOTHING ? result : void 0;
-    }
-    function finalize(rootScope, value2, path) {
-      if (isFrozen(value2)) return value2;
-      var state = value2[DRAFT_STATE];
-      if (!state) {
-        each(
-          value2,
-          function(key, childValue) {
-            return finalizeProperty(rootScope, state, value2, key, childValue, path);
-          },
-          true
-          // See #590, don't recurse into non-enumerable of non drafted objects
-        );
-        return value2;
-      }
-      if (state.scope_ !== rootScope) return value2;
-      if (!state.modified_) {
-        maybeFreeze(rootScope, state.base_, true);
-        return state.base_;
-      }
-      if (!state.finalized_) {
-        state.finalized_ = true;
-        state.scope_.unfinalizedDrafts_--;
-        var result = (
-          // For ES5, create a good copy from the draft first, with added keys and without deleted keys.
-          state.type_ === 4 || state.type_ === 5 ? state.copy_ = shallowCopy(state.draft_) : state.copy_
-        );
-        var resultEach = result;
-        var isSet2 = false;
-        if (state.type_ === 3) {
-          resultEach = new Set(result);
-          result.clear();
-          isSet2 = true;
-        }
-        each(resultEach, function(key, childValue) {
-          return finalizeProperty(rootScope, state, result, key, childValue, path, isSet2);
-        });
-        maybeFreeze(rootScope, result, false);
-        if (path && rootScope.patches_) {
-          getPlugin("Patches").generatePatches_(state, path, rootScope.patches_, rootScope.inversePatches_);
-        }
-      }
-      return state.copy_;
-    }
-    function finalizeProperty(rootScope, parentState, targetObject, prop, childValue, rootPath, targetIsSet) {
-      if (childValue === targetObject) die(5);
-      if (isDraft(childValue)) {
-        var path = rootPath && parentState && parentState.type_ !== 3 && // Set objects are atomic since they have no keys.
-        !has(parentState.assigned_, prop) ? rootPath.concat(prop) : void 0;
-        var res = finalize(rootScope, childValue, path);
-        set2(targetObject, prop, res);
-        if (isDraft(res)) {
-          rootScope.canAutoFreeze_ = false;
-        } else return;
-      } else if (targetIsSet) {
-        targetObject.add(childValue);
-      }
-      if (isDraftable(childValue) && !isFrozen(childValue)) {
-        if (!rootScope.immer_.autoFreeze_ && rootScope.unfinalizedDrafts_ < 1) {
-          return;
-        }
-        finalize(rootScope, childValue);
-        if (!parentState || !parentState.scope_.parent_) maybeFreeze(rootScope, childValue);
-      }
-    }
-    function maybeFreeze(scope, value2, deep) {
-      if (deep === void 0) {
-        deep = false;
-      }
-      if (!scope.parent_ && scope.immer_.autoFreeze_ && scope.canAutoFreeze_) {
-        freeze(value2, deep);
-      }
-    }
-    function createProxyProxy(base, parent) {
-      var isArray = Array.isArray(base);
-      var state = {
-        type_: isArray ? 1 : 0,
-        // Track which produce call this is associated with.
-        scope_: parent ? parent.scope_ : getCurrentScope(),
-        // True for both shallow and deep changes.
-        modified_: false,
-        // Used during finalization.
-        finalized_: false,
-        // Track which properties have been assigned (true) or deleted (false).
-        assigned_: {},
-        // The parent draft state.
-        parent_: parent,
-        // The base state.
-        base_: base,
-        // The base proxy.
-        draft_: null,
-        // The base copy with any updated values.
-        copy_: null,
-        // Called by the `produce` function.
-        revoke_: null,
-        isManual_: false
-      };
-      var target = state;
-      var traps = objectTraps;
-      if (isArray) {
-        target = [state];
-        traps = arrayTraps;
-      }
-      var _Proxy$revocable = Proxy.revocable(target, traps), revoke = _Proxy$revocable.revoke, proxy = _Proxy$revocable.proxy;
-      state.draft_ = proxy;
-      state.revoke_ = revoke;
-      return proxy;
-    }
-    var objectTraps = {
-      get: function get3(state, prop) {
-        if (prop === DRAFT_STATE) return state;
-        var source = latest(state);
-        if (!has(source, prop)) {
-          return readPropFromProto(state, source, prop);
-        }
-        var value2 = source[prop];
-        if (state.finalized_ || !isDraftable(value2)) {
-          return value2;
-        }
-        if (value2 === peek(state.base_, prop)) {
-          prepareCopy(state);
-          return state.copy_[prop] = createProxy(state.scope_.immer_, value2, state);
-        }
-        return value2;
-      },
-      has: function has2(state, prop) {
-        return prop in latest(state);
-      },
-      ownKeys: function ownKeys3(state) {
-        return Reflect.ownKeys(latest(state));
-      },
-      set: function set3(state, prop, value2) {
-        var desc = getDescriptorFromProto(latest(state), prop);
-        if (desc === null || desc === void 0 ? void 0 : desc.set) {
-          desc.set.call(state.draft_, value2);
-          return true;
-        }
-        if (!state.modified_) {
-          var current2 = peek(latest(state), prop);
-          var currentState = current2 === null || current2 === void 0 ? void 0 : current2[DRAFT_STATE];
-          if (currentState && currentState.base_ === value2) {
-            state.copy_[prop] = value2;
-            state.assigned_[prop] = false;
-            return true;
-          }
-          if (is(value2, current2) && (value2 !== void 0 || has(state.base_, prop))) return true;
-          prepareCopy(state);
-          markChanged(state);
-        }
-        if (state.copy_[prop] === value2 && // special case: handle new props with value 'undefined'
-        (value2 !== void 0 || prop in state.copy_) || // special case: NaN
-        Number.isNaN(value2) && Number.isNaN(state.copy_[prop])) return true;
-        state.copy_[prop] = value2;
-        state.assigned_[prop] = true;
-        return true;
-      },
-      deleteProperty: function deleteProperty(state, prop) {
-        if (peek(state.base_, prop) !== void 0 || prop in state.base_) {
-          state.assigned_[prop] = false;
-          prepareCopy(state);
-          markChanged(state);
-        } else {
-          delete state.assigned_[prop];
-        }
-        if (state.copy_) delete state.copy_[prop];
-        return true;
-      },
-      // Note: We never coerce `desc.value` into an Immer draft, because we can't make
-      // the same guarantee in ES5 mode.
-      getOwnPropertyDescriptor: function getOwnPropertyDescriptor(state, prop) {
-        var owner = latest(state);
-        var desc = Reflect.getOwnPropertyDescriptor(owner, prop);
-        if (!desc) return desc;
-        return {
-          writable: true,
-          configurable: state.type_ !== 1 || prop !== "length",
-          enumerable: desc.enumerable,
-          value: owner[prop]
-        };
-      },
-      defineProperty: function defineProperty() {
-        die(11);
-      },
-      getPrototypeOf: function getPrototypeOf(state) {
-        return Object.getPrototypeOf(state.base_);
-      },
-      setPrototypeOf: function setPrototypeOf() {
-        die(12);
-      }
-    };
-    var arrayTraps = {};
-    each(objectTraps, function(key, fn2) {
-      arrayTraps[key] = function() {
-        arguments[0] = arguments[0][0];
-        return fn2.apply(this, arguments);
-      };
-    });
-    arrayTraps.deleteProperty = function(state, prop) {
-      if (isNaN(parseInt(prop))) die(13);
-      return arrayTraps.set.call(this, state, prop, void 0);
-    };
-    arrayTraps.set = function(state, prop, value2) {
-      if (prop !== "length" && isNaN(parseInt(prop))) die(14);
-      return objectTraps.set.call(this, state[0], prop, value2, state[0]);
-    };
-    function peek(draft, prop) {
-      var state = draft[DRAFT_STATE];
-      var source = state ? latest(state) : draft;
-      return source[prop];
-    }
-    function readPropFromProto(state, source, prop) {
-      var _desc$get;
-      var desc = getDescriptorFromProto(source, prop);
-      return desc ? "value" in desc ? desc.value : (
-        // This is a very special case, if the prop is a getter defined by the
-        // prototype, we should invoke it with the draft as context!
-        (_desc$get = desc.get) === null || _desc$get === void 0 ? void 0 : _desc$get.call(state.draft_)
-      ) : void 0;
-    }
-    function getDescriptorFromProto(source, prop) {
-      if (!(prop in source)) return void 0;
-      var proto = Object.getPrototypeOf(source);
-      while (proto) {
-        var desc = Object.getOwnPropertyDescriptor(proto, prop);
-        if (desc) return desc;
-        proto = Object.getPrototypeOf(proto);
-      }
-      return void 0;
-    }
-    function markChanged(state) {
-      if (!state.modified_) {
-        state.modified_ = true;
-        if (state.parent_) {
-          markChanged(state.parent_);
-        }
-      }
-    }
-    function prepareCopy(state) {
-      if (!state.copy_) {
-        state.copy_ = shallowCopy(state.base_);
-      }
-    }
-    var Immer = /* @__PURE__ */ function() {
-      function Immer2(config) {
-        var _this = this;
-        this.useProxies_ = hasProxies;
-        this.autoFreeze_ = true;
-        this.produce = function(base, recipe, patchListener) {
-          if (typeof base === "function" && typeof recipe !== "function") {
-            var defaultBase = recipe;
-            recipe = base;
-            var self2 = _this;
-            return function curriedProduce(base2) {
-              var _this2 = this;
-              if (base2 === void 0) {
-                base2 = defaultBase;
-              }
-              for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                args[_key - 1] = arguments[_key];
-              }
-              return self2.produce(base2, function(draft) {
-                var _recipe;
-                return (_recipe = recipe).call.apply(_recipe, [_this2, draft].concat(args));
-              });
-            };
-          }
-          if (typeof recipe !== "function") die(6);
-          if (patchListener !== void 0 && typeof patchListener !== "function") die(7);
-          var result;
-          if (isDraftable(base)) {
-            var scope = enterScope(_this);
-            var proxy = createProxy(_this, base, void 0);
-            var hasError = true;
-            try {
-              result = recipe(proxy);
-              hasError = false;
-            } finally {
-              if (hasError) revokeScope(scope);
-              else leaveScope(scope);
-            }
-            if (typeof Promise !== "undefined" && result instanceof Promise) {
-              return result.then(function(result2) {
-                usePatchesInScope(scope, patchListener);
-                return processResult(result2, scope);
-              }, function(error2) {
-                revokeScope(scope);
-                throw error2;
-              });
-            }
-            usePatchesInScope(scope, patchListener);
-            return processResult(result, scope);
-          } else if (!base || typeof base !== "object") {
-            result = recipe(base);
-            if (result === void 0) result = base;
-            if (result === NOTHING) result = void 0;
-            if (_this.autoFreeze_) freeze(result, true);
-            if (patchListener) {
-              var p2 = [];
-              var ip = [];
-              getPlugin("Patches").generateReplacementPatches_(base, result, p2, ip);
-              patchListener(p2, ip);
-            }
-            return result;
-          } else die(21, base);
-        };
-        this.produceWithPatches = function(base, recipe) {
-          if (typeof base === "function") {
-            return function(state) {
-              for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-                args[_key2 - 1] = arguments[_key2];
-              }
-              return _this.produceWithPatches(state, function(draft) {
-                return base.apply(void 0, [draft].concat(args));
-              });
-            };
-          }
-          var patches, inversePatches;
-          var result = _this.produce(base, recipe, function(p2, ip) {
-            patches = p2;
-            inversePatches = ip;
-          });
-          if (typeof Promise !== "undefined" && result instanceof Promise) {
-            return result.then(function(nextState) {
-              return [nextState, patches, inversePatches];
-            });
-          }
-          return [result, patches, inversePatches];
-        };
-        if (typeof (config === null || config === void 0 ? void 0 : config.useProxies) === "boolean") this.setUseProxies(config.useProxies);
-        if (typeof (config === null || config === void 0 ? void 0 : config.autoFreeze) === "boolean") this.setAutoFreeze(config.autoFreeze);
-      }
-      var _proto = Immer2.prototype;
-      _proto.createDraft = function createDraft2(base) {
-        if (!isDraftable(base)) die(8);
-        if (isDraft(base)) base = current(base);
-        var scope = enterScope(this);
-        var proxy = createProxy(this, base, void 0);
-        proxy[DRAFT_STATE].isManual_ = true;
-        leaveScope(scope);
-        return proxy;
-      };
-      _proto.finishDraft = function finishDraft2(draft, patchListener) {
-        var state = draft && draft[DRAFT_STATE];
-        {
-          if (!state || !state.isManual_) die(9);
-          if (state.finalized_) die(10);
-        }
-        var scope = state.scope_;
-        usePatchesInScope(scope, patchListener);
-        return processResult(void 0, scope);
-      };
-      _proto.setAutoFreeze = function setAutoFreeze2(value2) {
-        this.autoFreeze_ = value2;
-      };
-      _proto.setUseProxies = function setUseProxies2(value2) {
-        if (value2 && !hasProxies) {
-          die(20);
-        }
-        this.useProxies_ = value2;
-      };
-      _proto.applyPatches = function applyPatches2(base, patches) {
-        var i2;
-        for (i2 = patches.length - 1; i2 >= 0; i2--) {
-          var patch2 = patches[i2];
-          if (patch2.path.length === 0 && patch2.op === "replace") {
-            base = patch2.value;
-            break;
-          }
-        }
-        if (i2 > -1) {
-          patches = patches.slice(i2 + 1);
-        }
-        var applyPatchesImpl = getPlugin("Patches").applyPatches_;
-        if (isDraft(base)) {
-          return applyPatchesImpl(base, patches);
-        }
-        return this.produce(base, function(draft) {
-          return applyPatchesImpl(draft, patches);
-        });
-      };
-      return Immer2;
-    }();
-    function createProxy(immer2, value2, parent) {
-      var draft = isMap(value2) ? getPlugin("MapSet").proxyMap_(value2, parent) : isSet(value2) ? getPlugin("MapSet").proxySet_(value2, parent) : immer2.useProxies_ ? createProxyProxy(value2, parent) : getPlugin("ES5").createES5Proxy_(value2, parent);
-      var scope = parent ? parent.scope_ : getCurrentScope();
-      scope.drafts_.push(draft);
-      return draft;
-    }
-    function current(value2) {
-      if (!isDraft(value2)) die(22, value2);
-      return currentImpl(value2);
-    }
-    function currentImpl(value2) {
-      if (!isDraftable(value2)) return value2;
-      var state = value2[DRAFT_STATE];
-      var copy2;
-      var archType = getArchtype(value2);
-      if (state) {
-        if (!state.modified_ && (state.type_ < 4 || !getPlugin("ES5").hasChanges_(state))) return state.base_;
-        state.finalized_ = true;
-        copy2 = copyHelper(value2, archType);
-        state.finalized_ = false;
-      } else {
-        copy2 = copyHelper(value2, archType);
-      }
-      each(copy2, function(key, childValue) {
-        if (state && get2(state.base_, key) === childValue) return;
-        set2(copy2, key, currentImpl(childValue));
-      });
-      return archType === 3 ? new Set(copy2) : copy2;
-    }
-    function copyHelper(value2, archType) {
-      switch (archType) {
-        case 2:
-          return new Map(value2);
-        case 3:
-          return Array.from(value2);
-      }
-      return shallowCopy(value2);
-    }
-    function enableES5() {
-      function willFinalizeES5_(scope, result, isReplaced) {
-        if (!isReplaced) {
-          if (scope.patches_) {
-            markChangesRecursively(scope.drafts_[0]);
-          }
-          markChangesSweep(scope.drafts_);
-        } else if (isDraft(result) && result[DRAFT_STATE].scope_ === scope) {
-          markChangesSweep(scope.drafts_);
-        }
-      }
-      function createES5Draft(isArray, base) {
-        if (isArray) {
-          var draft = new Array(base.length);
-          for (var i2 = 0; i2 < base.length; i2++) {
-            Object.defineProperty(draft, "" + i2, proxyProperty(i2, true));
-          }
-          return draft;
-        } else {
-          var _descriptors = getOwnPropertyDescriptors(base);
-          delete _descriptors[DRAFT_STATE];
-          var keys2 = ownKeys2(_descriptors);
-          for (var _i = 0; _i < keys2.length; _i++) {
-            var key = keys2[_i];
-            _descriptors[key] = proxyProperty(key, isArray || !!_descriptors[key].enumerable);
-          }
-          return Object.create(Object.getPrototypeOf(base), _descriptors);
-        }
-      }
-      function createES5Proxy_(base, parent) {
-        var isArray = Array.isArray(base);
-        var draft = createES5Draft(isArray, base);
-        var state = {
-          type_: isArray ? 5 : 4,
-          scope_: parent ? parent.scope_ : getCurrentScope(),
-          modified_: false,
-          finalized_: false,
-          assigned_: {},
-          parent_: parent,
-          // base is the object we are drafting
-          base_: base,
-          // draft is the draft object itself, that traps all reads and reads from either the base (if unmodified) or copy (if modified)
-          draft_: draft,
-          copy_: null,
-          revoked_: false,
-          isManual_: false
-        };
-        Object.defineProperty(draft, DRAFT_STATE, {
-          value: state,
-          // enumerable: false <- the default
-          writable: true
-        });
-        return draft;
-      }
-      var descriptors = {};
-      function proxyProperty(prop, enumerable) {
-        var desc = descriptors[prop];
-        if (desc) {
-          desc.enumerable = enumerable;
-        } else {
-          descriptors[prop] = desc = {
-            configurable: true,
-            enumerable,
-            get: function get3() {
-              var state = this[DRAFT_STATE];
-              assertUnrevoked(state);
-              return objectTraps.get(state, prop);
-            },
-            set: function set3(value2) {
-              var state = this[DRAFT_STATE];
-              assertUnrevoked(state);
-              objectTraps.set(state, prop, value2);
-            }
-          };
-        }
-        return desc;
-      }
-      function markChangesSweep(drafts) {
-        for (var i2 = drafts.length - 1; i2 >= 0; i2--) {
-          var state = drafts[i2][DRAFT_STATE];
-          if (!state.modified_) {
-            switch (state.type_) {
-              case 5:
-                if (hasArrayChanges(state)) markChanged(state);
-                break;
-              case 4:
-                if (hasObjectChanges(state)) markChanged(state);
-                break;
-            }
-          }
-        }
-      }
-      function markChangesRecursively(object2) {
-        if (!object2 || typeof object2 !== "object") return;
-        var state = object2[DRAFT_STATE];
-        if (!state) return;
-        var base_ = state.base_, draft_ = state.draft_, assigned_ = state.assigned_, type_ = state.type_;
-        if (type_ === 4) {
-          each(draft_, function(key) {
-            if (key === DRAFT_STATE) return;
-            if (base_[key] === void 0 && !has(base_, key)) {
-              assigned_[key] = true;
-              markChanged(state);
-            } else if (!assigned_[key]) {
-              markChangesRecursively(draft_[key]);
-            }
-          });
-          each(base_, function(key) {
-            if (draft_[key] === void 0 && !has(draft_, key)) {
-              assigned_[key] = false;
-              markChanged(state);
-            }
-          });
-        } else if (type_ === 5) {
-          if (hasArrayChanges(state)) {
-            markChanged(state);
-            assigned_.length = true;
-          }
-          if (draft_.length < base_.length) {
-            for (var i2 = draft_.length; i2 < base_.length; i2++) {
-              assigned_[i2] = false;
-            }
-          } else {
-            for (var _i2 = base_.length; _i2 < draft_.length; _i2++) {
-              assigned_[_i2] = true;
-            }
-          }
-          var min2 = Math.min(draft_.length, base_.length);
-          for (var _i3 = 0; _i3 < min2; _i3++) {
-            if (!draft_.hasOwnProperty(_i3)) {
-              assigned_[_i3] = true;
-            }
-            if (assigned_[_i3] === void 0) markChangesRecursively(draft_[_i3]);
-          }
-        }
-      }
-      function hasObjectChanges(state) {
-        var base_ = state.base_, draft_ = state.draft_;
-        var keys2 = ownKeys2(draft_);
-        for (var i2 = keys2.length - 1; i2 >= 0; i2--) {
-          var key = keys2[i2];
-          if (key === DRAFT_STATE) continue;
-          var baseValue = base_[key];
-          if (baseValue === void 0 && !has(base_, key)) {
-            return true;
-          } else {
-            var value2 = draft_[key];
-            var _state = value2 && value2[DRAFT_STATE];
-            if (_state ? _state.base_ !== baseValue : !is(value2, baseValue)) {
-              return true;
-            }
-          }
-        }
-        var baseIsDraft = !!base_[DRAFT_STATE];
-        return keys2.length !== ownKeys2(base_).length + (baseIsDraft ? 0 : 1);
-      }
-      function hasArrayChanges(state) {
-        var draft_ = state.draft_;
-        if (draft_.length !== state.base_.length) return true;
-        var descriptor = Object.getOwnPropertyDescriptor(draft_, draft_.length - 1);
-        if (descriptor && !descriptor.get) return true;
-        for (var i2 = 0; i2 < draft_.length; i2++) {
-          if (!draft_.hasOwnProperty(i2)) return true;
-        }
-        return false;
-      }
-      function hasChanges_(state) {
-        return state.type_ === 4 ? hasObjectChanges(state) : hasArrayChanges(state);
-      }
-      function assertUnrevoked(state) {
-        if (state.revoked_) die(3, JSON.stringify(latest(state)));
-      }
-      loadPlugin("ES5", {
-        createES5Proxy_,
-        willFinalizeES5_,
-        hasChanges_
-      });
-    }
-    function enablePatches() {
-      var REPLACE = "replace";
-      var ADD = "add";
-      var REMOVE = "remove";
-      function generatePatches_(state, basePath, patches, inversePatches) {
-        switch (state.type_) {
-          case 0:
-          case 4:
-          case 2:
-            return generatePatchesFromAssigned(state, basePath, patches, inversePatches);
-          case 5:
-          case 1:
-            return generateArrayPatches(state, basePath, patches, inversePatches);
-          case 3:
-            return generateSetPatches(state, basePath, patches, inversePatches);
-        }
-      }
-      function generateArrayPatches(state, basePath, patches, inversePatches) {
-        var base_ = state.base_, assigned_ = state.assigned_;
-        var copy_ = state.copy_;
-        if (copy_.length < base_.length) {
-          var _ref2 = [copy_, base_];
-          base_ = _ref2[0];
-          copy_ = _ref2[1];
-          var _ref22 = [inversePatches, patches];
-          patches = _ref22[0];
-          inversePatches = _ref22[1];
-        }
-        for (var i2 = 0; i2 < base_.length; i2++) {
-          if (assigned_[i2] && copy_[i2] !== base_[i2]) {
-            var path = basePath.concat([i2]);
-            patches.push({
-              op: REPLACE,
-              path,
-              // Need to maybe clone it, as it can in fact be the original value
-              // due to the base/copy inversion at the start of this function
-              value: clonePatchValueIfNeeded(copy_[i2])
-            });
-            inversePatches.push({
-              op: REPLACE,
-              path,
-              value: clonePatchValueIfNeeded(base_[i2])
-            });
-          }
-        }
-        for (var _i = base_.length; _i < copy_.length; _i++) {
-          var _path = basePath.concat([_i]);
-          patches.push({
-            op: ADD,
-            path: _path,
-            // Need to maybe clone it, as it can in fact be the original value
-            // due to the base/copy inversion at the start of this function
-            value: clonePatchValueIfNeeded(copy_[_i])
-          });
-        }
-        if (base_.length < copy_.length) {
-          inversePatches.push({
-            op: REPLACE,
-            path: basePath.concat(["length"]),
-            value: base_.length
-          });
-        }
-      }
-      function generatePatchesFromAssigned(state, basePath, patches, inversePatches) {
-        var base_ = state.base_, copy_ = state.copy_;
-        each(state.assigned_, function(key, assignedValue) {
-          var origValue = get2(base_, key);
-          var value2 = get2(copy_, key);
-          var op = !assignedValue ? REMOVE : has(base_, key) ? REPLACE : ADD;
-          if (origValue === value2 && op === REPLACE) return;
-          var path = basePath.concat(key);
-          patches.push(op === REMOVE ? {
-            op,
-            path
-          } : {
-            op,
-            path,
-            value: value2
-          });
-          inversePatches.push(op === ADD ? {
-            op: REMOVE,
-            path
-          } : op === REMOVE ? {
-            op: ADD,
-            path,
-            value: clonePatchValueIfNeeded(origValue)
-          } : {
-            op: REPLACE,
-            path,
-            value: clonePatchValueIfNeeded(origValue)
-          });
-        });
-      }
-      function generateSetPatches(state, basePath, patches, inversePatches) {
-        var base_ = state.base_, copy_ = state.copy_;
-        var i2 = 0;
-        base_.forEach(function(value2) {
-          if (!copy_.has(value2)) {
-            var path = basePath.concat([i2]);
-            patches.push({
-              op: REMOVE,
-              path,
-              value: value2
-            });
-            inversePatches.unshift({
-              op: ADD,
-              path,
-              value: value2
-            });
-          }
-          i2++;
-        });
-        i2 = 0;
-        copy_.forEach(function(value2) {
-          if (!base_.has(value2)) {
-            var path = basePath.concat([i2]);
-            patches.push({
-              op: ADD,
-              path,
-              value: value2
-            });
-            inversePatches.unshift({
-              op: REMOVE,
-              path,
-              value: value2
-            });
-          }
-          i2++;
-        });
-      }
-      function generateReplacementPatches_(baseValue, replacement, patches, inversePatches) {
-        patches.push({
-          op: REPLACE,
-          path: [],
-          value: replacement === NOTHING ? void 0 : replacement
-        });
-        inversePatches.push({
-          op: REPLACE,
-          path: [],
-          value: baseValue
-        });
-      }
-      function applyPatches_(draft, patches) {
-        patches.forEach(function(patch2) {
-          var path = patch2.path, op = patch2.op;
-          var base = draft;
-          for (var i2 = 0; i2 < path.length - 1; i2++) {
-            var parentType = getArchtype(base);
-            var p2 = path[i2];
-            if (typeof p2 !== "string" && typeof p2 !== "number") {
-              p2 = "" + p2;
-            }
-            if ((parentType === 0 || parentType === 1) && (p2 === "__proto__" || p2 === "constructor")) die(24);
-            if (typeof base === "function" && p2 === "prototype") die(24);
-            base = get2(base, p2);
-            if (typeof base !== "object") die(15, path.join("/"));
-          }
-          var type = getArchtype(base);
-          var value2 = deepClonePatchValue(patch2.value);
-          var key = path[path.length - 1];
-          switch (op) {
-            case REPLACE:
-              switch (type) {
-                case 2:
-                  return base.set(key, value2);
-                /* istanbul ignore next */
-                case 3:
-                  die(16);
-                default:
-                  return base[key] = value2;
-              }
-            case ADD:
-              switch (type) {
-                case 1:
-                  return key === "-" ? base.push(value2) : base.splice(key, 0, value2);
-                case 2:
-                  return base.set(key, value2);
-                case 3:
-                  return base.add(value2);
-                default:
-                  return base[key] = value2;
-              }
-            case REMOVE:
-              switch (type) {
-                case 1:
-                  return base.splice(key, 1);
-                case 2:
-                  return base.delete(key);
-                case 3:
-                  return base.delete(patch2.value);
-                default:
-                  return delete base[key];
-              }
-            default:
-              die(17, op);
-          }
-        });
-        return draft;
-      }
-      function deepClonePatchValue(obj) {
-        if (!isDraftable(obj)) return obj;
-        if (Array.isArray(obj)) return obj.map(deepClonePatchValue);
-        if (isMap(obj)) return new Map(Array.from(obj.entries()).map(function(_ref3) {
-          var k2 = _ref3[0], v2 = _ref3[1];
-          return [k2, deepClonePatchValue(v2)];
-        }));
-        if (isSet(obj)) return new Set(Array.from(obj).map(deepClonePatchValue));
-        var cloned = Object.create(Object.getPrototypeOf(obj));
-        for (var key in obj) {
-          cloned[key] = deepClonePatchValue(obj[key]);
-        }
-        if (has(obj, DRAFTABLE)) cloned[DRAFTABLE] = obj[DRAFTABLE];
-        return cloned;
-      }
-      function clonePatchValueIfNeeded(obj) {
-        if (isDraft(obj)) {
-          return deepClonePatchValue(obj);
-        } else return obj;
-      }
-      loadPlugin("Patches", {
-        applyPatches_,
-        generatePatches_,
-        generateReplacementPatches_
-      });
-    }
-    function enableMapSet() {
-      var _extendStatics = function extendStatics(d2, b2) {
-        _extendStatics = Object.setPrototypeOf || {
-          __proto__: []
-        } instanceof Array && function(d3, b3) {
-          d3.__proto__ = b3;
-        } || function(d3, b3) {
-          for (var p2 in b3) {
-            if (b3.hasOwnProperty(p2)) d3[p2] = b3[p2];
-          }
-        };
-        return _extendStatics(d2, b2);
-      };
-      function __extends(d2, b2) {
-        _extendStatics(d2, b2);
-        function __() {
-          this.constructor = d2;
-        }
-        d2.prototype = // @ts-ignore
-        (__.prototype = b2.prototype, new __());
-      }
-      var DraftMap = function(_super) {
-        __extends(DraftMap2, _super);
-        function DraftMap2(target, parent) {
-          this[DRAFT_STATE] = {
-            type_: 2,
-            parent_: parent,
-            scope_: parent ? parent.scope_ : getCurrentScope(),
-            modified_: false,
-            finalized_: false,
-            copy_: void 0,
-            assigned_: void 0,
-            base_: target,
-            draft_: this,
-            isManual_: false,
-            revoked_: false
-          };
-          return this;
-        }
-        var p2 = DraftMap2.prototype;
-        Object.defineProperty(p2, "size", {
-          get: function get3() {
-            return latest(this[DRAFT_STATE]).size;
-          }
-          // enumerable: false,
-          // configurable: true
-        });
-        p2.has = function(key) {
-          return latest(this[DRAFT_STATE]).has(key);
-        };
-        p2.set = function(key, value2) {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          if (!latest(state).has(key) || latest(state).get(key) !== value2) {
-            prepareMapCopy(state);
-            markChanged(state);
-            state.assigned_.set(key, true);
-            state.copy_.set(key, value2);
-            state.assigned_.set(key, true);
-          }
-          return this;
-        };
-        p2.delete = function(key) {
-          if (!this.has(key)) {
-            return false;
-          }
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          prepareMapCopy(state);
-          markChanged(state);
-          if (state.base_.has(key)) {
-            state.assigned_.set(key, false);
-          } else {
-            state.assigned_.delete(key);
-          }
-          state.copy_.delete(key);
-          return true;
-        };
-        p2.clear = function() {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          if (latest(state).size) {
-            prepareMapCopy(state);
-            markChanged(state);
-            state.assigned_ = /* @__PURE__ */ new Map();
-            each(state.base_, function(key) {
-              state.assigned_.set(key, false);
-            });
-            state.copy_.clear();
-          }
-        };
-        p2.forEach = function(cb, thisArg) {
-          var _this = this;
-          var state = this[DRAFT_STATE];
-          latest(state).forEach(function(_value, key, _map) {
-            cb.call(thisArg, _this.get(key), key, _this);
-          });
-        };
-        p2.get = function(key) {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          var value2 = latest(state).get(key);
-          if (state.finalized_ || !isDraftable(value2)) {
-            return value2;
-          }
-          if (value2 !== state.base_.get(key)) {
-            return value2;
-          }
-          var draft = createProxy(state.scope_.immer_, value2, state);
-          prepareMapCopy(state);
-          state.copy_.set(key, draft);
-          return draft;
-        };
-        p2.keys = function() {
-          return latest(this[DRAFT_STATE]).keys();
-        };
-        p2.values = function() {
-          var _this2 = this, _ref2;
-          var iterator = this.keys();
-          return _ref2 = {}, _ref2[iteratorSymbol] = function() {
-            return _this2.values();
-          }, _ref2.next = function next() {
-            var r2 = iterator.next();
-            if (r2.done) return r2;
-            var value2 = _this2.get(r2.value);
-            return {
-              done: false,
-              value: value2
-            };
-          }, _ref2;
-        };
-        p2.entries = function() {
-          var _this3 = this, _ref2;
-          var iterator = this.keys();
-          return _ref2 = {}, _ref2[iteratorSymbol] = function() {
-            return _this3.entries();
-          }, _ref2.next = function next() {
-            var r2 = iterator.next();
-            if (r2.done) return r2;
-            var value2 = _this3.get(r2.value);
-            return {
-              done: false,
-              value: [r2.value, value2]
-            };
-          }, _ref2;
-        };
-        p2[iteratorSymbol] = function() {
-          return this.entries();
-        };
-        return DraftMap2;
-      }(Map);
-      function proxyMap_(target, parent) {
-        return new DraftMap(target, parent);
-      }
-      function prepareMapCopy(state) {
-        if (!state.copy_) {
-          state.assigned_ = /* @__PURE__ */ new Map();
-          state.copy_ = new Map(state.base_);
-        }
-      }
-      var DraftSet = function(_super) {
-        __extends(DraftSet2, _super);
-        function DraftSet2(target, parent) {
-          this[DRAFT_STATE] = {
-            type_: 3,
-            parent_: parent,
-            scope_: parent ? parent.scope_ : getCurrentScope(),
-            modified_: false,
-            finalized_: false,
-            copy_: void 0,
-            base_: target,
-            draft_: this,
-            drafts_: /* @__PURE__ */ new Map(),
-            revoked_: false,
-            isManual_: false
-          };
-          return this;
-        }
-        var p2 = DraftSet2.prototype;
-        Object.defineProperty(p2, "size", {
-          get: function get3() {
-            return latest(this[DRAFT_STATE]).size;
-          }
-          // enumerable: true,
-        });
-        p2.has = function(value2) {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          if (!state.copy_) {
-            return state.base_.has(value2);
-          }
-          if (state.copy_.has(value2)) return true;
-          if (state.drafts_.has(value2) && state.copy_.has(state.drafts_.get(value2))) return true;
-          return false;
-        };
-        p2.add = function(value2) {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          if (!this.has(value2)) {
-            prepareSetCopy(state);
-            markChanged(state);
-            state.copy_.add(value2);
-          }
-          return this;
-        };
-        p2.delete = function(value2) {
-          if (!this.has(value2)) {
-            return false;
-          }
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          prepareSetCopy(state);
-          markChanged(state);
-          return state.copy_.delete(value2) || (state.drafts_.has(value2) ? state.copy_.delete(state.drafts_.get(value2)) : (
-            /* istanbul ignore next */
-            false
-          ));
-        };
-        p2.clear = function() {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          if (latest(state).size) {
-            prepareSetCopy(state);
-            markChanged(state);
-            state.copy_.clear();
-          }
-        };
-        p2.values = function() {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          prepareSetCopy(state);
-          return state.copy_.values();
-        };
-        p2.entries = function entries() {
-          var state = this[DRAFT_STATE];
-          assertUnrevoked(state);
-          prepareSetCopy(state);
-          return state.copy_.entries();
-        };
-        p2.keys = function() {
-          return this.values();
-        };
-        p2[iteratorSymbol] = function() {
-          return this.values();
-        };
-        p2.forEach = function forEach(cb, thisArg) {
-          var iterator = this.values();
-          var result = iterator.next();
-          while (!result.done) {
-            cb.call(thisArg, result.value, result.value, this);
-            result = iterator.next();
-          }
-        };
-        return DraftSet2;
-      }(Set);
-      function proxySet_(target, parent) {
-        return new DraftSet(target, parent);
-      }
-      function prepareSetCopy(state) {
-        if (!state.copy_) {
-          state.copy_ = /* @__PURE__ */ new Set();
-          state.base_.forEach(function(value2) {
-            if (isDraftable(value2)) {
-              var draft = createProxy(state.scope_.immer_, value2, state);
-              state.drafts_.set(value2, draft);
-              state.copy_.add(draft);
-            } else {
-              state.copy_.add(value2);
-            }
-          });
-        }
-      }
-      function assertUnrevoked(state) {
-        if (state.revoked_) die(3, JSON.stringify(latest(state)));
-      }
-      loadPlugin("MapSet", {
-        proxyMap_,
-        proxySet_
-      });
-    }
-    function enableAllPlugins() {
-      enableES5();
-      enableMapSet();
-      enablePatches();
-    }
-    var immer = /* @__PURE__ */ new Immer();
-    var produce = immer.produce;
-    var produceWithPatches = /* @__PURE__ */ immer.produceWithPatches.bind(immer);
-    var setAutoFreeze = /* @__PURE__ */ immer.setAutoFreeze.bind(immer);
-    var setUseProxies = /* @__PURE__ */ immer.setUseProxies.bind(immer);
-    var applyPatches = /* @__PURE__ */ immer.applyPatches.bind(immer);
-    var createDraft = /* @__PURE__ */ immer.createDraft.bind(immer);
-    var finishDraft = /* @__PURE__ */ immer.finishDraft.bind(immer);
-    function castDraft(value2) {
-      return value2;
-    }
-    function castImmutable(value2) {
-      return value2;
-    }
-    exports.Immer = Immer;
-    exports.applyPatches = applyPatches;
-    exports.castDraft = castDraft;
-    exports.castImmutable = castImmutable;
-    exports.createDraft = createDraft;
-    exports.current = current;
-    exports.default = produce;
-    exports.enableAllPlugins = enableAllPlugins;
-    exports.enableES5 = enableES5;
-    exports.enableMapSet = enableMapSet;
-    exports.enablePatches = enablePatches;
-    exports.finishDraft = finishDraft;
-    exports.freeze = freeze;
-    exports.immerable = DRAFTABLE;
-    exports.isDraft = isDraft;
-    exports.isDraftable = isDraftable;
-    exports.nothing = NOTHING;
-    exports.original = original;
-    exports.produce = produce;
-    exports.produceWithPatches = produceWithPatches;
-    exports.setAutoFreeze = setAutoFreeze;
-    exports.setUseProxies = setUseProxies;
-  }
-});
-
-// node_modules/immer/dist/index.js
-var require_dist = __commonJS({
-  "node_modules/immer/dist/index.js"(exports, module) {
-    "use strict";
-    if (false) {
-      module.exports = null;
-    } else {
-      module.exports = require_immer_cjs_development();
-    }
-  }
-});
-
-// node_modules/@mnbroatch/boardgame.io/dist/cjs/plugin-random-7425844d.js
-var require_plugin_random_7425844d = __commonJS({
-  "node_modules/@mnbroatch/boardgame.io/dist/cjs/plugin-random-7425844d.js"(exports) {
-    "use strict";
-    var Alea2 = class {
-      constructor(seed) {
-        const mash = Mash2();
-        this.c = 1;
-        this.s0 = mash(" ");
-        this.s1 = mash(" ");
-        this.s2 = mash(" ");
-        this.s0 -= mash(seed);
-        if (this.s0 < 0) {
-          this.s0 += 1;
-        }
-        this.s1 -= mash(seed);
-        if (this.s1 < 0) {
-          this.s1 += 1;
-        }
-        this.s2 -= mash(seed);
-        if (this.s2 < 0) {
-          this.s2 += 1;
-        }
-      }
-      next() {
-        const t2 = 2091639 * this.s0 + this.c * 23283064365386963e-26;
-        this.s0 = this.s1;
-        this.s1 = this.s2;
-        return this.s2 = t2 - (this.c = Math.trunc(t2));
-      }
-    };
-    function Mash2() {
-      let n2 = 4022871197;
-      const mash = function(data) {
-        const str = data.toString();
-        for (let i2 = 0; i2 < str.length; i2++) {
-          n2 += str.charCodeAt(i2);
-          let h2 = 0.02519603282416938 * n2;
-          n2 = h2 >>> 0;
-          h2 -= n2;
-          h2 *= n2;
-          n2 = h2 >>> 0;
-          h2 -= n2;
-          n2 += h2 * 4294967296;
-        }
-        return (n2 >>> 0) * 23283064365386963e-26;
-      };
-      return mash;
-    }
-    function copy2(f2, t2) {
-      t2.c = f2.c;
-      t2.s0 = f2.s0;
-      t2.s1 = f2.s1;
-      t2.s2 = f2.s2;
-      return t2;
-    }
-    function alea2(seed, state) {
-      const xg = new Alea2(seed);
-      const prng = xg.next.bind(xg);
-      if (state)
-        copy2(state, xg);
-      prng.state = () => copy2(xg, {});
-      return prng;
-    }
-    var Random2 = class {
-      /**
-       * constructor
-       * @param {object} ctx - The ctx object to initialize from.
-       */
-      constructor(state) {
-        this.state = state || { seed: "0" };
-        this.used = false;
-      }
-      /**
-       * Generates a new seed from the current date / time.
-       */
-      static seed() {
-        return Date.now().toString(36).slice(-10);
-      }
-      isUsed() {
-        return this.used;
-      }
-      getState() {
-        return this.state;
-      }
-      /**
-       * Generate a random number.
-       */
-      _random() {
-        this.used = true;
-        const R2 = this.state;
-        const seed = R2.prngstate ? "" : R2.seed;
-        const rand = alea2(seed, R2.prngstate);
-        const number = rand();
-        this.state = {
-          ...R2,
-          prngstate: rand.state()
-        };
-        return number;
-      }
-      api() {
-        const random2 = this._random.bind(this);
-        const SpotValue = {
-          D4: 4,
-          D6: 6,
-          D8: 8,
-          D10: 10,
-          D12: 12,
-          D20: 20
-        };
-        const predefined = {};
-        for (const key in SpotValue) {
-          const spotvalue = SpotValue[key];
-          predefined[key] = (diceCount) => {
-            return diceCount === void 0 ? Math.floor(random2() * spotvalue) + 1 : Array.from({ length: diceCount }).map(() => Math.floor(random2() * spotvalue) + 1);
-          };
-        }
-        function Die(spotvalue = 6, diceCount) {
-          return diceCount === void 0 ? Math.floor(random2() * spotvalue) + 1 : Array.from({ length: diceCount }).map(() => Math.floor(random2() * spotvalue) + 1);
-        }
-        return {
-          /**
-           * Similar to Die below, but with fixed spot values.
-           * Supports passing a diceCount
-           *    if not defined, defaults to 1 and returns the value directly.
-           *    if defined, returns an array containing the random dice values.
-           *
-           * D4: (diceCount) => value
-           * D6: (diceCount) => value
-           * D8: (diceCount) => value
-           * D10: (diceCount) => value
-           * D12: (diceCount) => value
-           * D20: (diceCount) => value
-           */
-          ...predefined,
-          /**
-           * Roll a die of specified spot value.
-           *
-           * @param {number} spotvalue - The die dimension (default: 6).
-           * @param {number} diceCount - number of dice to throw.
-           *                             if not defined, defaults to 1 and returns the value directly.
-           *                             if defined, returns an array containing the random dice values.
-           */
-          Die,
-          /**
-           * Generate a random number between 0 and 1.
-           */
-          Number: () => {
-            return random2();
-          },
-          /**
-           * Shuffle an array.
-           *
-           * @param {Array} deck - The array to shuffle. Does not mutate
-           *                       the input, but returns the shuffled array.
-           */
-          Shuffle: (deck) => {
-            const clone = [...deck];
-            let sourceIndex = deck.length;
-            let destinationIndex = 0;
-            const shuffled = Array.from({ length: sourceIndex });
-            while (sourceIndex) {
-              const randomIndex = Math.trunc(sourceIndex * random2());
-              shuffled[destinationIndex++] = clone[randomIndex];
-              clone[randomIndex] = clone[--sourceIndex];
-            }
-            return shuffled;
-          },
-          _private: this
-        };
-      }
-    };
-    var RandomPlugin2 = {
-      name: "random",
-      noClient: ({ api }) => {
-        return api._private.isUsed();
-      },
-      flush: ({ api }) => {
-        return api._private.getState();
-      },
-      api: ({ data }) => {
-        const random2 = new Random2(data);
-        return random2.api();
-      },
-      setup: ({ game }) => {
-        let { seed } = game;
-        if (seed === void 0) {
-          seed = Random2.seed();
-        }
-        return { seed };
-      },
-      playerView: () => void 0
-    };
-    exports.RandomPlugin = RandomPlugin2;
-    exports.alea = alea2;
-  }
-});
-
-// node_modules/lodash.isplainobject/index.js
-var require_lodash = __commonJS({
-  "node_modules/lodash.isplainobject/index.js"(exports, module) {
-    var objectTag = "[object Object]";
-    function isHostObject(value2) {
-      var result = false;
-      if (value2 != null && typeof value2.toString != "function") {
-        try {
-          result = !!(value2 + "");
-        } catch (e) {
-        }
-      }
-      return result;
-    }
-    function overArg(func, transform) {
-      return function(arg) {
-        return func(transform(arg));
-      };
-    }
-    var funcProto = Function.prototype;
-    var objectProto = Object.prototype;
-    var funcToString = funcProto.toString;
-    var hasOwnProperty = objectProto.hasOwnProperty;
-    var objectCtorString = funcToString.call(Object);
-    var objectToString = objectProto.toString;
-    var getPrototype = overArg(Object.getPrototypeOf, Object);
-    function isObjectLike(value2) {
-      return !!value2 && typeof value2 == "object";
-    }
-    function isPlainObject6(value2) {
-      if (!isObjectLike(value2) || objectToString.call(value2) != objectTag || isHostObject(value2)) {
-        return false;
-      }
-      var proto = getPrototype(value2);
-      if (proto === null) {
-        return true;
-      }
-      var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
-      return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
-    }
-    module.exports = isPlainObject6;
-  }
-});
-
-// node_modules/@mnbroatch/boardgame.io/dist/cjs/turn-order-b2ff8740.js
-var require_turn_order_b2ff8740 = __commonJS({
-  "node_modules/@mnbroatch/boardgame.io/dist/cjs/turn-order-b2ff8740.js"(exports) {
-    "use strict";
-    var produce = require_dist();
-    var pluginRandom = require_plugin_random_7425844d();
-    var isPlainObject6 = require_lodash();
-    function _interopDefaultLegacy(e) {
-      return e && typeof e === "object" && "default" in e ? e : { "default": e };
-    }
-    var produce__default = /* @__PURE__ */ _interopDefaultLegacy(produce);
-    var isPlainObject__default = /* @__PURE__ */ _interopDefaultLegacy(isPlainObject6);
-    var MAKE_MOVE2 = "MAKE_MOVE";
-    var GAME_EVENT2 = "GAME_EVENT";
-    var REDO2 = "REDO";
-    var RESET2 = "RESET";
-    var SYNC2 = "SYNC";
-    var UNDO2 = "UNDO";
-    var UPDATE2 = "UPDATE";
-    var PATCH2 = "PATCH";
-    var PLUGIN2 = "PLUGIN";
-    var STRIP_TRANSIENTS2 = "STRIP_TRANSIENTS";
-    var makeMove2 = (type, args, playerID, credentials) => ({
-      type: MAKE_MOVE2,
-      payload: { type, args, playerID, credentials }
-    });
-    var gameEvent2 = (type, args, playerID, credentials) => ({
-      type: GAME_EVENT2,
-      payload: { type, args, playerID, credentials }
-    });
-    var automaticGameEvent2 = (type, args, playerID, credentials) => ({
-      type: GAME_EVENT2,
-      payload: { type, args, playerID, credentials },
-      automatic: true
-    });
-    var sync2 = (info3) => ({
-      type: SYNC2,
-      state: info3.state,
-      log: info3.log,
-      initialState: info3.initialState,
-      clientOnly: true
-    });
-    var patch2 = (prevStateID, stateID, patch3, deltalog) => ({
-      type: PATCH2,
-      prevStateID,
-      stateID,
-      patch: patch3,
-      deltalog,
-      clientOnly: true
-    });
-    var update3 = (state, deltalog) => ({
-      type: UPDATE2,
-      state,
-      deltalog,
-      clientOnly: true
-    });
-    var reset2 = (state) => ({
-      type: RESET2,
-      state,
-      clientOnly: true
-    });
-    var undo2 = (playerID, credentials) => ({
-      type: UNDO2,
-      payload: { type: null, args: null, playerID, credentials }
-    });
-    var redo2 = (playerID, credentials) => ({
-      type: REDO2,
-      payload: { type: null, args: null, playerID, credentials }
-    });
-    var plugin2 = (type, args, playerID, credentials) => ({
-      type: PLUGIN2,
-      payload: { type, args, playerID, credentials }
-    });
-    var stripTransients2 = () => ({
-      type: STRIP_TRANSIENTS2
-    });
-    var ActionCreators2 = /* @__PURE__ */ Object.freeze({
-      __proto__: null,
-      makeMove: makeMove2,
-      gameEvent: gameEvent2,
-      automaticGameEvent: automaticGameEvent2,
-      sync: sync2,
-      patch: patch2,
-      update: update3,
-      reset: reset2,
-      undo: undo2,
-      redo: redo2,
-      plugin: plugin2,
-      stripTransients: stripTransients2
-    });
-    var INVALID_MOVE4 = "INVALID_MOVE";
-    var ImmerPlugin2 = {
-      name: "plugin-immer",
-      fnWrap: (move) => (context, ...args) => {
-        let isInvalid = false;
-        const newG = produce__default["default"](context.G, (G2) => {
-          const result = move({ ...context, G: G2 }, ...args);
-          if (result === INVALID_MOVE4) {
-            isInvalid = true;
-            return;
-          }
-          return result;
-        });
-        if (isInvalid)
-          return INVALID_MOVE4;
-        return newG;
-      }
-    };
-    exports.GameMethod = void 0;
-    (function(GameMethod2) {
-      GameMethod2["MOVE"] = "MOVE";
-      GameMethod2["GAME_ON_END"] = "GAME_ON_END";
-      GameMethod2["PHASE_ON_BEGIN"] = "PHASE_ON_BEGIN";
-      GameMethod2["PHASE_ON_END"] = "PHASE_ON_END";
-      GameMethod2["TURN_ON_BEGIN"] = "TURN_ON_BEGIN";
-      GameMethod2["TURN_ON_MOVE"] = "TURN_ON_MOVE";
-      GameMethod2["TURN_ON_END"] = "TURN_ON_END";
-    })(exports.GameMethod || (exports.GameMethod = {}));
-    var Errors2;
-    (function(Errors3) {
-      Errors3["CalledOutsideHook"] = "Events must be called from moves or the `onBegin`, `onEnd`, and `onMove` hooks.\nThis error probably means you called an event from other game code, like an `endIf` trigger or one of the `turn.order` methods.";
-      Errors3["EndTurnInOnEnd"] = "`endTurn` is disallowed in `onEnd` hooks \u2014 the turn is already ending.";
-      Errors3["MaxTurnEndings"] = "Maximum number of turn endings exceeded for this update.\nThis likely means game code is triggering an infinite loop.";
-      Errors3["PhaseEventInOnEnd"] = "`setPhase` & `endPhase` are disallowed in a phase\u2019s `onEnd` hook \u2014 the phase is already ending.\nIf you\u2019re trying to dynamically choose the next phase when a phase ends, use the phase\u2019s `next` trigger.";
-      Errors3["StageEventInOnEnd"] = "`setStage`, `endStage` & `setActivePlayers` are disallowed in `onEnd` hooks.";
-      Errors3["StageEventInPhaseBegin"] = "`setStage`, `endStage` & `setActivePlayers` are disallowed in a phase\u2019s `onBegin` hook.\nUse `setActivePlayers` in a `turn.onBegin` hook or declare stages with `turn.activePlayers` instead.";
-      Errors3["StageEventInTurnBegin"] = "`setStage` & `endStage` are disallowed in `turn.onBegin`.\nUse `setActivePlayers` or declare stages with `turn.activePlayers` instead.";
-    })(Errors2 || (Errors2 = {}));
-    var Events2 = class {
-      constructor(flow, ctx, playerID) {
-        this.flow = flow;
-        this.playerID = playerID;
-        this.dispatch = [];
-        this.initialTurn = ctx.turn;
-        this.updateTurnContext(ctx, void 0);
-        this.maxEndedTurnsPerAction = ctx.numPlayers * 100;
-      }
-      api() {
-        const events = {
-          _private: this
-        };
-        for (const type of this.flow.eventNames) {
-          events[type] = (...args) => {
-            this.dispatch.push({
-              type,
-              args,
-              phase: this.currentPhase,
-              turn: this.currentTurn,
-              calledFrom: this.currentMethod,
-              // Used to capture a stack trace in case it is needed later.
-              error: new Error("Events Plugin Error")
-            });
-          };
-        }
-        return events;
-      }
-      isUsed() {
-        return this.dispatch.length > 0;
-      }
-      updateTurnContext(ctx, methodType) {
-        this.currentPhase = ctx.phase;
-        this.currentTurn = ctx.turn;
-        this.currentMethod = methodType;
-      }
-      unsetCurrentMethod() {
-        this.currentMethod = void 0;
-      }
-      /**
-       * Updates ctx with the triggered events.
-       * @param {object} state - The state object { G, ctx }.
-       */
-      update(state) {
-        const initialState = state;
-        const stateWithError = ({ stack }, message) => ({
-          ...initialState,
-          plugins: {
-            ...initialState.plugins,
-            events: {
-              ...initialState.plugins.events,
-              data: { error: message + "\n" + stack }
-            }
-          }
-        });
-        EventQueue: for (let i2 = 0; i2 < this.dispatch.length; i2++) {
-          const event = this.dispatch[i2];
-          const turnHasEnded = event.turn !== state.ctx.turn;
-          const endedTurns = this.currentTurn - this.initialTurn;
-          if (endedTurns >= this.maxEndedTurnsPerAction) {
-            return stateWithError(event.error, Errors2.MaxTurnEndings);
-          }
-          if (event.calledFrom === void 0) {
-            return stateWithError(event.error, Errors2.CalledOutsideHook);
-          }
-          if (state.ctx.gameover)
-            break EventQueue;
-          switch (event.type) {
-            case "endStage":
-            case "setStage":
-            case "setActivePlayers": {
-              switch (event.calledFrom) {
-                // Disallow all stage events in onEnd and phase.onBegin hooks.
-                case exports.GameMethod.TURN_ON_END:
-                case exports.GameMethod.PHASE_ON_END:
-                  return stateWithError(event.error, Errors2.StageEventInOnEnd);
-                case exports.GameMethod.PHASE_ON_BEGIN:
-                  return stateWithError(event.error, Errors2.StageEventInPhaseBegin);
-                // Disallow setStage & endStage in turn.onBegin hooks.
-                case exports.GameMethod.TURN_ON_BEGIN:
-                  if (event.type === "setActivePlayers")
-                    break;
-                  return stateWithError(event.error, Errors2.StageEventInTurnBegin);
-              }
-              if (turnHasEnded)
-                continue EventQueue;
-              break;
-            }
-            case "endTurn": {
-              if (event.calledFrom === exports.GameMethod.TURN_ON_END || event.calledFrom === exports.GameMethod.PHASE_ON_END) {
-                return stateWithError(event.error, Errors2.EndTurnInOnEnd);
-              }
-              if (turnHasEnded)
-                continue EventQueue;
-              break;
-            }
-            case "endPhase":
-            case "setPhase": {
-              if (event.calledFrom === exports.GameMethod.PHASE_ON_END) {
-                return stateWithError(event.error, Errors2.PhaseEventInOnEnd);
-              }
-              if (event.phase !== state.ctx.phase)
-                continue EventQueue;
-              break;
-            }
-          }
-          const action = automaticGameEvent2(event.type, event.args, this.playerID);
-          state = this.flow.processEvent(state, action);
-        }
-        return state;
-      }
-    };
-    var EventsPlugin2 = {
-      name: "events",
-      noClient: ({ api }) => api._private.isUsed(),
-      isInvalid: ({ data }) => data.error || false,
-      // Update the events plugin’s internal turn context each time a move
-      // or hook is called. This allows events called after turn or phase
-      // endings to dispatch the current turn and phase correctly.
-      fnWrap: (method, methodType) => (context, ...args) => {
-        const api = context.events;
-        if (api)
-          api._private.updateTurnContext(context.ctx, methodType);
-        const G2 = method(context, ...args);
-        if (api)
-          api._private.unsetCurrentMethod();
-        return G2;
-      },
-      dangerouslyFlushRawState: ({ state, api }) => api._private.update(state),
-      api: ({ game, ctx, playerID }) => new Events2(game.flow, ctx, playerID).api()
-    };
-    var LogPlugin2 = {
-      name: "log",
-      flush: () => ({}),
-      api: ({ data }) => {
-        return {
-          setMetadata: (metadata) => {
-            data.metadata = metadata;
-          }
-        };
-      },
-      setup: () => ({})
-    };
-    function isSerializable2(value2) {
-      if (value2 === void 0 || value2 === null || typeof value2 === "boolean" || typeof value2 === "number" || typeof value2 === "string") {
-        return true;
-      }
-      if (!isPlainObject__default["default"](value2) && !Array.isArray(value2)) {
-        return false;
-      }
-      for (const key in value2) {
-        if (!isSerializable2(value2[key]))
-          return false;
-      }
-      return true;
-    }
-    var SerializablePlugin2 = {
-      name: "plugin-serializable",
-      fnWrap: (move) => (context, ...args) => {
-        const result = move(context, ...args);
-        if (!isSerializable2(result)) {
-          throw new Error("Move state is not JSON-serialiazable.\nSee https://boardgame.io/documentation/#/?id=state for more information.");
-        }
-        return result;
-      }
-    };
-    var production2 = false;
-    var logfn2 = production2 ? () => {
-    } : (...msg) => console.log(...msg);
-    var errorfn2 = (...msg) => console.error(...msg);
-    function info2(msg) {
-      logfn2(`INFO: ${msg}`);
-    }
-    function error2(error3) {
-      errorfn2("ERROR:", error3);
-    }
-    var CORE_PLUGINS2 = [ImmerPlugin2, pluginRandom.RandomPlugin, LogPlugin2, SerializablePlugin2];
-    var DEFAULT_PLUGINS2 = [...CORE_PLUGINS2, EventsPlugin2];
-    var ProcessAction2 = (state, action, opts) => {
-      opts.game.plugins.filter((plugin3) => plugin3.action !== void 0).filter((plugin3) => plugin3.name === action.payload.type).forEach((plugin3) => {
-        const name = plugin3.name;
-        const pluginState = state.plugins[name] || { data: {} };
-        const data = plugin3.action(pluginState.data, action.payload);
-        state = {
-          ...state,
-          plugins: {
-            ...state.plugins,
-            [name]: { ...pluginState, data }
-          }
-        };
-      });
-      return state;
-    };
-    var GetAPIs2 = ({ plugins }) => Object.entries(plugins || {}).reduce((apis, [name, { api }]) => {
-      apis[name] = api;
-      return apis;
-    }, {});
-    var FnWrap2 = (methodToWrap, methodType, plugins) => {
-      return [...CORE_PLUGINS2, ...plugins, EventsPlugin2].filter((plugin3) => plugin3.fnWrap !== void 0).reduce((method, { fnWrap }) => fnWrap(method, methodType), methodToWrap);
-    };
-    var Setup2 = (state, opts) => {
-      [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.setup !== void 0).forEach((plugin3) => {
-        const name = plugin3.name;
-        const data = plugin3.setup({
-          G: state.G,
-          ctx: state.ctx,
-          game: opts.game
-        });
-        state = {
-          ...state,
-          plugins: {
-            ...state.plugins,
-            [name]: { data }
-          }
-        };
-      });
-      return state;
-    };
-    var Enhance2 = (state, opts) => {
-      [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.api !== void 0).forEach((plugin3) => {
-        const name = plugin3.name;
-        const pluginState = state.plugins[name] || { data: {} };
-        const api = plugin3.api({
-          G: state.G,
-          ctx: state.ctx,
-          data: pluginState.data,
-          game: opts.game,
-          playerID: opts.playerID
-        });
-        state = {
-          ...state,
-          plugins: {
-            ...state.plugins,
-            [name]: { ...pluginState, api }
-          }
-        };
-      });
-      return state;
-    };
-    var Flush2 = (state, opts) => {
-      [...CORE_PLUGINS2, ...opts.game.plugins, EventsPlugin2].reverse().forEach((plugin3) => {
-        const name = plugin3.name;
-        const pluginState = state.plugins[name] || { data: {} };
-        if (plugin3.flush) {
-          const newData = plugin3.flush({
-            G: state.G,
-            ctx: state.ctx,
-            game: opts.game,
-            api: pluginState.api,
-            data: pluginState.data
-          });
-          state = {
-            ...state,
-            plugins: {
-              ...state.plugins,
-              [plugin3.name]: { data: newData }
-            }
-          };
-        } else if (plugin3.dangerouslyFlushRawState) {
-          state = plugin3.dangerouslyFlushRawState({
-            state,
-            game: opts.game,
-            api: pluginState.api,
-            data: pluginState.data
-          });
-          const data = state.plugins[name].data;
-          state = {
-            ...state,
-            plugins: {
-              ...state.plugins,
-              [plugin3.name]: { data }
-            }
-          };
-        }
-      });
-      return state;
-    };
-    var NoClient2 = (state, opts) => {
-      return [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.noClient !== void 0).map((plugin3) => {
-        const name = plugin3.name;
-        const pluginState = state.plugins[name];
-        if (pluginState) {
-          return plugin3.noClient({
-            G: state.G,
-            ctx: state.ctx,
-            game: opts.game,
-            api: pluginState.api,
-            data: pluginState.data
-          });
-        }
-        return false;
-      }).includes(true);
-    };
-    var IsInvalid2 = (state, opts) => {
-      const firstInvalidReturn = [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.isInvalid !== void 0).map((plugin3) => {
-        const { name } = plugin3;
-        const pluginState = state.plugins[name];
-        const message = plugin3.isInvalid({
-          G: state.G,
-          ctx: state.ctx,
-          game: opts.game,
-          data: pluginState && pluginState.data
-        });
-        return message ? { plugin: name, message } : false;
-      }).find((value2) => value2);
-      return firstInvalidReturn || false;
-    };
-    var FlushAndValidate2 = (state, opts) => {
-      const updatedState = Flush2(state, opts);
-      const isInvalid = IsInvalid2(updatedState, opts);
-      if (!isInvalid)
-        return [updatedState];
-      const { plugin: plugin3, message } = isInvalid;
-      error2(`${plugin3} plugin declared action invalid:
-${message}`);
-      return [state, isInvalid];
-    };
-    var PlayerView2 = ({ G: G2, ctx, plugins = {} }, { game, playerID }) => {
-      [...DEFAULT_PLUGINS2, ...game.plugins].forEach(({ name, playerView }) => {
-        if (!playerView)
-          return;
-        const { data } = plugins[name] || { data: {} };
-        const newData = playerView({ G: G2, ctx, game, data, playerID });
-        plugins = {
-          ...plugins,
-          [name]: { data: newData }
-        };
-      });
-      return plugins;
-    };
-    function supportDeprecatedMoveLimit2(options, enforceMinMoves = false) {
-      if (options.moveLimit) {
-        if (enforceMinMoves) {
-          options.minMoves = options.moveLimit;
-        }
-        options.maxMoves = options.moveLimit;
-        delete options.moveLimit;
-      }
-    }
-    function SetActivePlayers3(ctx, arg) {
-      let activePlayers = {};
-      let _prevActivePlayers = [];
-      let _nextActivePlayers = null;
-      let _activePlayersMinMoves = {};
-      let _activePlayersMaxMoves = {};
-      if (Array.isArray(arg)) {
-        const value2 = {};
-        arg.forEach((v2) => value2[v2] = Stage2.NULL);
-        activePlayers = value2;
-      } else {
-        supportDeprecatedMoveLimit2(arg);
-        if (arg.next) {
-          _nextActivePlayers = arg.next;
-        }
-        if (arg.revert) {
-          _prevActivePlayers = [
-            ...ctx._prevActivePlayers,
-            {
-              activePlayers: ctx.activePlayers,
-              _activePlayersMinMoves: ctx._activePlayersMinMoves,
-              _activePlayersMaxMoves: ctx._activePlayersMaxMoves,
-              _activePlayersNumMoves: ctx._activePlayersNumMoves
-            }
-          ];
-        }
-        if (arg.currentPlayer !== void 0) {
-          ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, ctx.currentPlayer, arg.currentPlayer);
-        }
-        if (arg.others !== void 0) {
-          for (let i2 = 0; i2 < ctx.playOrder.length; i2++) {
-            const id = ctx.playOrder[i2];
-            if (id !== ctx.currentPlayer) {
-              ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, id, arg.others);
-            }
-          }
-        }
-        if (arg.all !== void 0) {
-          for (let i2 = 0; i2 < ctx.playOrder.length; i2++) {
-            const id = ctx.playOrder[i2];
-            ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, id, arg.all);
-          }
-        }
-        if (arg.value) {
-          for (const id in arg.value) {
-            ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, id, arg.value[id]);
-          }
-        }
-        if (arg.minMoves) {
-          for (const id in activePlayers) {
-            if (_activePlayersMinMoves[id] === void 0) {
-              _activePlayersMinMoves[id] = arg.minMoves;
-            }
-          }
-        }
-        if (arg.maxMoves) {
-          for (const id in activePlayers) {
-            if (_activePlayersMaxMoves[id] === void 0) {
-              _activePlayersMaxMoves[id] = arg.maxMoves;
-            }
-          }
-        }
-      }
-      if (Object.keys(activePlayers).length === 0) {
-        activePlayers = null;
-      }
-      if (Object.keys(_activePlayersMinMoves).length === 0) {
-        _activePlayersMinMoves = null;
-      }
-      if (Object.keys(_activePlayersMaxMoves).length === 0) {
-        _activePlayersMaxMoves = null;
-      }
-      const _activePlayersNumMoves = {};
-      for (const id in activePlayers) {
-        _activePlayersNumMoves[id] = 0;
-      }
-      return {
-        ...ctx,
-        activePlayers,
-        _activePlayersMinMoves,
-        _activePlayersMaxMoves,
-        _activePlayersNumMoves,
-        _prevActivePlayers,
-        _nextActivePlayers
-      };
-    }
-    function UpdateActivePlayersOnceEmpty2(ctx) {
-      let { activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, _activePlayersNumMoves, _prevActivePlayers, _nextActivePlayers } = ctx;
-      if (activePlayers && Object.keys(activePlayers).length === 0) {
-        if (_nextActivePlayers) {
-          ctx = SetActivePlayers3(ctx, _nextActivePlayers);
-          ({
-            activePlayers,
-            _activePlayersMinMoves,
-            _activePlayersMaxMoves,
-            _activePlayersNumMoves,
-            _prevActivePlayers
-          } = ctx);
-        } else if (_prevActivePlayers.length > 0) {
-          const lastIndex = _prevActivePlayers.length - 1;
-          ({
-            activePlayers,
-            _activePlayersMinMoves,
-            _activePlayersMaxMoves,
-            _activePlayersNumMoves
-          } = _prevActivePlayers[lastIndex]);
-          _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
-        } else {
-          activePlayers = null;
-          _activePlayersMinMoves = null;
-          _activePlayersMaxMoves = null;
-        }
-      }
-      return {
-        ...ctx,
-        activePlayers,
-        _activePlayersMinMoves,
-        _activePlayersMaxMoves,
-        _activePlayersNumMoves,
-        _prevActivePlayers
-      };
-    }
-    function ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, playerID, arg) {
-      if (typeof arg !== "object" || arg === Stage2.NULL) {
-        arg = { stage: arg };
-      }
-      if (arg.stage !== void 0) {
-        supportDeprecatedMoveLimit2(arg);
-        activePlayers[playerID] = arg.stage;
-        if (arg.minMoves)
-          _activePlayersMinMoves[playerID] = arg.minMoves;
-        if (arg.maxMoves)
-          _activePlayersMaxMoves[playerID] = arg.maxMoves;
-      }
-    }
-    function getCurrentPlayer2(playOrder, playOrderPos) {
-      return playOrder[playOrderPos] + "";
-    }
-    function InitTurnOrderState2(state, turn) {
-      let { G: G2, ctx } = state;
-      const { numPlayers } = ctx;
-      const pluginAPIs = GetAPIs2(state);
-      const context = { ...pluginAPIs, G: G2, ctx };
-      const order = turn.order;
-      let playOrder = [...Array.from({ length: numPlayers })].map((_2, i2) => i2 + "");
-      if (order.playOrder !== void 0) {
-        playOrder = order.playOrder(context);
-      }
-      const playOrderPos = order.first(context);
-      const posType = typeof playOrderPos;
-      if (posType !== "number") {
-        error2(`invalid value returned by turn.order.first \u2014 expected number got ${posType} \u201C${playOrderPos}\u201D.`);
-      }
-      const currentPlayer = getCurrentPlayer2(playOrder, playOrderPos);
-      ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
-      ctx = SetActivePlayers3(ctx, turn.activePlayers || {});
-      return ctx;
-    }
-    function UpdateTurnOrderState2(state, currentPlayer, turn, endTurnArg) {
-      const order = turn.order;
-      let { G: G2, ctx } = state;
-      let playOrderPos = ctx.playOrderPos;
-      let endPhase = false;
-      if (endTurnArg && endTurnArg !== true) {
-        if (typeof endTurnArg !== "object") {
-          error2(`invalid argument to endTurn: ${endTurnArg}`);
-        }
-        Object.keys(endTurnArg).forEach((arg) => {
-          switch (arg) {
-            case "remove":
-              currentPlayer = getCurrentPlayer2(ctx.playOrder, playOrderPos);
-              break;
-            case "next":
-              playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
-              currentPlayer = endTurnArg.next;
-              break;
-            default:
-              error2(`invalid argument to endTurn: ${arg}`);
-          }
-        });
-      } else {
-        const pluginAPIs = GetAPIs2(state);
-        const context = { ...pluginAPIs, G: G2, ctx };
-        const t2 = order.next(context);
-        const type = typeof t2;
-        if (t2 !== void 0 && type !== "number") {
-          error2(`invalid value returned by turn.order.next \u2014 expected number or undefined got ${type} \u201C${t2}\u201D.`);
-        }
-        if (t2 === void 0) {
-          endPhase = true;
-        } else {
-          playOrderPos = t2;
-          currentPlayer = getCurrentPlayer2(ctx.playOrder, playOrderPos);
-        }
-      }
-      ctx = {
-        ...ctx,
-        playOrderPos,
-        currentPlayer
-      };
-      return { endPhase, ctx };
-    }
-    var TurnOrder2 = {
-      /**
-       * DEFAULT
-       *
-       * The default round-robin turn order.
-       */
-      DEFAULT: {
-        first: ({ ctx }) => ctx.turn === 0 ? ctx.playOrderPos : (ctx.playOrderPos + 1) % ctx.playOrder.length,
-        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
-      },
-      /**
-       * RESET
-       *
-       * Similar to DEFAULT, but starts from 0 each time.
-       */
-      RESET: {
-        first: () => 0,
-        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
-      },
-      /**
-       * CONTINUE
-       *
-       * Similar to DEFAULT, but starts with the player who ended the last phase.
-       */
-      CONTINUE: {
-        first: ({ ctx }) => ctx.playOrderPos,
-        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
-      },
-      /**
-       * ONCE
-       *
-       * Another round-robin turn order, but goes around just once.
-       * The phase ends after all players have played.
-       */
-      ONCE: {
-        first: () => 0,
-        next: ({ ctx }) => {
-          if (ctx.playOrderPos < ctx.playOrder.length - 1) {
-            return ctx.playOrderPos + 1;
-          }
-        }
-      },
-      /**
-       * CUSTOM
-       *
-       * Identical to DEFAULT, but also sets playOrder at the
-       * beginning of the phase.
-       *
-       * @param {Array} playOrder - The play order.
-       */
-      CUSTOM: (playOrder) => ({
-        playOrder: () => playOrder,
-        first: () => 0,
-        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
-      }),
-      /**
-       * CUSTOM_FROM
-       *
-       * Identical to DEFAULT, but also sets playOrder at the
-       * beginning of the phase to a value specified by a field
-       * in G.
-       *
-       * @param {string} playOrderField - Field in G.
-       */
-      CUSTOM_FROM: (playOrderField) => ({
-        playOrder: ({ G: G2 }) => G2[playOrderField],
-        first: () => 0,
-        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
-      })
-    };
-    var Stage2 = {
-      NULL: null
-    };
-    var ActivePlayers2 = {
-      /**
-       * ALL
-       *
-       * The turn stays with one player, but any player can play (in any order)
-       * until the phase ends.
-       */
-      ALL: { all: Stage2.NULL },
-      /**
-       * ALL_ONCE
-       *
-       * The turn stays with one player, but any player can play (once, and in any order).
-       * This is typically used in a phase where you want to elicit a response
-       * from every player in the game.
-       */
-      ALL_ONCE: { all: Stage2.NULL, minMoves: 1, maxMoves: 1 },
-      /**
-       * OTHERS
-       *
-       * The turn stays with one player, and every *other* player can play (in any order)
-       * until the phase ends.
-       */
-      OTHERS: { others: Stage2.NULL },
-      /**
-       * OTHERS_ONCE
-       *
-       * The turn stays with one player, and every *other* player can play (once, and in any order).
-       * This is typically used in a phase where you want to elicit a response
-       * from every *other* player in the game.
-       */
-      OTHERS_ONCE: { others: Stage2.NULL, minMoves: 1, maxMoves: 1 }
-    };
-    exports.ActionCreators = ActionCreators2;
-    exports.ActivePlayers = ActivePlayers2;
-    exports.Enhance = Enhance2;
-    exports.FlushAndValidate = FlushAndValidate2;
-    exports.FnWrap = FnWrap2;
-    exports.GAME_EVENT = GAME_EVENT2;
-    exports.GetAPIs = GetAPIs2;
-    exports.INVALID_MOVE = INVALID_MOVE4;
-    exports.InitTurnOrderState = InitTurnOrderState2;
-    exports.MAKE_MOVE = MAKE_MOVE2;
-    exports.NoClient = NoClient2;
-    exports.PATCH = PATCH2;
-    exports.PLUGIN = PLUGIN2;
-    exports.PlayerView = PlayerView2;
-    exports.ProcessAction = ProcessAction2;
-    exports.REDO = REDO2;
-    exports.RESET = RESET2;
-    exports.STRIP_TRANSIENTS = STRIP_TRANSIENTS2;
-    exports.SYNC = SYNC2;
-    exports.SetActivePlayers = SetActivePlayers3;
-    exports.Setup = Setup2;
-    exports.Stage = Stage2;
-    exports.TurnOrder = TurnOrder2;
-    exports.UNDO = UNDO2;
-    exports.UPDATE = UPDATE2;
-    exports.UpdateActivePlayersOnceEmpty = UpdateActivePlayersOnceEmpty2;
-    exports.UpdateTurnOrderState = UpdateTurnOrderState2;
-    exports.error = error2;
-    exports.gameEvent = gameEvent2;
-    exports.info = info2;
-    exports.makeMove = makeMove2;
-    exports.patch = patch2;
-    exports.redo = redo2;
-    exports.reset = reset2;
-    exports.stripTransients = stripTransients2;
-    exports.supportDeprecatedMoveLimit = supportDeprecatedMoveLimit2;
-    exports.sync = sync2;
-    exports.undo = undo2;
-    exports.update = update3;
-  }
-});
-
-// node_modules/@mnbroatch/boardgame.io/dist/cjs/core.js
-var require_core = __commonJS({
-  "node_modules/@mnbroatch/boardgame.io/dist/cjs/core.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var turnOrder = require_turn_order_b2ff8740();
-    require_dist();
-    require_plugin_random_7425844d();
-    require_lodash();
-    var PlayerView2 = {
-      /**
-       * STRIP_SECRETS
-       *
-       * Reducer which removes a key named `secret` and
-       * removes all the keys in `players`, except for the one
-       * corresponding to the current playerID.
-       */
-      STRIP_SECRETS: ({ G: G2, playerID }) => {
-        const r2 = { ...G2 };
-        if (r2.secret !== void 0) {
-          delete r2.secret;
-        }
-        if (r2.players) {
-          r2.players = playerID ? {
-            [playerID]: r2.players[playerID]
-          } : {};
-        }
-        return r2;
-      }
-    };
-    exports.ActivePlayers = turnOrder.ActivePlayers;
-    Object.defineProperty(exports, "GameMethod", {
-      enumerable: true,
-      get: function() {
-        return turnOrder.GameMethod;
-      }
-    });
-    exports.INVALID_MOVE = turnOrder.INVALID_MOVE;
-    exports.Stage = turnOrder.Stage;
-    exports.TurnOrder = turnOrder.TurnOrder;
-    exports.PlayerView = PlayerView2;
-  }
-});
-
 // node_modules/lodash/_baseSlice.js
 var require_baseSlice = __commonJS({
   "node_modules/lodash/_baseSlice.js"(exports, module) {
@@ -5793,6 +3265,2534 @@ var require_matches = __commonJS({
   }
 });
 
+// node_modules/immer/dist/immer.cjs.development.js
+var require_immer_cjs_development = __commonJS({
+  "node_modules/immer/dist/immer.cjs.development.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var _ref;
+    var hasSymbol = typeof Symbol !== "undefined" && typeof /* @__PURE__ */ Symbol("x") === "symbol";
+    var hasMap = typeof Map !== "undefined";
+    var hasSet = typeof Set !== "undefined";
+    var hasProxies = typeof Proxy !== "undefined" && typeof Proxy.revocable !== "undefined" && typeof Reflect !== "undefined";
+    var NOTHING = hasSymbol ? /* @__PURE__ */ Symbol.for("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
+    var DRAFTABLE = hasSymbol ? /* @__PURE__ */ Symbol.for("immer-draftable") : "__$immer_draftable";
+    var DRAFT_STATE = hasSymbol ? /* @__PURE__ */ Symbol.for("immer-state") : "__$immer_state";
+    var iteratorSymbol = typeof Symbol != "undefined" && Symbol.iterator || "@@iterator";
+    var errors = {
+      0: "Illegal state",
+      1: "Immer drafts cannot have computed properties",
+      2: "This object has been frozen and should not be mutated",
+      3: function _2(data) {
+        return "Cannot use a proxy that has been revoked. Did you pass an object from inside an immer function to an async process? " + data;
+      },
+      4: "An immer producer returned a new value *and* modified its draft. Either return a new value *or* modify the draft.",
+      5: "Immer forbids circular references",
+      6: "The first or second argument to `produce` must be a function",
+      7: "The third argument to `produce` must be a function or undefined",
+      8: "First argument to `createDraft` must be a plain object, an array, or an immerable object",
+      9: "First argument to `finishDraft` must be a draft returned by `createDraft`",
+      10: "The given draft is already finalized",
+      11: "Object.defineProperty() cannot be used on an Immer draft",
+      12: "Object.setPrototypeOf() cannot be used on an Immer draft",
+      13: "Immer only supports deleting array indices",
+      14: "Immer only supports setting array indices and the 'length' property",
+      15: function _2(path) {
+        return "Cannot apply patch, path doesn't resolve: " + path;
+      },
+      16: 'Sets cannot have "replace" patches.',
+      17: function _2(op) {
+        return "Unsupported patch operation: " + op;
+      },
+      18: function _2(plugin2) {
+        return "The plugin for '" + plugin2 + "' has not been loaded into Immer. To enable the plugin, import and call `enable" + plugin2 + "()` when initializing your application.";
+      },
+      20: "Cannot use proxies if Proxy, Proxy.revocable or Reflect are not available",
+      21: function _2(thing) {
+        return "produce can only be called on things that are draftable: plain objects, arrays, Map, Set or classes that are marked with '[immerable]: true'. Got '" + thing + "'";
+      },
+      22: function _2(thing) {
+        return "'current' expects a draft, got: " + thing;
+      },
+      23: function _2(thing) {
+        return "'original' expects a draft, got: " + thing;
+      },
+      24: "Patching reserved attributes like __proto__, prototype and constructor is not allowed"
+    };
+    function die(error2) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+      {
+        var e = errors[error2];
+        var msg = !e ? "unknown error nr: " + error2 : typeof e === "function" ? e.apply(null, args) : e;
+        throw new Error("[Immer] " + msg);
+      }
+    }
+    function isDraft(value2) {
+      return !!value2 && !!value2[DRAFT_STATE];
+    }
+    function isDraftable(value2) {
+      var _value$constructor;
+      if (!value2) return false;
+      return isPlainObject6(value2) || Array.isArray(value2) || !!value2[DRAFTABLE] || !!((_value$constructor = value2.constructor) === null || _value$constructor === void 0 ? void 0 : _value$constructor[DRAFTABLE]) || isMap(value2) || isSet(value2);
+    }
+    var objectCtorString = /* @__PURE__ */ Object.prototype.constructor.toString();
+    function isPlainObject6(value2) {
+      if (!value2 || typeof value2 !== "object") return false;
+      var proto = Object.getPrototypeOf(value2);
+      if (proto === null) {
+        return true;
+      }
+      var Ctor = Object.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+      if (Ctor === Object) return true;
+      return typeof Ctor == "function" && Function.toString.call(Ctor) === objectCtorString;
+    }
+    function original(value2) {
+      if (!isDraft(value2)) die(23, value2);
+      return value2[DRAFT_STATE].base_;
+    }
+    var ownKeys2 = typeof Reflect !== "undefined" && Reflect.ownKeys ? Reflect.ownKeys : typeof Object.getOwnPropertySymbols !== "undefined" ? function(obj) {
+      return Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertySymbols(obj));
+    } : (
+      /* istanbul ignore next */
+      Object.getOwnPropertyNames
+    );
+    var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors || function getOwnPropertyDescriptors2(target) {
+      var res = {};
+      ownKeys2(target).forEach(function(key) {
+        res[key] = Object.getOwnPropertyDescriptor(target, key);
+      });
+      return res;
+    };
+    function each(obj, iter, enumerableOnly) {
+      if (enumerableOnly === void 0) {
+        enumerableOnly = false;
+      }
+      if (getArchtype(obj) === 0) {
+        (enumerableOnly ? Object.keys : ownKeys2)(obj).forEach(function(key) {
+          if (!enumerableOnly || typeof key !== "symbol") iter(key, obj[key], obj);
+        });
+      } else {
+        obj.forEach(function(entry, index) {
+          return iter(index, entry, obj);
+        });
+      }
+    }
+    function getArchtype(thing) {
+      var state = thing[DRAFT_STATE];
+      return state ? state.type_ > 3 ? state.type_ - 4 : state.type_ : Array.isArray(thing) ? 1 : isMap(thing) ? 2 : isSet(thing) ? 3 : 0;
+    }
+    function has(thing, prop) {
+      return getArchtype(thing) === 2 ? thing.has(prop) : Object.prototype.hasOwnProperty.call(thing, prop);
+    }
+    function get2(thing, prop) {
+      return getArchtype(thing) === 2 ? thing.get(prop) : thing[prop];
+    }
+    function set2(thing, propOrOldValue, value2) {
+      var t2 = getArchtype(thing);
+      if (t2 === 2) thing.set(propOrOldValue, value2);
+      else if (t2 === 3) {
+        thing.add(value2);
+      } else thing[propOrOldValue] = value2;
+    }
+    function is(x2, y2) {
+      if (x2 === y2) {
+        return x2 !== 0 || 1 / x2 === 1 / y2;
+      } else {
+        return x2 !== x2 && y2 !== y2;
+      }
+    }
+    function isMap(target) {
+      return hasMap && target instanceof Map;
+    }
+    function isSet(target) {
+      return hasSet && target instanceof Set;
+    }
+    function latest(state) {
+      return state.copy_ || state.base_;
+    }
+    function shallowCopy(base) {
+      if (Array.isArray(base)) return Array.prototype.slice.call(base);
+      var descriptors = getOwnPropertyDescriptors(base);
+      delete descriptors[DRAFT_STATE];
+      var keys2 = ownKeys2(descriptors);
+      for (var i2 = 0; i2 < keys2.length; i2++) {
+        var key = keys2[i2];
+        var desc = descriptors[key];
+        if (desc.writable === false) {
+          desc.writable = true;
+          desc.configurable = true;
+        }
+        if (desc.get || desc.set) descriptors[key] = {
+          configurable: true,
+          writable: true,
+          enumerable: desc.enumerable,
+          value: base[key]
+        };
+      }
+      return Object.create(Object.getPrototypeOf(base), descriptors);
+    }
+    function freeze(obj, deep) {
+      if (deep === void 0) {
+        deep = false;
+      }
+      if (isFrozen(obj) || isDraft(obj) || !isDraftable(obj)) return obj;
+      if (getArchtype(obj) > 1) {
+        obj.set = obj.add = obj.clear = obj.delete = dontMutateFrozenCollections;
+      }
+      Object.freeze(obj);
+      if (deep) each(obj, function(key, value2) {
+        return freeze(value2, true);
+      }, true);
+      return obj;
+    }
+    function dontMutateFrozenCollections() {
+      die(2);
+    }
+    function isFrozen(obj) {
+      if (obj == null || typeof obj !== "object") return true;
+      return Object.isFrozen(obj);
+    }
+    var plugins = {};
+    function getPlugin(pluginKey) {
+      var plugin2 = plugins[pluginKey];
+      if (!plugin2) {
+        die(18, pluginKey);
+      }
+      return plugin2;
+    }
+    function loadPlugin(pluginKey, implementation) {
+      if (!plugins[pluginKey]) plugins[pluginKey] = implementation;
+    }
+    var currentScope;
+    function getCurrentScope() {
+      if (!currentScope) die(0);
+      return currentScope;
+    }
+    function createScope(parent_, immer_) {
+      return {
+        drafts_: [],
+        parent_,
+        immer_,
+        // Whenever the modified draft contains a draft from another scope, we
+        // need to prevent auto-freezing so the unowned draft can be finalized.
+        canAutoFreeze_: true,
+        unfinalizedDrafts_: 0
+      };
+    }
+    function usePatchesInScope(scope, patchListener) {
+      if (patchListener) {
+        getPlugin("Patches");
+        scope.patches_ = [];
+        scope.inversePatches_ = [];
+        scope.patchListener_ = patchListener;
+      }
+    }
+    function revokeScope(scope) {
+      leaveScope(scope);
+      scope.drafts_.forEach(revokeDraft);
+      scope.drafts_ = null;
+    }
+    function leaveScope(scope) {
+      if (scope === currentScope) {
+        currentScope = scope.parent_;
+      }
+    }
+    function enterScope(immer2) {
+      return currentScope = createScope(currentScope, immer2);
+    }
+    function revokeDraft(draft) {
+      var state = draft[DRAFT_STATE];
+      if (state.type_ === 0 || state.type_ === 1) state.revoke_();
+      else state.revoked_ = true;
+    }
+    function processResult(result, scope) {
+      scope.unfinalizedDrafts_ = scope.drafts_.length;
+      var baseDraft = scope.drafts_[0];
+      var isReplaced = result !== void 0 && result !== baseDraft;
+      if (!scope.immer_.useProxies_) getPlugin("ES5").willFinalizeES5_(scope, result, isReplaced);
+      if (isReplaced) {
+        if (baseDraft[DRAFT_STATE].modified_) {
+          revokeScope(scope);
+          die(4);
+        }
+        if (isDraftable(result)) {
+          result = finalize(scope, result);
+          if (!scope.parent_) maybeFreeze(scope, result);
+        }
+        if (scope.patches_) {
+          getPlugin("Patches").generateReplacementPatches_(baseDraft[DRAFT_STATE].base_, result, scope.patches_, scope.inversePatches_);
+        }
+      } else {
+        result = finalize(scope, baseDraft, []);
+      }
+      revokeScope(scope);
+      if (scope.patches_) {
+        scope.patchListener_(scope.patches_, scope.inversePatches_);
+      }
+      return result !== NOTHING ? result : void 0;
+    }
+    function finalize(rootScope, value2, path) {
+      if (isFrozen(value2)) return value2;
+      var state = value2[DRAFT_STATE];
+      if (!state) {
+        each(
+          value2,
+          function(key, childValue) {
+            return finalizeProperty(rootScope, state, value2, key, childValue, path);
+          },
+          true
+          // See #590, don't recurse into non-enumerable of non drafted objects
+        );
+        return value2;
+      }
+      if (state.scope_ !== rootScope) return value2;
+      if (!state.modified_) {
+        maybeFreeze(rootScope, state.base_, true);
+        return state.base_;
+      }
+      if (!state.finalized_) {
+        state.finalized_ = true;
+        state.scope_.unfinalizedDrafts_--;
+        var result = (
+          // For ES5, create a good copy from the draft first, with added keys and without deleted keys.
+          state.type_ === 4 || state.type_ === 5 ? state.copy_ = shallowCopy(state.draft_) : state.copy_
+        );
+        var resultEach = result;
+        var isSet2 = false;
+        if (state.type_ === 3) {
+          resultEach = new Set(result);
+          result.clear();
+          isSet2 = true;
+        }
+        each(resultEach, function(key, childValue) {
+          return finalizeProperty(rootScope, state, result, key, childValue, path, isSet2);
+        });
+        maybeFreeze(rootScope, result, false);
+        if (path && rootScope.patches_) {
+          getPlugin("Patches").generatePatches_(state, path, rootScope.patches_, rootScope.inversePatches_);
+        }
+      }
+      return state.copy_;
+    }
+    function finalizeProperty(rootScope, parentState, targetObject, prop, childValue, rootPath, targetIsSet) {
+      if (childValue === targetObject) die(5);
+      if (isDraft(childValue)) {
+        var path = rootPath && parentState && parentState.type_ !== 3 && // Set objects are atomic since they have no keys.
+        !has(parentState.assigned_, prop) ? rootPath.concat(prop) : void 0;
+        var res = finalize(rootScope, childValue, path);
+        set2(targetObject, prop, res);
+        if (isDraft(res)) {
+          rootScope.canAutoFreeze_ = false;
+        } else return;
+      } else if (targetIsSet) {
+        targetObject.add(childValue);
+      }
+      if (isDraftable(childValue) && !isFrozen(childValue)) {
+        if (!rootScope.immer_.autoFreeze_ && rootScope.unfinalizedDrafts_ < 1) {
+          return;
+        }
+        finalize(rootScope, childValue);
+        if (!parentState || !parentState.scope_.parent_) maybeFreeze(rootScope, childValue);
+      }
+    }
+    function maybeFreeze(scope, value2, deep) {
+      if (deep === void 0) {
+        deep = false;
+      }
+      if (!scope.parent_ && scope.immer_.autoFreeze_ && scope.canAutoFreeze_) {
+        freeze(value2, deep);
+      }
+    }
+    function createProxyProxy(base, parent) {
+      var isArray = Array.isArray(base);
+      var state = {
+        type_: isArray ? 1 : 0,
+        // Track which produce call this is associated with.
+        scope_: parent ? parent.scope_ : getCurrentScope(),
+        // True for both shallow and deep changes.
+        modified_: false,
+        // Used during finalization.
+        finalized_: false,
+        // Track which properties have been assigned (true) or deleted (false).
+        assigned_: {},
+        // The parent draft state.
+        parent_: parent,
+        // The base state.
+        base_: base,
+        // The base proxy.
+        draft_: null,
+        // The base copy with any updated values.
+        copy_: null,
+        // Called by the `produce` function.
+        revoke_: null,
+        isManual_: false
+      };
+      var target = state;
+      var traps = objectTraps;
+      if (isArray) {
+        target = [state];
+        traps = arrayTraps;
+      }
+      var _Proxy$revocable = Proxy.revocable(target, traps), revoke = _Proxy$revocable.revoke, proxy = _Proxy$revocable.proxy;
+      state.draft_ = proxy;
+      state.revoke_ = revoke;
+      return proxy;
+    }
+    var objectTraps = {
+      get: function get3(state, prop) {
+        if (prop === DRAFT_STATE) return state;
+        var source = latest(state);
+        if (!has(source, prop)) {
+          return readPropFromProto(state, source, prop);
+        }
+        var value2 = source[prop];
+        if (state.finalized_ || !isDraftable(value2)) {
+          return value2;
+        }
+        if (value2 === peek(state.base_, prop)) {
+          prepareCopy(state);
+          return state.copy_[prop] = createProxy(state.scope_.immer_, value2, state);
+        }
+        return value2;
+      },
+      has: function has2(state, prop) {
+        return prop in latest(state);
+      },
+      ownKeys: function ownKeys3(state) {
+        return Reflect.ownKeys(latest(state));
+      },
+      set: function set3(state, prop, value2) {
+        var desc = getDescriptorFromProto(latest(state), prop);
+        if (desc === null || desc === void 0 ? void 0 : desc.set) {
+          desc.set.call(state.draft_, value2);
+          return true;
+        }
+        if (!state.modified_) {
+          var current2 = peek(latest(state), prop);
+          var currentState = current2 === null || current2 === void 0 ? void 0 : current2[DRAFT_STATE];
+          if (currentState && currentState.base_ === value2) {
+            state.copy_[prop] = value2;
+            state.assigned_[prop] = false;
+            return true;
+          }
+          if (is(value2, current2) && (value2 !== void 0 || has(state.base_, prop))) return true;
+          prepareCopy(state);
+          markChanged(state);
+        }
+        if (state.copy_[prop] === value2 && // special case: handle new props with value 'undefined'
+        (value2 !== void 0 || prop in state.copy_) || // special case: NaN
+        Number.isNaN(value2) && Number.isNaN(state.copy_[prop])) return true;
+        state.copy_[prop] = value2;
+        state.assigned_[prop] = true;
+        return true;
+      },
+      deleteProperty: function deleteProperty(state, prop) {
+        if (peek(state.base_, prop) !== void 0 || prop in state.base_) {
+          state.assigned_[prop] = false;
+          prepareCopy(state);
+          markChanged(state);
+        } else {
+          delete state.assigned_[prop];
+        }
+        if (state.copy_) delete state.copy_[prop];
+        return true;
+      },
+      // Note: We never coerce `desc.value` into an Immer draft, because we can't make
+      // the same guarantee in ES5 mode.
+      getOwnPropertyDescriptor: function getOwnPropertyDescriptor(state, prop) {
+        var owner = latest(state);
+        var desc = Reflect.getOwnPropertyDescriptor(owner, prop);
+        if (!desc) return desc;
+        return {
+          writable: true,
+          configurable: state.type_ !== 1 || prop !== "length",
+          enumerable: desc.enumerable,
+          value: owner[prop]
+        };
+      },
+      defineProperty: function defineProperty() {
+        die(11);
+      },
+      getPrototypeOf: function getPrototypeOf(state) {
+        return Object.getPrototypeOf(state.base_);
+      },
+      setPrototypeOf: function setPrototypeOf() {
+        die(12);
+      }
+    };
+    var arrayTraps = {};
+    each(objectTraps, function(key, fn2) {
+      arrayTraps[key] = function() {
+        arguments[0] = arguments[0][0];
+        return fn2.apply(this, arguments);
+      };
+    });
+    arrayTraps.deleteProperty = function(state, prop) {
+      if (isNaN(parseInt(prop))) die(13);
+      return arrayTraps.set.call(this, state, prop, void 0);
+    };
+    arrayTraps.set = function(state, prop, value2) {
+      if (prop !== "length" && isNaN(parseInt(prop))) die(14);
+      return objectTraps.set.call(this, state[0], prop, value2, state[0]);
+    };
+    function peek(draft, prop) {
+      var state = draft[DRAFT_STATE];
+      var source = state ? latest(state) : draft;
+      return source[prop];
+    }
+    function readPropFromProto(state, source, prop) {
+      var _desc$get;
+      var desc = getDescriptorFromProto(source, prop);
+      return desc ? "value" in desc ? desc.value : (
+        // This is a very special case, if the prop is a getter defined by the
+        // prototype, we should invoke it with the draft as context!
+        (_desc$get = desc.get) === null || _desc$get === void 0 ? void 0 : _desc$get.call(state.draft_)
+      ) : void 0;
+    }
+    function getDescriptorFromProto(source, prop) {
+      if (!(prop in source)) return void 0;
+      var proto = Object.getPrototypeOf(source);
+      while (proto) {
+        var desc = Object.getOwnPropertyDescriptor(proto, prop);
+        if (desc) return desc;
+        proto = Object.getPrototypeOf(proto);
+      }
+      return void 0;
+    }
+    function markChanged(state) {
+      if (!state.modified_) {
+        state.modified_ = true;
+        if (state.parent_) {
+          markChanged(state.parent_);
+        }
+      }
+    }
+    function prepareCopy(state) {
+      if (!state.copy_) {
+        state.copy_ = shallowCopy(state.base_);
+      }
+    }
+    var Immer = /* @__PURE__ */ function() {
+      function Immer2(config) {
+        var _this = this;
+        this.useProxies_ = hasProxies;
+        this.autoFreeze_ = true;
+        this.produce = function(base, recipe, patchListener) {
+          if (typeof base === "function" && typeof recipe !== "function") {
+            var defaultBase = recipe;
+            recipe = base;
+            var self2 = _this;
+            return function curriedProduce(base2) {
+              var _this2 = this;
+              if (base2 === void 0) {
+                base2 = defaultBase;
+              }
+              for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                args[_key - 1] = arguments[_key];
+              }
+              return self2.produce(base2, function(draft) {
+                var _recipe;
+                return (_recipe = recipe).call.apply(_recipe, [_this2, draft].concat(args));
+              });
+            };
+          }
+          if (typeof recipe !== "function") die(6);
+          if (patchListener !== void 0 && typeof patchListener !== "function") die(7);
+          var result;
+          if (isDraftable(base)) {
+            var scope = enterScope(_this);
+            var proxy = createProxy(_this, base, void 0);
+            var hasError = true;
+            try {
+              result = recipe(proxy);
+              hasError = false;
+            } finally {
+              if (hasError) revokeScope(scope);
+              else leaveScope(scope);
+            }
+            if (typeof Promise !== "undefined" && result instanceof Promise) {
+              return result.then(function(result2) {
+                usePatchesInScope(scope, patchListener);
+                return processResult(result2, scope);
+              }, function(error2) {
+                revokeScope(scope);
+                throw error2;
+              });
+            }
+            usePatchesInScope(scope, patchListener);
+            return processResult(result, scope);
+          } else if (!base || typeof base !== "object") {
+            result = recipe(base);
+            if (result === void 0) result = base;
+            if (result === NOTHING) result = void 0;
+            if (_this.autoFreeze_) freeze(result, true);
+            if (patchListener) {
+              var p2 = [];
+              var ip = [];
+              getPlugin("Patches").generateReplacementPatches_(base, result, p2, ip);
+              patchListener(p2, ip);
+            }
+            return result;
+          } else die(21, base);
+        };
+        this.produceWithPatches = function(base, recipe) {
+          if (typeof base === "function") {
+            return function(state) {
+              for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+                args[_key2 - 1] = arguments[_key2];
+              }
+              return _this.produceWithPatches(state, function(draft) {
+                return base.apply(void 0, [draft].concat(args));
+              });
+            };
+          }
+          var patches, inversePatches;
+          var result = _this.produce(base, recipe, function(p2, ip) {
+            patches = p2;
+            inversePatches = ip;
+          });
+          if (typeof Promise !== "undefined" && result instanceof Promise) {
+            return result.then(function(nextState) {
+              return [nextState, patches, inversePatches];
+            });
+          }
+          return [result, patches, inversePatches];
+        };
+        if (typeof (config === null || config === void 0 ? void 0 : config.useProxies) === "boolean") this.setUseProxies(config.useProxies);
+        if (typeof (config === null || config === void 0 ? void 0 : config.autoFreeze) === "boolean") this.setAutoFreeze(config.autoFreeze);
+      }
+      var _proto = Immer2.prototype;
+      _proto.createDraft = function createDraft2(base) {
+        if (!isDraftable(base)) die(8);
+        if (isDraft(base)) base = current(base);
+        var scope = enterScope(this);
+        var proxy = createProxy(this, base, void 0);
+        proxy[DRAFT_STATE].isManual_ = true;
+        leaveScope(scope);
+        return proxy;
+      };
+      _proto.finishDraft = function finishDraft2(draft, patchListener) {
+        var state = draft && draft[DRAFT_STATE];
+        {
+          if (!state || !state.isManual_) die(9);
+          if (state.finalized_) die(10);
+        }
+        var scope = state.scope_;
+        usePatchesInScope(scope, patchListener);
+        return processResult(void 0, scope);
+      };
+      _proto.setAutoFreeze = function setAutoFreeze2(value2) {
+        this.autoFreeze_ = value2;
+      };
+      _proto.setUseProxies = function setUseProxies2(value2) {
+        if (value2 && !hasProxies) {
+          die(20);
+        }
+        this.useProxies_ = value2;
+      };
+      _proto.applyPatches = function applyPatches2(base, patches) {
+        var i2;
+        for (i2 = patches.length - 1; i2 >= 0; i2--) {
+          var patch2 = patches[i2];
+          if (patch2.path.length === 0 && patch2.op === "replace") {
+            base = patch2.value;
+            break;
+          }
+        }
+        if (i2 > -1) {
+          patches = patches.slice(i2 + 1);
+        }
+        var applyPatchesImpl = getPlugin("Patches").applyPatches_;
+        if (isDraft(base)) {
+          return applyPatchesImpl(base, patches);
+        }
+        return this.produce(base, function(draft) {
+          return applyPatchesImpl(draft, patches);
+        });
+      };
+      return Immer2;
+    }();
+    function createProxy(immer2, value2, parent) {
+      var draft = isMap(value2) ? getPlugin("MapSet").proxyMap_(value2, parent) : isSet(value2) ? getPlugin("MapSet").proxySet_(value2, parent) : immer2.useProxies_ ? createProxyProxy(value2, parent) : getPlugin("ES5").createES5Proxy_(value2, parent);
+      var scope = parent ? parent.scope_ : getCurrentScope();
+      scope.drafts_.push(draft);
+      return draft;
+    }
+    function current(value2) {
+      if (!isDraft(value2)) die(22, value2);
+      return currentImpl(value2);
+    }
+    function currentImpl(value2) {
+      if (!isDraftable(value2)) return value2;
+      var state = value2[DRAFT_STATE];
+      var copy2;
+      var archType = getArchtype(value2);
+      if (state) {
+        if (!state.modified_ && (state.type_ < 4 || !getPlugin("ES5").hasChanges_(state))) return state.base_;
+        state.finalized_ = true;
+        copy2 = copyHelper(value2, archType);
+        state.finalized_ = false;
+      } else {
+        copy2 = copyHelper(value2, archType);
+      }
+      each(copy2, function(key, childValue) {
+        if (state && get2(state.base_, key) === childValue) return;
+        set2(copy2, key, currentImpl(childValue));
+      });
+      return archType === 3 ? new Set(copy2) : copy2;
+    }
+    function copyHelper(value2, archType) {
+      switch (archType) {
+        case 2:
+          return new Map(value2);
+        case 3:
+          return Array.from(value2);
+      }
+      return shallowCopy(value2);
+    }
+    function enableES5() {
+      function willFinalizeES5_(scope, result, isReplaced) {
+        if (!isReplaced) {
+          if (scope.patches_) {
+            markChangesRecursively(scope.drafts_[0]);
+          }
+          markChangesSweep(scope.drafts_);
+        } else if (isDraft(result) && result[DRAFT_STATE].scope_ === scope) {
+          markChangesSweep(scope.drafts_);
+        }
+      }
+      function createES5Draft(isArray, base) {
+        if (isArray) {
+          var draft = new Array(base.length);
+          for (var i2 = 0; i2 < base.length; i2++) {
+            Object.defineProperty(draft, "" + i2, proxyProperty(i2, true));
+          }
+          return draft;
+        } else {
+          var _descriptors = getOwnPropertyDescriptors(base);
+          delete _descriptors[DRAFT_STATE];
+          var keys2 = ownKeys2(_descriptors);
+          for (var _i = 0; _i < keys2.length; _i++) {
+            var key = keys2[_i];
+            _descriptors[key] = proxyProperty(key, isArray || !!_descriptors[key].enumerable);
+          }
+          return Object.create(Object.getPrototypeOf(base), _descriptors);
+        }
+      }
+      function createES5Proxy_(base, parent) {
+        var isArray = Array.isArray(base);
+        var draft = createES5Draft(isArray, base);
+        var state = {
+          type_: isArray ? 5 : 4,
+          scope_: parent ? parent.scope_ : getCurrentScope(),
+          modified_: false,
+          finalized_: false,
+          assigned_: {},
+          parent_: parent,
+          // base is the object we are drafting
+          base_: base,
+          // draft is the draft object itself, that traps all reads and reads from either the base (if unmodified) or copy (if modified)
+          draft_: draft,
+          copy_: null,
+          revoked_: false,
+          isManual_: false
+        };
+        Object.defineProperty(draft, DRAFT_STATE, {
+          value: state,
+          // enumerable: false <- the default
+          writable: true
+        });
+        return draft;
+      }
+      var descriptors = {};
+      function proxyProperty(prop, enumerable) {
+        var desc = descriptors[prop];
+        if (desc) {
+          desc.enumerable = enumerable;
+        } else {
+          descriptors[prop] = desc = {
+            configurable: true,
+            enumerable,
+            get: function get3() {
+              var state = this[DRAFT_STATE];
+              assertUnrevoked(state);
+              return objectTraps.get(state, prop);
+            },
+            set: function set3(value2) {
+              var state = this[DRAFT_STATE];
+              assertUnrevoked(state);
+              objectTraps.set(state, prop, value2);
+            }
+          };
+        }
+        return desc;
+      }
+      function markChangesSweep(drafts) {
+        for (var i2 = drafts.length - 1; i2 >= 0; i2--) {
+          var state = drafts[i2][DRAFT_STATE];
+          if (!state.modified_) {
+            switch (state.type_) {
+              case 5:
+                if (hasArrayChanges(state)) markChanged(state);
+                break;
+              case 4:
+                if (hasObjectChanges(state)) markChanged(state);
+                break;
+            }
+          }
+        }
+      }
+      function markChangesRecursively(object2) {
+        if (!object2 || typeof object2 !== "object") return;
+        var state = object2[DRAFT_STATE];
+        if (!state) return;
+        var base_ = state.base_, draft_ = state.draft_, assigned_ = state.assigned_, type_ = state.type_;
+        if (type_ === 4) {
+          each(draft_, function(key) {
+            if (key === DRAFT_STATE) return;
+            if (base_[key] === void 0 && !has(base_, key)) {
+              assigned_[key] = true;
+              markChanged(state);
+            } else if (!assigned_[key]) {
+              markChangesRecursively(draft_[key]);
+            }
+          });
+          each(base_, function(key) {
+            if (draft_[key] === void 0 && !has(draft_, key)) {
+              assigned_[key] = false;
+              markChanged(state);
+            }
+          });
+        } else if (type_ === 5) {
+          if (hasArrayChanges(state)) {
+            markChanged(state);
+            assigned_.length = true;
+          }
+          if (draft_.length < base_.length) {
+            for (var i2 = draft_.length; i2 < base_.length; i2++) {
+              assigned_[i2] = false;
+            }
+          } else {
+            for (var _i2 = base_.length; _i2 < draft_.length; _i2++) {
+              assigned_[_i2] = true;
+            }
+          }
+          var min2 = Math.min(draft_.length, base_.length);
+          for (var _i3 = 0; _i3 < min2; _i3++) {
+            if (!draft_.hasOwnProperty(_i3)) {
+              assigned_[_i3] = true;
+            }
+            if (assigned_[_i3] === void 0) markChangesRecursively(draft_[_i3]);
+          }
+        }
+      }
+      function hasObjectChanges(state) {
+        var base_ = state.base_, draft_ = state.draft_;
+        var keys2 = ownKeys2(draft_);
+        for (var i2 = keys2.length - 1; i2 >= 0; i2--) {
+          var key = keys2[i2];
+          if (key === DRAFT_STATE) continue;
+          var baseValue = base_[key];
+          if (baseValue === void 0 && !has(base_, key)) {
+            return true;
+          } else {
+            var value2 = draft_[key];
+            var _state = value2 && value2[DRAFT_STATE];
+            if (_state ? _state.base_ !== baseValue : !is(value2, baseValue)) {
+              return true;
+            }
+          }
+        }
+        var baseIsDraft = !!base_[DRAFT_STATE];
+        return keys2.length !== ownKeys2(base_).length + (baseIsDraft ? 0 : 1);
+      }
+      function hasArrayChanges(state) {
+        var draft_ = state.draft_;
+        if (draft_.length !== state.base_.length) return true;
+        var descriptor = Object.getOwnPropertyDescriptor(draft_, draft_.length - 1);
+        if (descriptor && !descriptor.get) return true;
+        for (var i2 = 0; i2 < draft_.length; i2++) {
+          if (!draft_.hasOwnProperty(i2)) return true;
+        }
+        return false;
+      }
+      function hasChanges_(state) {
+        return state.type_ === 4 ? hasObjectChanges(state) : hasArrayChanges(state);
+      }
+      function assertUnrevoked(state) {
+        if (state.revoked_) die(3, JSON.stringify(latest(state)));
+      }
+      loadPlugin("ES5", {
+        createES5Proxy_,
+        willFinalizeES5_,
+        hasChanges_
+      });
+    }
+    function enablePatches() {
+      var REPLACE = "replace";
+      var ADD = "add";
+      var REMOVE = "remove";
+      function generatePatches_(state, basePath, patches, inversePatches) {
+        switch (state.type_) {
+          case 0:
+          case 4:
+          case 2:
+            return generatePatchesFromAssigned(state, basePath, patches, inversePatches);
+          case 5:
+          case 1:
+            return generateArrayPatches(state, basePath, patches, inversePatches);
+          case 3:
+            return generateSetPatches(state, basePath, patches, inversePatches);
+        }
+      }
+      function generateArrayPatches(state, basePath, patches, inversePatches) {
+        var base_ = state.base_, assigned_ = state.assigned_;
+        var copy_ = state.copy_;
+        if (copy_.length < base_.length) {
+          var _ref2 = [copy_, base_];
+          base_ = _ref2[0];
+          copy_ = _ref2[1];
+          var _ref22 = [inversePatches, patches];
+          patches = _ref22[0];
+          inversePatches = _ref22[1];
+        }
+        for (var i2 = 0; i2 < base_.length; i2++) {
+          if (assigned_[i2] && copy_[i2] !== base_[i2]) {
+            var path = basePath.concat([i2]);
+            patches.push({
+              op: REPLACE,
+              path,
+              // Need to maybe clone it, as it can in fact be the original value
+              // due to the base/copy inversion at the start of this function
+              value: clonePatchValueIfNeeded(copy_[i2])
+            });
+            inversePatches.push({
+              op: REPLACE,
+              path,
+              value: clonePatchValueIfNeeded(base_[i2])
+            });
+          }
+        }
+        for (var _i = base_.length; _i < copy_.length; _i++) {
+          var _path = basePath.concat([_i]);
+          patches.push({
+            op: ADD,
+            path: _path,
+            // Need to maybe clone it, as it can in fact be the original value
+            // due to the base/copy inversion at the start of this function
+            value: clonePatchValueIfNeeded(copy_[_i])
+          });
+        }
+        if (base_.length < copy_.length) {
+          inversePatches.push({
+            op: REPLACE,
+            path: basePath.concat(["length"]),
+            value: base_.length
+          });
+        }
+      }
+      function generatePatchesFromAssigned(state, basePath, patches, inversePatches) {
+        var base_ = state.base_, copy_ = state.copy_;
+        each(state.assigned_, function(key, assignedValue) {
+          var origValue = get2(base_, key);
+          var value2 = get2(copy_, key);
+          var op = !assignedValue ? REMOVE : has(base_, key) ? REPLACE : ADD;
+          if (origValue === value2 && op === REPLACE) return;
+          var path = basePath.concat(key);
+          patches.push(op === REMOVE ? {
+            op,
+            path
+          } : {
+            op,
+            path,
+            value: value2
+          });
+          inversePatches.push(op === ADD ? {
+            op: REMOVE,
+            path
+          } : op === REMOVE ? {
+            op: ADD,
+            path,
+            value: clonePatchValueIfNeeded(origValue)
+          } : {
+            op: REPLACE,
+            path,
+            value: clonePatchValueIfNeeded(origValue)
+          });
+        });
+      }
+      function generateSetPatches(state, basePath, patches, inversePatches) {
+        var base_ = state.base_, copy_ = state.copy_;
+        var i2 = 0;
+        base_.forEach(function(value2) {
+          if (!copy_.has(value2)) {
+            var path = basePath.concat([i2]);
+            patches.push({
+              op: REMOVE,
+              path,
+              value: value2
+            });
+            inversePatches.unshift({
+              op: ADD,
+              path,
+              value: value2
+            });
+          }
+          i2++;
+        });
+        i2 = 0;
+        copy_.forEach(function(value2) {
+          if (!base_.has(value2)) {
+            var path = basePath.concat([i2]);
+            patches.push({
+              op: ADD,
+              path,
+              value: value2
+            });
+            inversePatches.unshift({
+              op: REMOVE,
+              path,
+              value: value2
+            });
+          }
+          i2++;
+        });
+      }
+      function generateReplacementPatches_(baseValue, replacement, patches, inversePatches) {
+        patches.push({
+          op: REPLACE,
+          path: [],
+          value: replacement === NOTHING ? void 0 : replacement
+        });
+        inversePatches.push({
+          op: REPLACE,
+          path: [],
+          value: baseValue
+        });
+      }
+      function applyPatches_(draft, patches) {
+        patches.forEach(function(patch2) {
+          var path = patch2.path, op = patch2.op;
+          var base = draft;
+          for (var i2 = 0; i2 < path.length - 1; i2++) {
+            var parentType = getArchtype(base);
+            var p2 = path[i2];
+            if (typeof p2 !== "string" && typeof p2 !== "number") {
+              p2 = "" + p2;
+            }
+            if ((parentType === 0 || parentType === 1) && (p2 === "__proto__" || p2 === "constructor")) die(24);
+            if (typeof base === "function" && p2 === "prototype") die(24);
+            base = get2(base, p2);
+            if (typeof base !== "object") die(15, path.join("/"));
+          }
+          var type = getArchtype(base);
+          var value2 = deepClonePatchValue(patch2.value);
+          var key = path[path.length - 1];
+          switch (op) {
+            case REPLACE:
+              switch (type) {
+                case 2:
+                  return base.set(key, value2);
+                /* istanbul ignore next */
+                case 3:
+                  die(16);
+                default:
+                  return base[key] = value2;
+              }
+            case ADD:
+              switch (type) {
+                case 1:
+                  return key === "-" ? base.push(value2) : base.splice(key, 0, value2);
+                case 2:
+                  return base.set(key, value2);
+                case 3:
+                  return base.add(value2);
+                default:
+                  return base[key] = value2;
+              }
+            case REMOVE:
+              switch (type) {
+                case 1:
+                  return base.splice(key, 1);
+                case 2:
+                  return base.delete(key);
+                case 3:
+                  return base.delete(patch2.value);
+                default:
+                  return delete base[key];
+              }
+            default:
+              die(17, op);
+          }
+        });
+        return draft;
+      }
+      function deepClonePatchValue(obj) {
+        if (!isDraftable(obj)) return obj;
+        if (Array.isArray(obj)) return obj.map(deepClonePatchValue);
+        if (isMap(obj)) return new Map(Array.from(obj.entries()).map(function(_ref3) {
+          var k2 = _ref3[0], v2 = _ref3[1];
+          return [k2, deepClonePatchValue(v2)];
+        }));
+        if (isSet(obj)) return new Set(Array.from(obj).map(deepClonePatchValue));
+        var cloned = Object.create(Object.getPrototypeOf(obj));
+        for (var key in obj) {
+          cloned[key] = deepClonePatchValue(obj[key]);
+        }
+        if (has(obj, DRAFTABLE)) cloned[DRAFTABLE] = obj[DRAFTABLE];
+        return cloned;
+      }
+      function clonePatchValueIfNeeded(obj) {
+        if (isDraft(obj)) {
+          return deepClonePatchValue(obj);
+        } else return obj;
+      }
+      loadPlugin("Patches", {
+        applyPatches_,
+        generatePatches_,
+        generateReplacementPatches_
+      });
+    }
+    function enableMapSet() {
+      var _extendStatics = function extendStatics(d2, b2) {
+        _extendStatics = Object.setPrototypeOf || {
+          __proto__: []
+        } instanceof Array && function(d3, b3) {
+          d3.__proto__ = b3;
+        } || function(d3, b3) {
+          for (var p2 in b3) {
+            if (b3.hasOwnProperty(p2)) d3[p2] = b3[p2];
+          }
+        };
+        return _extendStatics(d2, b2);
+      };
+      function __extends(d2, b2) {
+        _extendStatics(d2, b2);
+        function __() {
+          this.constructor = d2;
+        }
+        d2.prototype = // @ts-ignore
+        (__.prototype = b2.prototype, new __());
+      }
+      var DraftMap = function(_super) {
+        __extends(DraftMap2, _super);
+        function DraftMap2(target, parent) {
+          this[DRAFT_STATE] = {
+            type_: 2,
+            parent_: parent,
+            scope_: parent ? parent.scope_ : getCurrentScope(),
+            modified_: false,
+            finalized_: false,
+            copy_: void 0,
+            assigned_: void 0,
+            base_: target,
+            draft_: this,
+            isManual_: false,
+            revoked_: false
+          };
+          return this;
+        }
+        var p2 = DraftMap2.prototype;
+        Object.defineProperty(p2, "size", {
+          get: function get3() {
+            return latest(this[DRAFT_STATE]).size;
+          }
+          // enumerable: false,
+          // configurable: true
+        });
+        p2.has = function(key) {
+          return latest(this[DRAFT_STATE]).has(key);
+        };
+        p2.set = function(key, value2) {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          if (!latest(state).has(key) || latest(state).get(key) !== value2) {
+            prepareMapCopy(state);
+            markChanged(state);
+            state.assigned_.set(key, true);
+            state.copy_.set(key, value2);
+            state.assigned_.set(key, true);
+          }
+          return this;
+        };
+        p2.delete = function(key) {
+          if (!this.has(key)) {
+            return false;
+          }
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          prepareMapCopy(state);
+          markChanged(state);
+          if (state.base_.has(key)) {
+            state.assigned_.set(key, false);
+          } else {
+            state.assigned_.delete(key);
+          }
+          state.copy_.delete(key);
+          return true;
+        };
+        p2.clear = function() {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          if (latest(state).size) {
+            prepareMapCopy(state);
+            markChanged(state);
+            state.assigned_ = /* @__PURE__ */ new Map();
+            each(state.base_, function(key) {
+              state.assigned_.set(key, false);
+            });
+            state.copy_.clear();
+          }
+        };
+        p2.forEach = function(cb, thisArg) {
+          var _this = this;
+          var state = this[DRAFT_STATE];
+          latest(state).forEach(function(_value, key, _map) {
+            cb.call(thisArg, _this.get(key), key, _this);
+          });
+        };
+        p2.get = function(key) {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          var value2 = latest(state).get(key);
+          if (state.finalized_ || !isDraftable(value2)) {
+            return value2;
+          }
+          if (value2 !== state.base_.get(key)) {
+            return value2;
+          }
+          var draft = createProxy(state.scope_.immer_, value2, state);
+          prepareMapCopy(state);
+          state.copy_.set(key, draft);
+          return draft;
+        };
+        p2.keys = function() {
+          return latest(this[DRAFT_STATE]).keys();
+        };
+        p2.values = function() {
+          var _this2 = this, _ref2;
+          var iterator = this.keys();
+          return _ref2 = {}, _ref2[iteratorSymbol] = function() {
+            return _this2.values();
+          }, _ref2.next = function next() {
+            var r2 = iterator.next();
+            if (r2.done) return r2;
+            var value2 = _this2.get(r2.value);
+            return {
+              done: false,
+              value: value2
+            };
+          }, _ref2;
+        };
+        p2.entries = function() {
+          var _this3 = this, _ref2;
+          var iterator = this.keys();
+          return _ref2 = {}, _ref2[iteratorSymbol] = function() {
+            return _this3.entries();
+          }, _ref2.next = function next() {
+            var r2 = iterator.next();
+            if (r2.done) return r2;
+            var value2 = _this3.get(r2.value);
+            return {
+              done: false,
+              value: [r2.value, value2]
+            };
+          }, _ref2;
+        };
+        p2[iteratorSymbol] = function() {
+          return this.entries();
+        };
+        return DraftMap2;
+      }(Map);
+      function proxyMap_(target, parent) {
+        return new DraftMap(target, parent);
+      }
+      function prepareMapCopy(state) {
+        if (!state.copy_) {
+          state.assigned_ = /* @__PURE__ */ new Map();
+          state.copy_ = new Map(state.base_);
+        }
+      }
+      var DraftSet = function(_super) {
+        __extends(DraftSet2, _super);
+        function DraftSet2(target, parent) {
+          this[DRAFT_STATE] = {
+            type_: 3,
+            parent_: parent,
+            scope_: parent ? parent.scope_ : getCurrentScope(),
+            modified_: false,
+            finalized_: false,
+            copy_: void 0,
+            base_: target,
+            draft_: this,
+            drafts_: /* @__PURE__ */ new Map(),
+            revoked_: false,
+            isManual_: false
+          };
+          return this;
+        }
+        var p2 = DraftSet2.prototype;
+        Object.defineProperty(p2, "size", {
+          get: function get3() {
+            return latest(this[DRAFT_STATE]).size;
+          }
+          // enumerable: true,
+        });
+        p2.has = function(value2) {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          if (!state.copy_) {
+            return state.base_.has(value2);
+          }
+          if (state.copy_.has(value2)) return true;
+          if (state.drafts_.has(value2) && state.copy_.has(state.drafts_.get(value2))) return true;
+          return false;
+        };
+        p2.add = function(value2) {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          if (!this.has(value2)) {
+            prepareSetCopy(state);
+            markChanged(state);
+            state.copy_.add(value2);
+          }
+          return this;
+        };
+        p2.delete = function(value2) {
+          if (!this.has(value2)) {
+            return false;
+          }
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          prepareSetCopy(state);
+          markChanged(state);
+          return state.copy_.delete(value2) || (state.drafts_.has(value2) ? state.copy_.delete(state.drafts_.get(value2)) : (
+            /* istanbul ignore next */
+            false
+          ));
+        };
+        p2.clear = function() {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          if (latest(state).size) {
+            prepareSetCopy(state);
+            markChanged(state);
+            state.copy_.clear();
+          }
+        };
+        p2.values = function() {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          prepareSetCopy(state);
+          return state.copy_.values();
+        };
+        p2.entries = function entries() {
+          var state = this[DRAFT_STATE];
+          assertUnrevoked(state);
+          prepareSetCopy(state);
+          return state.copy_.entries();
+        };
+        p2.keys = function() {
+          return this.values();
+        };
+        p2[iteratorSymbol] = function() {
+          return this.values();
+        };
+        p2.forEach = function forEach(cb, thisArg) {
+          var iterator = this.values();
+          var result = iterator.next();
+          while (!result.done) {
+            cb.call(thisArg, result.value, result.value, this);
+            result = iterator.next();
+          }
+        };
+        return DraftSet2;
+      }(Set);
+      function proxySet_(target, parent) {
+        return new DraftSet(target, parent);
+      }
+      function prepareSetCopy(state) {
+        if (!state.copy_) {
+          state.copy_ = /* @__PURE__ */ new Set();
+          state.base_.forEach(function(value2) {
+            if (isDraftable(value2)) {
+              var draft = createProxy(state.scope_.immer_, value2, state);
+              state.drafts_.set(value2, draft);
+              state.copy_.add(draft);
+            } else {
+              state.copy_.add(value2);
+            }
+          });
+        }
+      }
+      function assertUnrevoked(state) {
+        if (state.revoked_) die(3, JSON.stringify(latest(state)));
+      }
+      loadPlugin("MapSet", {
+        proxyMap_,
+        proxySet_
+      });
+    }
+    function enableAllPlugins() {
+      enableES5();
+      enableMapSet();
+      enablePatches();
+    }
+    var immer = /* @__PURE__ */ new Immer();
+    var produce = immer.produce;
+    var produceWithPatches = /* @__PURE__ */ immer.produceWithPatches.bind(immer);
+    var setAutoFreeze = /* @__PURE__ */ immer.setAutoFreeze.bind(immer);
+    var setUseProxies = /* @__PURE__ */ immer.setUseProxies.bind(immer);
+    var applyPatches = /* @__PURE__ */ immer.applyPatches.bind(immer);
+    var createDraft = /* @__PURE__ */ immer.createDraft.bind(immer);
+    var finishDraft = /* @__PURE__ */ immer.finishDraft.bind(immer);
+    function castDraft(value2) {
+      return value2;
+    }
+    function castImmutable(value2) {
+      return value2;
+    }
+    exports.Immer = Immer;
+    exports.applyPatches = applyPatches;
+    exports.castDraft = castDraft;
+    exports.castImmutable = castImmutable;
+    exports.createDraft = createDraft;
+    exports.current = current;
+    exports.default = produce;
+    exports.enableAllPlugins = enableAllPlugins;
+    exports.enableES5 = enableES5;
+    exports.enableMapSet = enableMapSet;
+    exports.enablePatches = enablePatches;
+    exports.finishDraft = finishDraft;
+    exports.freeze = freeze;
+    exports.immerable = DRAFTABLE;
+    exports.isDraft = isDraft;
+    exports.isDraftable = isDraftable;
+    exports.nothing = NOTHING;
+    exports.original = original;
+    exports.produce = produce;
+    exports.produceWithPatches = produceWithPatches;
+    exports.setAutoFreeze = setAutoFreeze;
+    exports.setUseProxies = setUseProxies;
+  }
+});
+
+// node_modules/immer/dist/index.js
+var require_dist = __commonJS({
+  "node_modules/immer/dist/index.js"(exports, module) {
+    "use strict";
+    if (false) {
+      module.exports = null;
+    } else {
+      module.exports = require_immer_cjs_development();
+    }
+  }
+});
+
+// node_modules/@mnbroatch/boardgame.io/dist/cjs/plugin-random-7425844d.js
+var require_plugin_random_7425844d = __commonJS({
+  "node_modules/@mnbroatch/boardgame.io/dist/cjs/plugin-random-7425844d.js"(exports) {
+    "use strict";
+    var Alea2 = class {
+      constructor(seed) {
+        const mash = Mash2();
+        this.c = 1;
+        this.s0 = mash(" ");
+        this.s1 = mash(" ");
+        this.s2 = mash(" ");
+        this.s0 -= mash(seed);
+        if (this.s0 < 0) {
+          this.s0 += 1;
+        }
+        this.s1 -= mash(seed);
+        if (this.s1 < 0) {
+          this.s1 += 1;
+        }
+        this.s2 -= mash(seed);
+        if (this.s2 < 0) {
+          this.s2 += 1;
+        }
+      }
+      next() {
+        const t2 = 2091639 * this.s0 + this.c * 23283064365386963e-26;
+        this.s0 = this.s1;
+        this.s1 = this.s2;
+        return this.s2 = t2 - (this.c = Math.trunc(t2));
+      }
+    };
+    function Mash2() {
+      let n2 = 4022871197;
+      const mash = function(data) {
+        const str = data.toString();
+        for (let i2 = 0; i2 < str.length; i2++) {
+          n2 += str.charCodeAt(i2);
+          let h2 = 0.02519603282416938 * n2;
+          n2 = h2 >>> 0;
+          h2 -= n2;
+          h2 *= n2;
+          n2 = h2 >>> 0;
+          h2 -= n2;
+          n2 += h2 * 4294967296;
+        }
+        return (n2 >>> 0) * 23283064365386963e-26;
+      };
+      return mash;
+    }
+    function copy2(f2, t2) {
+      t2.c = f2.c;
+      t2.s0 = f2.s0;
+      t2.s1 = f2.s1;
+      t2.s2 = f2.s2;
+      return t2;
+    }
+    function alea2(seed, state) {
+      const xg = new Alea2(seed);
+      const prng = xg.next.bind(xg);
+      if (state)
+        copy2(state, xg);
+      prng.state = () => copy2(xg, {});
+      return prng;
+    }
+    var Random2 = class {
+      /**
+       * constructor
+       * @param {object} ctx - The ctx object to initialize from.
+       */
+      constructor(state) {
+        this.state = state || { seed: "0" };
+        this.used = false;
+      }
+      /**
+       * Generates a new seed from the current date / time.
+       */
+      static seed() {
+        return Date.now().toString(36).slice(-10);
+      }
+      isUsed() {
+        return this.used;
+      }
+      getState() {
+        return this.state;
+      }
+      /**
+       * Generate a random number.
+       */
+      _random() {
+        this.used = true;
+        const R2 = this.state;
+        const seed = R2.prngstate ? "" : R2.seed;
+        const rand = alea2(seed, R2.prngstate);
+        const number = rand();
+        this.state = {
+          ...R2,
+          prngstate: rand.state()
+        };
+        return number;
+      }
+      api() {
+        const random2 = this._random.bind(this);
+        const SpotValue = {
+          D4: 4,
+          D6: 6,
+          D8: 8,
+          D10: 10,
+          D12: 12,
+          D20: 20
+        };
+        const predefined = {};
+        for (const key in SpotValue) {
+          const spotvalue = SpotValue[key];
+          predefined[key] = (diceCount) => {
+            return diceCount === void 0 ? Math.floor(random2() * spotvalue) + 1 : Array.from({ length: diceCount }).map(() => Math.floor(random2() * spotvalue) + 1);
+          };
+        }
+        function Die(spotvalue = 6, diceCount) {
+          return diceCount === void 0 ? Math.floor(random2() * spotvalue) + 1 : Array.from({ length: diceCount }).map(() => Math.floor(random2() * spotvalue) + 1);
+        }
+        return {
+          /**
+           * Similar to Die below, but with fixed spot values.
+           * Supports passing a diceCount
+           *    if not defined, defaults to 1 and returns the value directly.
+           *    if defined, returns an array containing the random dice values.
+           *
+           * D4: (diceCount) => value
+           * D6: (diceCount) => value
+           * D8: (diceCount) => value
+           * D10: (diceCount) => value
+           * D12: (diceCount) => value
+           * D20: (diceCount) => value
+           */
+          ...predefined,
+          /**
+           * Roll a die of specified spot value.
+           *
+           * @param {number} spotvalue - The die dimension (default: 6).
+           * @param {number} diceCount - number of dice to throw.
+           *                             if not defined, defaults to 1 and returns the value directly.
+           *                             if defined, returns an array containing the random dice values.
+           */
+          Die,
+          /**
+           * Generate a random number between 0 and 1.
+           */
+          Number: () => {
+            return random2();
+          },
+          /**
+           * Shuffle an array.
+           *
+           * @param {Array} deck - The array to shuffle. Does not mutate
+           *                       the input, but returns the shuffled array.
+           */
+          Shuffle: (deck) => {
+            const clone = [...deck];
+            let sourceIndex = deck.length;
+            let destinationIndex = 0;
+            const shuffled = Array.from({ length: sourceIndex });
+            while (sourceIndex) {
+              const randomIndex = Math.trunc(sourceIndex * random2());
+              shuffled[destinationIndex++] = clone[randomIndex];
+              clone[randomIndex] = clone[--sourceIndex];
+            }
+            return shuffled;
+          },
+          _private: this
+        };
+      }
+    };
+    var RandomPlugin2 = {
+      name: "random",
+      noClient: ({ api }) => {
+        return api._private.isUsed();
+      },
+      flush: ({ api }) => {
+        return api._private.getState();
+      },
+      api: ({ data }) => {
+        const random2 = new Random2(data);
+        return random2.api();
+      },
+      setup: ({ game }) => {
+        let { seed } = game;
+        if (seed === void 0) {
+          seed = Random2.seed();
+        }
+        return { seed };
+      },
+      playerView: () => void 0
+    };
+    exports.RandomPlugin = RandomPlugin2;
+    exports.alea = alea2;
+  }
+});
+
+// node_modules/lodash.isplainobject/index.js
+var require_lodash = __commonJS({
+  "node_modules/lodash.isplainobject/index.js"(exports, module) {
+    var objectTag = "[object Object]";
+    function isHostObject(value2) {
+      var result = false;
+      if (value2 != null && typeof value2.toString != "function") {
+        try {
+          result = !!(value2 + "");
+        } catch (e) {
+        }
+      }
+      return result;
+    }
+    function overArg(func, transform) {
+      return function(arg) {
+        return func(transform(arg));
+      };
+    }
+    var funcProto = Function.prototype;
+    var objectProto = Object.prototype;
+    var funcToString = funcProto.toString;
+    var hasOwnProperty = objectProto.hasOwnProperty;
+    var objectCtorString = funcToString.call(Object);
+    var objectToString = objectProto.toString;
+    var getPrototype = overArg(Object.getPrototypeOf, Object);
+    function isObjectLike(value2) {
+      return !!value2 && typeof value2 == "object";
+    }
+    function isPlainObject6(value2) {
+      if (!isObjectLike(value2) || objectToString.call(value2) != objectTag || isHostObject(value2)) {
+        return false;
+      }
+      var proto = getPrototype(value2);
+      if (proto === null) {
+        return true;
+      }
+      var Ctor = hasOwnProperty.call(proto, "constructor") && proto.constructor;
+      return typeof Ctor == "function" && Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString;
+    }
+    module.exports = isPlainObject6;
+  }
+});
+
+// node_modules/@mnbroatch/boardgame.io/dist/cjs/turn-order-b2ff8740.js
+var require_turn_order_b2ff8740 = __commonJS({
+  "node_modules/@mnbroatch/boardgame.io/dist/cjs/turn-order-b2ff8740.js"(exports) {
+    "use strict";
+    var produce = require_dist();
+    var pluginRandom = require_plugin_random_7425844d();
+    var isPlainObject6 = require_lodash();
+    function _interopDefaultLegacy(e) {
+      return e && typeof e === "object" && "default" in e ? e : { "default": e };
+    }
+    var produce__default = /* @__PURE__ */ _interopDefaultLegacy(produce);
+    var isPlainObject__default = /* @__PURE__ */ _interopDefaultLegacy(isPlainObject6);
+    var MAKE_MOVE2 = "MAKE_MOVE";
+    var GAME_EVENT2 = "GAME_EVENT";
+    var REDO2 = "REDO";
+    var RESET2 = "RESET";
+    var SYNC2 = "SYNC";
+    var UNDO2 = "UNDO";
+    var UPDATE2 = "UPDATE";
+    var PATCH2 = "PATCH";
+    var PLUGIN2 = "PLUGIN";
+    var STRIP_TRANSIENTS2 = "STRIP_TRANSIENTS";
+    var makeMove2 = (type, args, playerID, credentials) => ({
+      type: MAKE_MOVE2,
+      payload: { type, args, playerID, credentials }
+    });
+    var gameEvent2 = (type, args, playerID, credentials) => ({
+      type: GAME_EVENT2,
+      payload: { type, args, playerID, credentials }
+    });
+    var automaticGameEvent2 = (type, args, playerID, credentials) => ({
+      type: GAME_EVENT2,
+      payload: { type, args, playerID, credentials },
+      automatic: true
+    });
+    var sync2 = (info3) => ({
+      type: SYNC2,
+      state: info3.state,
+      log: info3.log,
+      initialState: info3.initialState,
+      clientOnly: true
+    });
+    var patch2 = (prevStateID, stateID, patch3, deltalog) => ({
+      type: PATCH2,
+      prevStateID,
+      stateID,
+      patch: patch3,
+      deltalog,
+      clientOnly: true
+    });
+    var update3 = (state, deltalog) => ({
+      type: UPDATE2,
+      state,
+      deltalog,
+      clientOnly: true
+    });
+    var reset2 = (state) => ({
+      type: RESET2,
+      state,
+      clientOnly: true
+    });
+    var undo2 = (playerID, credentials) => ({
+      type: UNDO2,
+      payload: { type: null, args: null, playerID, credentials }
+    });
+    var redo2 = (playerID, credentials) => ({
+      type: REDO2,
+      payload: { type: null, args: null, playerID, credentials }
+    });
+    var plugin2 = (type, args, playerID, credentials) => ({
+      type: PLUGIN2,
+      payload: { type, args, playerID, credentials }
+    });
+    var stripTransients2 = () => ({
+      type: STRIP_TRANSIENTS2
+    });
+    var ActionCreators2 = /* @__PURE__ */ Object.freeze({
+      __proto__: null,
+      makeMove: makeMove2,
+      gameEvent: gameEvent2,
+      automaticGameEvent: automaticGameEvent2,
+      sync: sync2,
+      patch: patch2,
+      update: update3,
+      reset: reset2,
+      undo: undo2,
+      redo: redo2,
+      plugin: plugin2,
+      stripTransients: stripTransients2
+    });
+    var INVALID_MOVE4 = "INVALID_MOVE";
+    var ImmerPlugin2 = {
+      name: "plugin-immer",
+      fnWrap: (move) => (context, ...args) => {
+        let isInvalid = false;
+        const newG = produce__default["default"](context.G, (G2) => {
+          const result = move({ ...context, G: G2 }, ...args);
+          if (result === INVALID_MOVE4) {
+            isInvalid = true;
+            return;
+          }
+          return result;
+        });
+        if (isInvalid)
+          return INVALID_MOVE4;
+        return newG;
+      }
+    };
+    exports.GameMethod = void 0;
+    (function(GameMethod2) {
+      GameMethod2["MOVE"] = "MOVE";
+      GameMethod2["GAME_ON_END"] = "GAME_ON_END";
+      GameMethod2["PHASE_ON_BEGIN"] = "PHASE_ON_BEGIN";
+      GameMethod2["PHASE_ON_END"] = "PHASE_ON_END";
+      GameMethod2["TURN_ON_BEGIN"] = "TURN_ON_BEGIN";
+      GameMethod2["TURN_ON_MOVE"] = "TURN_ON_MOVE";
+      GameMethod2["TURN_ON_END"] = "TURN_ON_END";
+    })(exports.GameMethod || (exports.GameMethod = {}));
+    var Errors2;
+    (function(Errors3) {
+      Errors3["CalledOutsideHook"] = "Events must be called from moves or the `onBegin`, `onEnd`, and `onMove` hooks.\nThis error probably means you called an event from other game code, like an `endIf` trigger or one of the `turn.order` methods.";
+      Errors3["EndTurnInOnEnd"] = "`endTurn` is disallowed in `onEnd` hooks \u2014 the turn is already ending.";
+      Errors3["MaxTurnEndings"] = "Maximum number of turn endings exceeded for this update.\nThis likely means game code is triggering an infinite loop.";
+      Errors3["PhaseEventInOnEnd"] = "`setPhase` & `endPhase` are disallowed in a phase\u2019s `onEnd` hook \u2014 the phase is already ending.\nIf you\u2019re trying to dynamically choose the next phase when a phase ends, use the phase\u2019s `next` trigger.";
+      Errors3["StageEventInOnEnd"] = "`setStage`, `endStage` & `setActivePlayers` are disallowed in `onEnd` hooks.";
+      Errors3["StageEventInPhaseBegin"] = "`setStage`, `endStage` & `setActivePlayers` are disallowed in a phase\u2019s `onBegin` hook.\nUse `setActivePlayers` in a `turn.onBegin` hook or declare stages with `turn.activePlayers` instead.";
+      Errors3["StageEventInTurnBegin"] = "`setStage` & `endStage` are disallowed in `turn.onBegin`.\nUse `setActivePlayers` or declare stages with `turn.activePlayers` instead.";
+    })(Errors2 || (Errors2 = {}));
+    var Events2 = class {
+      constructor(flow, ctx, playerID) {
+        this.flow = flow;
+        this.playerID = playerID;
+        this.dispatch = [];
+        this.initialTurn = ctx.turn;
+        this.updateTurnContext(ctx, void 0);
+        this.maxEndedTurnsPerAction = ctx.numPlayers * 100;
+      }
+      api() {
+        const events = {
+          _private: this
+        };
+        for (const type of this.flow.eventNames) {
+          events[type] = (...args) => {
+            this.dispatch.push({
+              type,
+              args,
+              phase: this.currentPhase,
+              turn: this.currentTurn,
+              calledFrom: this.currentMethod,
+              // Used to capture a stack trace in case it is needed later.
+              error: new Error("Events Plugin Error")
+            });
+          };
+        }
+        return events;
+      }
+      isUsed() {
+        return this.dispatch.length > 0;
+      }
+      updateTurnContext(ctx, methodType) {
+        this.currentPhase = ctx.phase;
+        this.currentTurn = ctx.turn;
+        this.currentMethod = methodType;
+      }
+      unsetCurrentMethod() {
+        this.currentMethod = void 0;
+      }
+      /**
+       * Updates ctx with the triggered events.
+       * @param {object} state - The state object { G, ctx }.
+       */
+      update(state) {
+        const initialState = state;
+        const stateWithError = ({ stack }, message) => ({
+          ...initialState,
+          plugins: {
+            ...initialState.plugins,
+            events: {
+              ...initialState.plugins.events,
+              data: { error: message + "\n" + stack }
+            }
+          }
+        });
+        EventQueue: for (let i2 = 0; i2 < this.dispatch.length; i2++) {
+          const event = this.dispatch[i2];
+          const turnHasEnded = event.turn !== state.ctx.turn;
+          const endedTurns = this.currentTurn - this.initialTurn;
+          if (endedTurns >= this.maxEndedTurnsPerAction) {
+            return stateWithError(event.error, Errors2.MaxTurnEndings);
+          }
+          if (event.calledFrom === void 0) {
+            return stateWithError(event.error, Errors2.CalledOutsideHook);
+          }
+          if (state.ctx.gameover)
+            break EventQueue;
+          switch (event.type) {
+            case "endStage":
+            case "setStage":
+            case "setActivePlayers": {
+              switch (event.calledFrom) {
+                // Disallow all stage events in onEnd and phase.onBegin hooks.
+                case exports.GameMethod.TURN_ON_END:
+                case exports.GameMethod.PHASE_ON_END:
+                  return stateWithError(event.error, Errors2.StageEventInOnEnd);
+                case exports.GameMethod.PHASE_ON_BEGIN:
+                  return stateWithError(event.error, Errors2.StageEventInPhaseBegin);
+                // Disallow setStage & endStage in turn.onBegin hooks.
+                case exports.GameMethod.TURN_ON_BEGIN:
+                  if (event.type === "setActivePlayers")
+                    break;
+                  return stateWithError(event.error, Errors2.StageEventInTurnBegin);
+              }
+              if (turnHasEnded)
+                continue EventQueue;
+              break;
+            }
+            case "endTurn": {
+              if (event.calledFrom === exports.GameMethod.TURN_ON_END || event.calledFrom === exports.GameMethod.PHASE_ON_END) {
+                return stateWithError(event.error, Errors2.EndTurnInOnEnd);
+              }
+              if (turnHasEnded)
+                continue EventQueue;
+              break;
+            }
+            case "endPhase":
+            case "setPhase": {
+              if (event.calledFrom === exports.GameMethod.PHASE_ON_END) {
+                return stateWithError(event.error, Errors2.PhaseEventInOnEnd);
+              }
+              if (event.phase !== state.ctx.phase)
+                continue EventQueue;
+              break;
+            }
+          }
+          const action = automaticGameEvent2(event.type, event.args, this.playerID);
+          state = this.flow.processEvent(state, action);
+        }
+        return state;
+      }
+    };
+    var EventsPlugin2 = {
+      name: "events",
+      noClient: ({ api }) => api._private.isUsed(),
+      isInvalid: ({ data }) => data.error || false,
+      // Update the events plugin’s internal turn context each time a move
+      // or hook is called. This allows events called after turn or phase
+      // endings to dispatch the current turn and phase correctly.
+      fnWrap: (method, methodType) => (context, ...args) => {
+        const api = context.events;
+        if (api)
+          api._private.updateTurnContext(context.ctx, methodType);
+        const G2 = method(context, ...args);
+        if (api)
+          api._private.unsetCurrentMethod();
+        return G2;
+      },
+      dangerouslyFlushRawState: ({ state, api }) => api._private.update(state),
+      api: ({ game, ctx, playerID }) => new Events2(game.flow, ctx, playerID).api()
+    };
+    var LogPlugin2 = {
+      name: "log",
+      flush: () => ({}),
+      api: ({ data }) => {
+        return {
+          setMetadata: (metadata) => {
+            data.metadata = metadata;
+          }
+        };
+      },
+      setup: () => ({})
+    };
+    function isSerializable2(value2) {
+      if (value2 === void 0 || value2 === null || typeof value2 === "boolean" || typeof value2 === "number" || typeof value2 === "string") {
+        return true;
+      }
+      if (!isPlainObject__default["default"](value2) && !Array.isArray(value2)) {
+        return false;
+      }
+      for (const key in value2) {
+        if (!isSerializable2(value2[key]))
+          return false;
+      }
+      return true;
+    }
+    var SerializablePlugin2 = {
+      name: "plugin-serializable",
+      fnWrap: (move) => (context, ...args) => {
+        const result = move(context, ...args);
+        if (!isSerializable2(result)) {
+          throw new Error("Move state is not JSON-serialiazable.\nSee https://boardgame.io/documentation/#/?id=state for more information.");
+        }
+        return result;
+      }
+    };
+    var production2 = false;
+    var logfn2 = production2 ? () => {
+    } : (...msg) => console.log(...msg);
+    var errorfn2 = (...msg) => console.error(...msg);
+    function info2(msg) {
+      logfn2(`INFO: ${msg}`);
+    }
+    function error2(error3) {
+      errorfn2("ERROR:", error3);
+    }
+    var CORE_PLUGINS2 = [ImmerPlugin2, pluginRandom.RandomPlugin, LogPlugin2, SerializablePlugin2];
+    var DEFAULT_PLUGINS2 = [...CORE_PLUGINS2, EventsPlugin2];
+    var ProcessAction2 = (state, action, opts) => {
+      opts.game.plugins.filter((plugin3) => plugin3.action !== void 0).filter((plugin3) => plugin3.name === action.payload.type).forEach((plugin3) => {
+        const name = plugin3.name;
+        const pluginState = state.plugins[name] || { data: {} };
+        const data = plugin3.action(pluginState.data, action.payload);
+        state = {
+          ...state,
+          plugins: {
+            ...state.plugins,
+            [name]: { ...pluginState, data }
+          }
+        };
+      });
+      return state;
+    };
+    var GetAPIs2 = ({ plugins }) => Object.entries(plugins || {}).reduce((apis, [name, { api }]) => {
+      apis[name] = api;
+      return apis;
+    }, {});
+    var FnWrap2 = (methodToWrap, methodType, plugins) => {
+      return [...CORE_PLUGINS2, ...plugins, EventsPlugin2].filter((plugin3) => plugin3.fnWrap !== void 0).reduce((method, { fnWrap }) => fnWrap(method, methodType), methodToWrap);
+    };
+    var Setup2 = (state, opts) => {
+      [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.setup !== void 0).forEach((plugin3) => {
+        const name = plugin3.name;
+        const data = plugin3.setup({
+          G: state.G,
+          ctx: state.ctx,
+          game: opts.game
+        });
+        state = {
+          ...state,
+          plugins: {
+            ...state.plugins,
+            [name]: { data }
+          }
+        };
+      });
+      return state;
+    };
+    var Enhance2 = (state, opts) => {
+      [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.api !== void 0).forEach((plugin3) => {
+        const name = plugin3.name;
+        const pluginState = state.plugins[name] || { data: {} };
+        const api = plugin3.api({
+          G: state.G,
+          ctx: state.ctx,
+          data: pluginState.data,
+          game: opts.game,
+          playerID: opts.playerID
+        });
+        state = {
+          ...state,
+          plugins: {
+            ...state.plugins,
+            [name]: { ...pluginState, api }
+          }
+        };
+      });
+      return state;
+    };
+    var Flush2 = (state, opts) => {
+      [...CORE_PLUGINS2, ...opts.game.plugins, EventsPlugin2].reverse().forEach((plugin3) => {
+        const name = plugin3.name;
+        const pluginState = state.plugins[name] || { data: {} };
+        if (plugin3.flush) {
+          const newData = plugin3.flush({
+            G: state.G,
+            ctx: state.ctx,
+            game: opts.game,
+            api: pluginState.api,
+            data: pluginState.data
+          });
+          state = {
+            ...state,
+            plugins: {
+              ...state.plugins,
+              [plugin3.name]: { data: newData }
+            }
+          };
+        } else if (plugin3.dangerouslyFlushRawState) {
+          state = plugin3.dangerouslyFlushRawState({
+            state,
+            game: opts.game,
+            api: pluginState.api,
+            data: pluginState.data
+          });
+          const data = state.plugins[name].data;
+          state = {
+            ...state,
+            plugins: {
+              ...state.plugins,
+              [plugin3.name]: { data }
+            }
+          };
+        }
+      });
+      return state;
+    };
+    var NoClient2 = (state, opts) => {
+      return [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.noClient !== void 0).map((plugin3) => {
+        const name = plugin3.name;
+        const pluginState = state.plugins[name];
+        if (pluginState) {
+          return plugin3.noClient({
+            G: state.G,
+            ctx: state.ctx,
+            game: opts.game,
+            api: pluginState.api,
+            data: pluginState.data
+          });
+        }
+        return false;
+      }).includes(true);
+    };
+    var IsInvalid2 = (state, opts) => {
+      const firstInvalidReturn = [...DEFAULT_PLUGINS2, ...opts.game.plugins].filter((plugin3) => plugin3.isInvalid !== void 0).map((plugin3) => {
+        const { name } = plugin3;
+        const pluginState = state.plugins[name];
+        const message = plugin3.isInvalid({
+          G: state.G,
+          ctx: state.ctx,
+          game: opts.game,
+          data: pluginState && pluginState.data
+        });
+        return message ? { plugin: name, message } : false;
+      }).find((value2) => value2);
+      return firstInvalidReturn || false;
+    };
+    var FlushAndValidate2 = (state, opts) => {
+      const updatedState = Flush2(state, opts);
+      const isInvalid = IsInvalid2(updatedState, opts);
+      if (!isInvalid)
+        return [updatedState];
+      const { plugin: plugin3, message } = isInvalid;
+      error2(`${plugin3} plugin declared action invalid:
+${message}`);
+      return [state, isInvalid];
+    };
+    var PlayerView2 = ({ G: G2, ctx, plugins = {} }, { game, playerID }) => {
+      [...DEFAULT_PLUGINS2, ...game.plugins].forEach(({ name, playerView }) => {
+        if (!playerView)
+          return;
+        const { data } = plugins[name] || { data: {} };
+        const newData = playerView({ G: G2, ctx, game, data, playerID });
+        plugins = {
+          ...plugins,
+          [name]: { data: newData }
+        };
+      });
+      return plugins;
+    };
+    function supportDeprecatedMoveLimit2(options, enforceMinMoves = false) {
+      if (options.moveLimit) {
+        if (enforceMinMoves) {
+          options.minMoves = options.moveLimit;
+        }
+        options.maxMoves = options.moveLimit;
+        delete options.moveLimit;
+      }
+    }
+    function SetActivePlayers3(ctx, arg) {
+      let activePlayers = {};
+      let _prevActivePlayers = [];
+      let _nextActivePlayers = null;
+      let _activePlayersMinMoves = {};
+      let _activePlayersMaxMoves = {};
+      if (Array.isArray(arg)) {
+        const value2 = {};
+        arg.forEach((v2) => value2[v2] = Stage2.NULL);
+        activePlayers = value2;
+      } else {
+        supportDeprecatedMoveLimit2(arg);
+        if (arg.next) {
+          _nextActivePlayers = arg.next;
+        }
+        if (arg.revert) {
+          _prevActivePlayers = [
+            ...ctx._prevActivePlayers,
+            {
+              activePlayers: ctx.activePlayers,
+              _activePlayersMinMoves: ctx._activePlayersMinMoves,
+              _activePlayersMaxMoves: ctx._activePlayersMaxMoves,
+              _activePlayersNumMoves: ctx._activePlayersNumMoves
+            }
+          ];
+        }
+        if (arg.currentPlayer !== void 0) {
+          ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, ctx.currentPlayer, arg.currentPlayer);
+        }
+        if (arg.others !== void 0) {
+          for (let i2 = 0; i2 < ctx.playOrder.length; i2++) {
+            const id = ctx.playOrder[i2];
+            if (id !== ctx.currentPlayer) {
+              ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, id, arg.others);
+            }
+          }
+        }
+        if (arg.all !== void 0) {
+          for (let i2 = 0; i2 < ctx.playOrder.length; i2++) {
+            const id = ctx.playOrder[i2];
+            ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, id, arg.all);
+          }
+        }
+        if (arg.value) {
+          for (const id in arg.value) {
+            ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, id, arg.value[id]);
+          }
+        }
+        if (arg.minMoves) {
+          for (const id in activePlayers) {
+            if (_activePlayersMinMoves[id] === void 0) {
+              _activePlayersMinMoves[id] = arg.minMoves;
+            }
+          }
+        }
+        if (arg.maxMoves) {
+          for (const id in activePlayers) {
+            if (_activePlayersMaxMoves[id] === void 0) {
+              _activePlayersMaxMoves[id] = arg.maxMoves;
+            }
+          }
+        }
+      }
+      if (Object.keys(activePlayers).length === 0) {
+        activePlayers = null;
+      }
+      if (Object.keys(_activePlayersMinMoves).length === 0) {
+        _activePlayersMinMoves = null;
+      }
+      if (Object.keys(_activePlayersMaxMoves).length === 0) {
+        _activePlayersMaxMoves = null;
+      }
+      const _activePlayersNumMoves = {};
+      for (const id in activePlayers) {
+        _activePlayersNumMoves[id] = 0;
+      }
+      return {
+        ...ctx,
+        activePlayers,
+        _activePlayersMinMoves,
+        _activePlayersMaxMoves,
+        _activePlayersNumMoves,
+        _prevActivePlayers,
+        _nextActivePlayers
+      };
+    }
+    function UpdateActivePlayersOnceEmpty2(ctx) {
+      let { activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, _activePlayersNumMoves, _prevActivePlayers, _nextActivePlayers } = ctx;
+      if (activePlayers && Object.keys(activePlayers).length === 0) {
+        if (_nextActivePlayers) {
+          ctx = SetActivePlayers3(ctx, _nextActivePlayers);
+          ({
+            activePlayers,
+            _activePlayersMinMoves,
+            _activePlayersMaxMoves,
+            _activePlayersNumMoves,
+            _prevActivePlayers
+          } = ctx);
+        } else if (_prevActivePlayers.length > 0) {
+          const lastIndex = _prevActivePlayers.length - 1;
+          ({
+            activePlayers,
+            _activePlayersMinMoves,
+            _activePlayersMaxMoves,
+            _activePlayersNumMoves
+          } = _prevActivePlayers[lastIndex]);
+          _prevActivePlayers = _prevActivePlayers.slice(0, lastIndex);
+        } else {
+          activePlayers = null;
+          _activePlayersMinMoves = null;
+          _activePlayersMaxMoves = null;
+        }
+      }
+      return {
+        ...ctx,
+        activePlayers,
+        _activePlayersMinMoves,
+        _activePlayersMaxMoves,
+        _activePlayersNumMoves,
+        _prevActivePlayers
+      };
+    }
+    function ApplyActivePlayerArgument2(activePlayers, _activePlayersMinMoves, _activePlayersMaxMoves, playerID, arg) {
+      if (typeof arg !== "object" || arg === Stage2.NULL) {
+        arg = { stage: arg };
+      }
+      if (arg.stage !== void 0) {
+        supportDeprecatedMoveLimit2(arg);
+        activePlayers[playerID] = arg.stage;
+        if (arg.minMoves)
+          _activePlayersMinMoves[playerID] = arg.minMoves;
+        if (arg.maxMoves)
+          _activePlayersMaxMoves[playerID] = arg.maxMoves;
+      }
+    }
+    function getCurrentPlayer2(playOrder, playOrderPos) {
+      return playOrder[playOrderPos] + "";
+    }
+    function InitTurnOrderState2(state, turn) {
+      let { G: G2, ctx } = state;
+      const { numPlayers } = ctx;
+      const pluginAPIs = GetAPIs2(state);
+      const context = { ...pluginAPIs, G: G2, ctx };
+      const order = turn.order;
+      let playOrder = [...Array.from({ length: numPlayers })].map((_2, i2) => i2 + "");
+      if (order.playOrder !== void 0) {
+        playOrder = order.playOrder(context);
+      }
+      const playOrderPos = order.first(context);
+      const posType = typeof playOrderPos;
+      if (posType !== "number") {
+        error2(`invalid value returned by turn.order.first \u2014 expected number got ${posType} \u201C${playOrderPos}\u201D.`);
+      }
+      const currentPlayer = getCurrentPlayer2(playOrder, playOrderPos);
+      ctx = { ...ctx, currentPlayer, playOrderPos, playOrder };
+      ctx = SetActivePlayers3(ctx, turn.activePlayers || {});
+      return ctx;
+    }
+    function UpdateTurnOrderState2(state, currentPlayer, turn, endTurnArg) {
+      const order = turn.order;
+      let { G: G2, ctx } = state;
+      let playOrderPos = ctx.playOrderPos;
+      let endPhase = false;
+      if (endTurnArg && endTurnArg !== true) {
+        if (typeof endTurnArg !== "object") {
+          error2(`invalid argument to endTurn: ${endTurnArg}`);
+        }
+        Object.keys(endTurnArg).forEach((arg) => {
+          switch (arg) {
+            case "remove":
+              currentPlayer = getCurrentPlayer2(ctx.playOrder, playOrderPos);
+              break;
+            case "next":
+              playOrderPos = ctx.playOrder.indexOf(endTurnArg.next);
+              currentPlayer = endTurnArg.next;
+              break;
+            default:
+              error2(`invalid argument to endTurn: ${arg}`);
+          }
+        });
+      } else {
+        const pluginAPIs = GetAPIs2(state);
+        const context = { ...pluginAPIs, G: G2, ctx };
+        const t2 = order.next(context);
+        const type = typeof t2;
+        if (t2 !== void 0 && type !== "number") {
+          error2(`invalid value returned by turn.order.next \u2014 expected number or undefined got ${type} \u201C${t2}\u201D.`);
+        }
+        if (t2 === void 0) {
+          endPhase = true;
+        } else {
+          playOrderPos = t2;
+          currentPlayer = getCurrentPlayer2(ctx.playOrder, playOrderPos);
+        }
+      }
+      ctx = {
+        ...ctx,
+        playOrderPos,
+        currentPlayer
+      };
+      return { endPhase, ctx };
+    }
+    var TurnOrder2 = {
+      /**
+       * DEFAULT
+       *
+       * The default round-robin turn order.
+       */
+      DEFAULT: {
+        first: ({ ctx }) => ctx.turn === 0 ? ctx.playOrderPos : (ctx.playOrderPos + 1) % ctx.playOrder.length,
+        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
+      },
+      /**
+       * RESET
+       *
+       * Similar to DEFAULT, but starts from 0 each time.
+       */
+      RESET: {
+        first: () => 0,
+        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
+      },
+      /**
+       * CONTINUE
+       *
+       * Similar to DEFAULT, but starts with the player who ended the last phase.
+       */
+      CONTINUE: {
+        first: ({ ctx }) => ctx.playOrderPos,
+        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
+      },
+      /**
+       * ONCE
+       *
+       * Another round-robin turn order, but goes around just once.
+       * The phase ends after all players have played.
+       */
+      ONCE: {
+        first: () => 0,
+        next: ({ ctx }) => {
+          if (ctx.playOrderPos < ctx.playOrder.length - 1) {
+            return ctx.playOrderPos + 1;
+          }
+        }
+      },
+      /**
+       * CUSTOM
+       *
+       * Identical to DEFAULT, but also sets playOrder at the
+       * beginning of the phase.
+       *
+       * @param {Array} playOrder - The play order.
+       */
+      CUSTOM: (playOrder) => ({
+        playOrder: () => playOrder,
+        first: () => 0,
+        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
+      }),
+      /**
+       * CUSTOM_FROM
+       *
+       * Identical to DEFAULT, but also sets playOrder at the
+       * beginning of the phase to a value specified by a field
+       * in G.
+       *
+       * @param {string} playOrderField - Field in G.
+       */
+      CUSTOM_FROM: (playOrderField) => ({
+        playOrder: ({ G: G2 }) => G2[playOrderField],
+        first: () => 0,
+        next: ({ ctx }) => (ctx.playOrderPos + 1) % ctx.playOrder.length
+      })
+    };
+    var Stage2 = {
+      NULL: null
+    };
+    var ActivePlayers2 = {
+      /**
+       * ALL
+       *
+       * The turn stays with one player, but any player can play (in any order)
+       * until the phase ends.
+       */
+      ALL: { all: Stage2.NULL },
+      /**
+       * ALL_ONCE
+       *
+       * The turn stays with one player, but any player can play (once, and in any order).
+       * This is typically used in a phase where you want to elicit a response
+       * from every player in the game.
+       */
+      ALL_ONCE: { all: Stage2.NULL, minMoves: 1, maxMoves: 1 },
+      /**
+       * OTHERS
+       *
+       * The turn stays with one player, and every *other* player can play (in any order)
+       * until the phase ends.
+       */
+      OTHERS: { others: Stage2.NULL },
+      /**
+       * OTHERS_ONCE
+       *
+       * The turn stays with one player, and every *other* player can play (once, and in any order).
+       * This is typically used in a phase where you want to elicit a response
+       * from every *other* player in the game.
+       */
+      OTHERS_ONCE: { others: Stage2.NULL, minMoves: 1, maxMoves: 1 }
+    };
+    exports.ActionCreators = ActionCreators2;
+    exports.ActivePlayers = ActivePlayers2;
+    exports.Enhance = Enhance2;
+    exports.FlushAndValidate = FlushAndValidate2;
+    exports.FnWrap = FnWrap2;
+    exports.GAME_EVENT = GAME_EVENT2;
+    exports.GetAPIs = GetAPIs2;
+    exports.INVALID_MOVE = INVALID_MOVE4;
+    exports.InitTurnOrderState = InitTurnOrderState2;
+    exports.MAKE_MOVE = MAKE_MOVE2;
+    exports.NoClient = NoClient2;
+    exports.PATCH = PATCH2;
+    exports.PLUGIN = PLUGIN2;
+    exports.PlayerView = PlayerView2;
+    exports.ProcessAction = ProcessAction2;
+    exports.REDO = REDO2;
+    exports.RESET = RESET2;
+    exports.STRIP_TRANSIENTS = STRIP_TRANSIENTS2;
+    exports.SYNC = SYNC2;
+    exports.SetActivePlayers = SetActivePlayers3;
+    exports.Setup = Setup2;
+    exports.Stage = Stage2;
+    exports.TurnOrder = TurnOrder2;
+    exports.UNDO = UNDO2;
+    exports.UPDATE = UPDATE2;
+    exports.UpdateActivePlayersOnceEmpty = UpdateActivePlayersOnceEmpty2;
+    exports.UpdateTurnOrderState = UpdateTurnOrderState2;
+    exports.error = error2;
+    exports.gameEvent = gameEvent2;
+    exports.info = info2;
+    exports.makeMove = makeMove2;
+    exports.patch = patch2;
+    exports.redo = redo2;
+    exports.reset = reset2;
+    exports.stripTransients = stripTransients2;
+    exports.supportDeprecatedMoveLimit = supportDeprecatedMoveLimit2;
+    exports.sync = sync2;
+    exports.undo = undo2;
+    exports.update = update3;
+  }
+});
+
+// node_modules/@mnbroatch/boardgame.io/dist/cjs/core.js
+var require_core = __commonJS({
+  "node_modules/@mnbroatch/boardgame.io/dist/cjs/core.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var turnOrder = require_turn_order_b2ff8740();
+    require_dist();
+    require_plugin_random_7425844d();
+    require_lodash();
+    var PlayerView2 = {
+      /**
+       * STRIP_SECRETS
+       *
+       * Reducer which removes a key named `secret` and
+       * removes all the keys in `players`, except for the one
+       * corresponding to the current playerID.
+       */
+      STRIP_SECRETS: ({ G: G2, playerID }) => {
+        const r2 = { ...G2 };
+        if (r2.secret !== void 0) {
+          delete r2.secret;
+        }
+        if (r2.players) {
+          r2.players = playerID ? {
+            [playerID]: r2.players[playerID]
+          } : {};
+        }
+        return r2;
+      }
+    };
+    exports.ActivePlayers = turnOrder.ActivePlayers;
+    Object.defineProperty(exports, "GameMethod", {
+      enumerable: true,
+      get: function() {
+        return turnOrder.GameMethod;
+      }
+    });
+    exports.INVALID_MOVE = turnOrder.INVALID_MOVE;
+    exports.Stage = turnOrder.Stage;
+    exports.TurnOrder = turnOrder.TurnOrder;
+    exports.PlayerView = PlayerView2;
+  }
+});
+
 // node_modules/lodash/cloneDeep.js
 var require_cloneDeep = __commonJS({
   "node_modules/lodash/cloneDeep.js"(exports, module) {
@@ -6492,6 +6492,16 @@ function serialize(state, options) {
   const duplicatesArr = [...duplicates];
   const duplicatesMap = new Map(duplicatesArr.map((d2) => [d2, null]));
   const deduplicateInstances = options?.deduplicateInstances !== false;
+  const registry2 = options?.registry;
+  const nameByConstructor = registry2 ? new Map(Object.entries(registry2).map(([name, ctor]) => [ctor, name])) : null;
+  const constructorNameFor = (ctor) => {
+    if (!nameByConstructor) return ctor.name;
+    const name = nameByConstructor.get(ctor);
+    if (!name) {
+      throw new Error(`Constructor ${ctor.name} is not in registry`);
+    }
+    return name;
+  };
   return JSON.stringify(state, (_2, value2) => {
     if (typeof value2 === "object" && value2 !== null && !Array.isArray(value2)) {
       const duplicateId = duplicatesMap.get(value2);
@@ -6511,7 +6521,7 @@ function serialize(state, options) {
         copy2._instanceReference = duplicateId;
       }
       if (value2.constructor && value2.constructor !== Object && value2.constructor !== Array) {
-        copy2._constructorName = value2.constructor.name;
+        copy2._constructorName = constructorNameFor(value2.constructor);
       }
       return copy2;
     } else if (Number.isNaN(value2)) {
@@ -6600,9 +6610,6 @@ function walkCyclical(value2, visitor, seen = /* @__PURE__ */ new WeakSet(), par
   path.delete(value2);
   return { duplicates, circular };
 }
-
-// src/game-factory/move/move-factory.js
-var import_core2 = __toESM(require_core());
 
 // src/game-factory/entity.js
 var Entity = class {
@@ -8898,7 +8905,7 @@ var IsFull = class extends Condition {
 
 // src/utils/simulate-move.js
 function simulateMove(bgioArguments, payload, context) {
-  const simulatedG = deserialize(serialize(bgioArguments.G), registry);
+  const simulatedG = deserialize(serialize(bgioArguments.G, { registry }), registry);
   const newBgioArguments = {
     ...bgioArguments,
     G: simulatedG
@@ -9363,6 +9370,9 @@ var registry = {
   Entity
 };
 
+// src/game-factory/move/move-factory.js
+var import_core2 = __toESM(require_core());
+
 // src/utils/deserialize-bgio-arguments.js
 function deserializeBgioArguments(bgioArguments) {
   return {
@@ -9650,7 +9660,7 @@ function moveFactory(moveRule, game) {
         context.moveConditionResults.push(result);
       }
     }
-    return JSON.parse(serialize(G2));
+    return JSON.parse(serialize(G2, { registry }));
   };
   compatibleMove.moveInstance = moveInstance;
   return compatibleMove;
@@ -10007,7 +10017,7 @@ function gameFactory(gameRules, gameName) {
         { ...bgioArguments, G: initialState }
       );
     });
-    return JSON.parse(serialize(initialState));
+    return JSON.parse(serialize(initialState, { registry }));
   };
   if (rules.moves) {
     game.moves = createMoves(rules.moves, game);
@@ -10040,7 +10050,7 @@ function gameFactory(gameRules, gameName) {
           }
         }
       });
-      return JSON.parse(serialize(G2));
+      return JSON.parse(serialize(G2, { registry }));
     };
   }
   return game;
@@ -10085,7 +10095,7 @@ function createTurn(turnRule, game) {
     newBgioArguments.G._meta.passedPlayers = newBgioArguments.G._meta.passedPlayers.filter((p2) => p2 !== newBgioArguments.ctx.currentPlayer);
     doMoves(newBgioArguments, turnRule.initialMoves, { game });
     doMoves(newBgioArguments, stageRule?.initialMoves, { game });
-    return JSON.parse(serialize(newBgioArguments.G));
+    return JSON.parse(serialize(newBgioArguments.G, { registry }));
   };
   if (turnRule.stages) {
     Object.entries(turnRule.stages).forEach(([stageName, stageRule]) => {
@@ -10116,7 +10126,7 @@ function createPhase(phaseRule, game) {
     doMoves(newBgioArguments, phaseRule.initialMoves, { game });
     newBgioArguments.G._meta.currentPhaseHasBeenSetUp = true;
     newBgioArguments.G._meta.nextPhase = phaseRule.next;
-    return JSON.parse(serialize(newBgioArguments.G));
+    return JSON.parse(serialize(newBgioArguments.G, { registry }));
   };
   if (phaseRule.endIf) {
     phase.endIf = (bgioArguments) => {
@@ -27014,7 +27024,7 @@ function preparePayload(payload) {
       ...acc,
       [key]: argument.abstract ? argument : argument.entityId
     }), {});
-    return JSON.parse(serialize(payloadCopy, { deduplicateInstances: false }));
+    return JSON.parse(serialize(payloadCopy, { deduplicateInstances: false, registry }));
   } else {
     return payload;
   }
@@ -27213,7 +27223,7 @@ function isMoveCompleted(state, moves, remainingMoveEntries, stepIndex) {
 }
 function getWinnerAfterMove(state, game, moveInstance, movePayload) {
   const simulatedG = simulateMove(state, preparePayload(movePayload), { moveInstance });
-  return game.endIf?.({ ...state, G: JSON.parse(serialize(simulatedG)) });
+  return game.endIf?.({ ...state, G: JSON.parse(serialize(simulatedG, { registry })) });
 }
 export {
   Client2 as Client,

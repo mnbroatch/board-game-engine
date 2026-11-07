@@ -2,7 +2,7 @@ import { serialize, deserialize } from 'wackson'
 import { registry } from '../registry.js'
 
 export default function simulateMove (bgioArguments, payload, context) {
-  const simulatedG = deserialize(serialize(bgioArguments.G), registry)
+  const simulatedG = deserialize(serialize(bgioArguments.G, { registry }), registry)
   const newBgioArguments = {
     ...bgioArguments,
     G: simulatedG,

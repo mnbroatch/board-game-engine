@@ -220,5 +220,5 @@ function isMoveCompleted(state, moves, remainingMoveEntries, stepIndex) {
 
 function getWinnerAfterMove (state, game, moveInstance, movePayload) {
   const simulatedG = simulateMove(state, preparePayload(movePayload), { moveInstance })
-  return game.endIf?.({ ...state, G: JSON.parse(serialize(simulatedG)) })
+  return game.endIf?.({ ...state, G: JSON.parse(serialize(simulatedG, { registry })) })
 }

@@ -1,4 +1,5 @@
 import { serialize } from "wackson";
+import { registry } from '../registry.js'
 import moveFactory from "./move/move-factory.js";
 import Bank from "./bank/bank.js";
 import expandGameRules from "./expand-game-rules.js";
@@ -53,7 +54,7 @@ export default function gameFactory (gameRules, gameName) {
         { ...bgioArguments, G: initialState }
       );
     })
-    return JSON.parse(serialize(initialState));
+    return JSON.parse(serialize(initialState, {registry}));
   }
 
   if (rules.moves) {
@@ -105,7 +106,7 @@ export default function gameFactory (gameRules, gameName) {
           }
         }
       }))
-      return JSON.parse(serialize(G))
+      return JSON.parse(serialize(G, {registry}))
     }
   }
 
@@ -170,7 +171,7 @@ function createTurn (turnRule, game) {
     doMoves(newBgioArguments, turnRule.initialMoves, { game })
     doMoves(newBgioArguments, stageRule?.initialMoves, { game })
 
-    return JSON.parse(serialize(newBgioArguments.G));
+    return JSON.parse(serialize(newBgioArguments.G, {registry}));
   }
 
   if (turnRule.stages) {
@@ -208,7 +209,7 @@ function createPhase (phaseRule, game) {
     doMoves(newBgioArguments, phaseRule.initialMoves, { game })
     newBgioArguments.G._meta.currentPhaseHasBeenSetUp = true
     newBgioArguments.G._meta.nextPhase = phaseRule.next
-    return JSON.parse(serialize(newBgioArguments.G));
+    return JSON.parse(serialize(newBgioArguments.G, {registry}));
   }
 
   if (phaseRule.endIf) {
